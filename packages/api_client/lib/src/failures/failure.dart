@@ -1,0 +1,150 @@
+import 'dart:developer';
+
+import 'package:api_client/api_client.dart';
+import 'package:flutter/foundation.dart';
+
+/// Base class for all failures
+@immutable
+sealed class Failure {
+  const Failure(this.code, this.message);
+
+  /// ErrorCode for the failure
+  final int code;
+
+  /// Message for the failure, should be in a form presentable to the user
+  final String message;
+
+  @override
+  String toString() {
+    return 'Failure{code: $code, message: $message}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Failure &&
+          runtimeType == other.runtimeType &&
+          code == other.code &&
+          message == other.message;
+
+  @override
+  int get hashCode => code.hashCode ^ message.hashCode;
+}
+
+/// {@template unknown_failure}
+/// Class representing an unknown failure
+/// {@endtemplate}
+class UnknownFailure extends Failure {
+  /// {@macro unknown_failure}
+  ///
+  /// [message] should be in a form presentable to the user
+  const UnknownFailure({
+    int code = 0,
+    String message = 'Unknown error occurred',
+  }) : super(code, message);
+
+  @override
+  String toString() {
+    return 'UnknownFailure{code: $code, message: $message}';
+  }
+}
+
+/// Base class for all API failures
+sealed class ApiFailure extends Failure {
+  const ApiFailure(super.code, super.message);
+}
+
+/// Base class for all storage failures
+class StorageFailure extends Failure {
+  /// Create a new instance of [StorageFailure]
+  const StorageFailure({
+    required int code,
+    required String message,
+  }) : super(code, message);
+}
+
+/// {@template api_validation_failure}
+/// Api Validation Failure
+/// Thrown when the API returns a 422 response
+/// {@endtemplate}
+class ApiValidationFailure extends ApiFailure {
+  /// {@macro api_validation_failure}
+  const ApiValidationFailure(this.details, String message)
+      : super(422, message);
+
+  /// Create a new instance of [ApiValidationFailure] from json
+  factory ApiValidationFailure.fromJson(Map<String, dynamic> json) {
+    try {
+      if (json.containsKey('error')) {
+        return ApiValidationFailure(
+          const [],
+          json['error'] as String,
+        );
+      }
+      final details = (json['details'] as List)
+          .map<ValidationFailureDetail>(
+            (e) => ValidationFailureDetail.fromJson(e as Map<String, dynamic>),
+          )
+          .toList();
+      return ApiValidationFailure(
+        details,
+        details.map((e) => '${e.context.key}: ${e.message}').join('\n'),
+      );
+    } on Exception catch (e, s) {
+      log('Error parsing ApiValidationFailure: $e', stackTrace: s);
+      return const ApiValidationFailure(
+        [],
+        'Validation failed',
+      );
+    }
+  }
+
+  /// Details of the failure
+  final List<ValidationFailureDetail> details;
+
+  @override
+  String toString() {
+    return 'ApiValidationFailure{details: $details}';
+  }
+}
+
+/// Failure for 401 Unauthorized
+class UnauthorizedFailure extends ApiFailure {
+  /// Create a new instance of [UnauthorizedFailure]
+  const UnauthorizedFailure() : super(401, 'Unauthorized');
+}
+
+/// Failure for 404 Not Found
+class NotFoundFailure extends ApiFailure {
+  /// Create a new instance of [NotFoundFailure]
+  const NotFoundFailure({
+    String? message,
+  }) : super(404, message ?? 'Not Found');
+}
+
+/// Used for unknown failures
+class UnknownApiFailure extends ApiFailure {
+  /// Create a new instance of [UnknownApiFailure]
+  const UnknownApiFailure(super.code, super.message, {this.apiErrorMessage});
+
+  /// Error message from the API. Could be inside 'error' in the response body
+  final String? apiErrorMessage;
+
+  @override
+  String toString() {
+    return 'UnknownApiFailure{apiErrorMessage: $apiErrorMessage}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownApiFailure &&
+          runtimeType == other.runtimeType &&
+          code == other.code &&
+          message == other.message &&
+          apiErrorMessage == other.apiErrorMessage;
+
+  @override
+  int get hashCode =>
+      code.hashCode ^ message.hashCode ^ apiErrorMessage.hashCode;
+}

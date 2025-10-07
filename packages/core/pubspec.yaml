@@ -1,0 +1,33 @@
+name: core
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  api_client:
+    path: ../api_client
+  app_ui:
+    path: ../app_ui
+  auto_route: ^10.1.2
+  bloc_concurrency: ^0.3.0
+  deep_pick: ^1.1.0
+  equatable: ^2.0.7
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  flutter_file_dialog: ^3.0.2
+  fpdart: ^1.1.1
+  intl: ^0.20.2
+  path_provider: ^2.1.5
+  pdf: ^3.11.3
+  stream_transform: ^2.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.0
+  very_good_analysis: ^5.1.0

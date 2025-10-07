@@ -1,0 +1,45 @@
+name: instamess_app
+description: A Very Good Project created by Very Good CLI.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.35.0
+
+dependencies:
+  api_client:
+    path: packages/api_client
+  app_ui:
+    path: packages/app_ui
+  auto_route: ^10.1.2
+  bloc: ^9.0.0
+  cached_network_image: ^3.3.1
+  core:
+    path: packages/core
+  equatable: ^2.0.7
+  instamess_api:
+    path: packages/instamess_api
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  flutter_localizations:
+    sdk: flutter
+  flutter_staggered_grid_view: ^0.7.0
+  fpdart: ^1.1.0
+  google_fonts: ^6.2.1
+  intl: ^0.20.2
+
+dev_dependencies:
+  auto_route_generator: ^10.1.2
+  bloc_lint: ^0.3.1
+  bloc_test: ^10.0.0
+  build_runner: ^2.5.4
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  very_good_analysis: ^9.0.0
+
+flutter:
+  generate: false
+  uses-material-design: true
