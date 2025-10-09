@@ -36,17 +36,17 @@ class MainShellView extends StatelessWidget {
         final tabsRouter = AutoTabsRouter.of(context);
         final index = tabsRouter.activeIndex;
         return Scaffold(
-          appBar: AppBar(
-            title: Text(_getPageTitle(index)),
-            centerTitle: false,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
+          // appBar: AppBar(
+          //   title: Text(_getPageTitle(index)),
+          //   centerTitle: false,
+          //   actions: [
+          //     IconButton(
+          //       icon: const Icon(Icons.notifications_outlined),
+          //       onPressed: () {},
+          //     ),
+          //     const SizedBox(width: 8),
+          //   ],
+          // ),
           body: child,
           bottomNavigationBar: FoodBottomNavBar(
             currentIndex: index,

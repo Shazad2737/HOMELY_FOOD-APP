@@ -118,19 +118,5 @@ class _AppState extends State<App> {
     return multiBlocProvider;
   }
 
-  ThemeData get _theme => AppTheme.standard.copyWith(
-    appBarTheme: AppTheme.standard.appBarTheme.copyWith(
-      backgroundColor: AppColors.white,
-      foregroundColor: AppColors.black,
-      elevation: 0,
-      centerTitle: true,
-      iconTheme: const IconThemeData(
-        color: AppColors.black,
-      ),
-    ),
-    scaffoldBackgroundColor: AppColors.grey100,
-    inputDecorationTheme: AppTheme.standard.inputDecorationTheme.copyWith(
-      fillColor: AppColors.white,
-    ),
-  );
+  ThemeData get _theme => AppTheme.standard;
 }

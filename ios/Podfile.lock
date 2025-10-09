@@ -1,0 +1,60 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_file_dialog (0.0.1):
+    - Flutter
+  - flutter_secure_storage (6.0.0):
+    - Flutter
+  - image_picker_ios (0.0.1):
+    - Flutter
+  - pasteboard (0.0.1):
+    - Flutter
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - smart_auth (0.0.1):
+    - Flutter
+  - sqflite_darwin (0.0.4):
+    - Flutter
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_file_dialog (from `.symlinks/plugins/flutter_file_dialog/ios`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - pasteboard (from `.symlinks/plugins/pasteboard/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - smart_auth (from `.symlinks/plugins/smart_auth/ios`)
+  - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_file_dialog:
+    :path: ".symlinks/plugins/flutter_file_dialog/ios"
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  image_picker_ios:
+    :path: ".symlinks/plugins/image_picker_ios/ios"
+  pasteboard:
+    :path: ".symlinks/plugins/pasteboard/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  smart_auth:
+    :path: ".symlinks/plugins/smart_auth/ios"
+  sqflite_darwin:
+    :path: ".symlinks/plugins/sqflite_darwin/darwin"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_file_dialog: 4c014a45b105709a27391e266c277d7e588e9299
+  flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
+  image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
+  pasteboard: 982969ebaa7c78af3e6cc7761e8f5e77565d9ce0
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  smart_auth: 4bedbc118723912d0e45a07e8ab34039c19e04f2
+  sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
+
+PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+
+COCOAPODS: 1.16.2

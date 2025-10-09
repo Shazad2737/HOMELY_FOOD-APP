@@ -2,13 +2,11 @@ import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_app/auth/login/bloc/login_bloc.dart';
 import 'package:instamess_app/router/router.gr.dart';
 
 @RoutePage()
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class SignupPage extends StatelessWidget {
+  const SignupPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +35,7 @@ class _MobileWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Log In',
+                      'Sign Up',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
@@ -46,7 +44,7 @@ class _MobileWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Please sign in to your existing account',
+                      'Please sign up to get started',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(
@@ -55,13 +53,13 @@ class _MobileWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const _LoginForm(),
+                    const _SignupForm(),
                     const SizedBox(height: 4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Don't have an account? ",
+                          'Already have an account? ',
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(
@@ -71,9 +69,9 @@ class _MobileWidget extends StatelessWidget {
                         ),
                         TextButton(
                           onPressed: () {
-                            context.router.push(const SignupRoute());
+                            context.router.replace(const LoginRoute());
                           },
-                          child: const Text('SIGN UP'),
+                          child: const Text('LOGIN'),
                         ),
                       ],
                     ),
@@ -124,100 +122,83 @@ class _MobileWidget extends StatelessWidget {
   }
 }
 
-class _LoginForm extends StatefulWidget {
-  const _LoginForm();
+class _SignupForm extends StatefulWidget {
+  const _SignupForm();
 
   @override
-  State<_LoginForm> createState() => _LoginFormState();
+  State<_SignupForm> createState() => _SignupFormState();
 }
 
-class _LoginFormState extends State<_LoginForm> {
-  final TextEditingController passwordController = TextEditingController();
+class _SignupFormState extends State<_SignupForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _phoneController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    passwordController.addListener(() {
-      context.read<LoginBloc>().add(
-        LoginPasswordChangedEvent(passwordController.text),
-      );
-    });
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LoginBloc, LoginState>(
-      listenWhen: (previous, current) =>
-          previous.loginFailureOrSuccessOption !=
-          current.loginFailureOrSuccessOption,
-      listener: (context, state) {
-        state.loginFailureOrSuccessOption.fold(() => null, (t) {
-          t.fold(
-            (l) => AppSnackbar.showErrorSnackbar(context, content: l.message),
-            (user) {
-              // Success handled elsewhere
-            },
-          );
-        });
-      },
-      builder: (context, state) {
-        return Form(
-          autovalidateMode: state.showErrorMessages
-              ? AutovalidateMode.always
-              : AutovalidateMode.disabled,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text('Mobile Number'),
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Enter Mobile Number',
-                ),
-                initialValue: state.username,
-                onChanged: (value) => context.read<LoginBloc>().add(
-                  LoginUserNameChangedEvent(value),
-                ),
-              ),
-              const Space(),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text('Password'),
-              ),
-              PasswordField(
-                controller: passwordController,
-                hintText: 'Enter password',
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  onPressed: () {},
-                  child: const Text('Forgot Password'),
-                ),
-              ),
-              const Space(3),
-              SizedBox(
-                width: double.infinity,
-                child: PrimaryButton(
-                  // backgroundColor: AppColors.accent,
-                  onPressed: () {
-                    context.read<LoginBloc>().add(LoginSubmittedEvent());
-                  },
-                  isLoading: state.isSubmitting,
-                  text: 'Login',
-                ),
-              ),
-            ],
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text('Name'),
           ),
-        );
-      },
+          TextFormField(
+            decoration: const InputDecoration(
+              hintText: 'Enter Name',
+            ),
+          ),
+          const Space(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text('Mobile Number'),
+          ),
+          TextField(
+            keyboardType: TextInputType.phone,
+            controller: _phoneController,
+            decoration: const InputDecoration(
+              hintText: 'Enter Mobile Number',
+            ),
+          ),
+          const Space(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text('Password'),
+          ),
+          const PasswordField(
+            hintText: 'Enter password',
+          ),
+          const Space(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text('Confirm Password'),
+          ),
+          const PasswordField(
+            hintText: 'Enter Confirm password',
+          ),
+          const Space(3),
+          SizedBox(
+            width: double.infinity,
+            child: PrimaryButton(
+              onPressed: () {
+                final phone = _phoneController.text.trim();
+                if (phone.isEmpty) return;
+                context.router.push(
+                  OtpRoute(phone: phone),
+                );
+              },
+              text: 'Sign Up',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

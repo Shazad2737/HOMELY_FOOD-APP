@@ -21,13 +21,15 @@ abstract class AppSnackbar {
     required String content,
     SnackBarAction? action,
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      _snackBar(
-        content: content,
-        action: action,
-        backgroundColor: AppColors.error,
-      ),
-    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        _snackBar(
+          content: content,
+          action: action,
+          backgroundColor: AppColors.error,
+        ),
+      );
   }
 
   static SnackBar _snackBar({

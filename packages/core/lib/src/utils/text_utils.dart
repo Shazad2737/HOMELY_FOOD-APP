@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+const kNonBreakingSpace = '\u00A0';
+
 /// Utility functions for working with [Text]
 abstract class TextUtils {
   /// Returns the size of a [Text] widget with the given [text] and [style]

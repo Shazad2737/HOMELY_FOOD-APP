@@ -7,6 +7,7 @@ class PasswordField extends StatefulWidget {
     this.onChanged,
     this.validator,
     this.hintText,
+    this.labelText,
     this.initialValue,
     this.controller,
     this.iconAndCursorColor,
@@ -18,6 +19,7 @@ class PasswordField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final FormFieldValidator<String>? validator;
   final String? hintText;
+  final String? labelText;
 
   final String? initialValue;
   final TextEditingController? controller;
@@ -40,21 +42,28 @@ class _PasswordFieldState extends State<PasswordField> {
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      !(widget.initialValue != null && widget.controller != null),
+      'Pass either initialValue or controller, not both',
+    );
+
+    final theme = Theme.of(context);
+    final iconColor =
+        widget.iconAndCursorColor ?? theme.inputDecorationTheme.suffixIconColor;
+
     return TextFormField(
-      cursorColor: widget.iconAndCursorColor,
+      cursorColor:
+          widget.iconAndCursorColor ?? theme.textSelectionTheme.cursorColor,
       onFieldSubmitted: widget.onFieldSubmitted,
       style: widget.style,
       focusNode: widget.focusNode,
       decoration: InputDecoration(
         hintText: widget.hintText,
+        labelText: widget.labelText,
         suffixIcon: IconButton(
           icon: _isObscure
-              ? appIcons.eyeSlash.svg(
-                  color: widget.iconAndCursorColor,
-                )
-              : appIcons.eye.svg(
-                  color: widget.iconAndCursorColor,
-                ),
+              ? appIcons.eyeSlash.svg(color: iconColor)
+              : appIcons.eye.svg(color: iconColor),
           onPressed: () {
             setState(() {
               _isObscure = !_isObscure;

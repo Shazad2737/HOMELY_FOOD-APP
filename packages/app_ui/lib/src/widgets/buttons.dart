@@ -1,9 +1,6 @@
 /// Button widgets
 library app_button;
 
-import 'package:app_ui/app_ui.dart';
-import 'package:app_ui/src/typography/app_text_styles.dart';
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 /// {@template app_button_secondary}
@@ -17,7 +14,7 @@ class PrimaryButton extends StatelessWidget {
     this.child,
     this.text,
     this.isLoading = false,
-    this.foregroundColor = AppColors.white,
+    this.foregroundColor,
     this.backgroundColor,
     this.isDisabled = false,
     this.maxSize,
@@ -66,54 +63,78 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = this.textStyle ??
-        AppTextStyles.titleMedium.copyWith(height: 1, color: foregroundColor);
-    return IgnorePointer(
-      ignoring: isLoading ?? false || isDisabled,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          foregroundColor: foregroundColor,
-          maximumSize: maxSize,
-          backgroundColor: backgroundColor ?? AppColors.primary,
-          padding: padding ?? const EdgeInsets.all(16),
-        ),
-        onPressed: isDisabled ? null : onPressed,
-        child: child ??
-            () {
-              if (text == null) {
-                return const SizedBox();
-              }
-              final ts = textStyle;
-              final textSize = TextUtils.getTextSize(
-                text ?? '',
-                ts,
-              );
+    final theme = Theme.of(context);
+    final resolvedTextStyle = textStyle ?? theme.textTheme.labelLarge;
+    final resolvedForeground = foregroundColor ?? theme.colorScheme.onPrimary;
 
-              return SizedBox(
-                width: textSize.width + 16,
-                child: Center(
-                  child: Builder(
-                    builder: (context) {
-                      if (isLoading ?? false) {
-                        print('is loading');
-                        return SizedBox(
-                          width: textSize.height,
-                          height: textSize.height,
-                          child: CircularProgressIndicator(
-                            color: foregroundColor,
-                          ),
-                        );
-                      }
-                      return Text(
-                        text!,
-                        style: ts,
-                      );
-                    },
-                  ),
-                ),
-              );
-            }(),
+    final content = child ??
+        (text != null
+            ? _LoadingLabel(
+                label: text!,
+                style: resolvedTextStyle,
+                isLoading: isLoading ?? false,
+                textColor: resolvedForeground,
+              )
+            : const SizedBox.shrink());
+
+    return FilledButton(
+      style: ButtonStyle(
+        foregroundColor: foregroundColor != null
+            ? WidgetStatePropertyAll(resolvedForeground)
+            : null,
+        backgroundColor: backgroundColor != null
+            ? WidgetStatePropertyAll(backgroundColor)
+            : null,
+        padding: WidgetStatePropertyAll(
+          padding ?? const EdgeInsets.all(16),
+        ),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(20),
+          ),
+        ),
+        maximumSize: maxSize != null ? WidgetStatePropertyAll(maxSize) : null,
       ),
+      onPressed: isDisabled || (isLoading ?? false) ? null : onPressed,
+      child: content,
+    );
+  }
+}
+
+class _LoadingLabel extends StatelessWidget {
+  const _LoadingLabel({
+    required this.label,
+    required this.style,
+    required this.isLoading,
+    required this.textColor,
+  });
+
+  final String label;
+  final TextStyle? style;
+  final bool isLoading;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Visibility(
+          visible: !isLoading,
+          maintainAnimation: true,
+          maintainSize: true,
+          maintainState: true,
+          child: Text(
+            label,
+            style: (style ?? const TextStyle()).copyWith(color: textColor),
+          ),
+        ),
+        if (isLoading)
+          const SizedBox.square(
+            dimension: 20,
+            child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+          ),
+      ],
     );
   }
 }

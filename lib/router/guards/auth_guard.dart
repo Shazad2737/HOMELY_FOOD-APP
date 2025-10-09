@@ -35,8 +35,11 @@ class AuthGuard extends AutoRouteGuard {
       case Authenticated():
         // User is authenticated - allow access to protected routes
 
-        // If trying to access login or splash, redirect to main shell
-        if (routeName == LoginRoute.name || routeName == SplashRoute.name) {
+        // If trying to access login, signup, otp or splash, redirect to main
+        if (routeName == LoginRoute.name ||
+            routeName == SplashRoute.name ||
+            routeName == SignupRoute.name ||
+            routeName == OtpRoute.name) {
           const target = MainShellRoute();
           if (topName != target.routeName) {
             log(
@@ -56,16 +59,23 @@ class AuthGuard extends AutoRouteGuard {
 
       case Unauthenticated():
         const target = LoginRoute();
-        if (routeName != LoginRoute.name) {
+        final isPublicRoute =
+            routeName == LoginRoute.name ||
+            routeName == SignupRoute.name ||
+            routeName == OtpRoute.name;
+        print('---isPublicRoute: $isPublicRoute');
+        if (!isPublicRoute) {
           if (topName != target.routeName) {
             log('AuthGuard: Replacing stack with login (unauthenticated)');
             await root.replaceAll(<PageRouteInfo>[target]);
             resolver.next(false);
           } else {
+            print('---resolver.next()');
             resolver.next();
           }
         } else {
           log('AuthGuard: Allowing access to $routeName (unauthenticated)');
+          print('---resolver.next()');
           resolver.next();
         }
 
