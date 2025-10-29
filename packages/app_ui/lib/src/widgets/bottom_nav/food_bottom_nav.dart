@@ -1,5 +1,7 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutter/material.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 /// Bottom navigation bar styled for the food app
 class FoodBottomNavBar extends StatelessWidget {
@@ -14,41 +16,58 @@ class FoodBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 16,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: BottomNavigationBar(
-          currentIndex: currentIndex,
-          onTap: onTap,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home_rounded),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view_outlined),
-              activeIcon: Icon(Icons.grid_view_rounded),
-              label: 'Menu',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle_outlined),
-              activeIcon: Icon(Icons.account_circle),
-              label: 'Account',
-            ),
-          ],
+    return FlashyTabBar(
+      selectedIndex: currentIndex,
+      items: [
+        // FlashyTabBarItem(
+        //   icon: const Icon(
+        //     SolarIconsOutline.home,
+        //     key: ValueKey('home_outlined'),
+        //   ),
+        //   title: const Icon(SolarIconsBold.home, key: ValueKey('home_bold')),
+        // ),
+        _navItem(
+          icon: SolarIconsOutline.home,
+          boldIcon: SolarIconsBold.home,
         ),
-      ),
+        _navItem(
+          icon: SolarIconsOutline.widget,
+          boldIcon: SolarIconsBold.widget,
+        ),
+        _navItem(
+          icon: SolarIconsOutline.documentText,
+          boldIcon: SolarIconsBold.documentText,
+        ),
+        _navItem(
+          icon: SolarIconsOutline.wallet,
+          boldIcon: SolarIconsBold.wallet,
+        ),
+        _navItem(
+          icon: SolarIconsOutline.user,
+          boldIcon: SolarIconsBold.user,
+        ),
+      ],
+      onItemSelected: onTap,
     );
   }
+}
+
+FlashyTabBarItem _navItem({
+  required IconData icon,
+  required IconData boldIcon,
+}) {
+  return FlashyTabBarItem(
+    icon: Icon(
+      icon,
+      key: ValueKey('$icon'),
+      color: AppColors.grey600,
+    ),
+    title: Icon(
+      icon,
+      color: AppColors.appRed,
+      key: ValueKey('$boldIcon'),
+    ),
+    activeColor: AppColors.appRed,
+    inactiveColor: AppColors.grey600,
+  );
 }

@@ -1,10 +1,15 @@
 import 'package:api_client/api_client.dart';
 import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_api/src/auth/mock_auth_facade.dart';
 
 abstract class IInstaMessApi {
   /// {@macro auth_facade}
   IAuthFacade get authFacade;
+
+  /// CMS Facade
+  ICmsRepository get cmsFacade;
+
+  /// Menu Facade
+  IMenuRepository get menuFacade;
 
   DashboardRepo get dashboardRepo;
 
@@ -40,16 +45,34 @@ class InstaMessApi implements IInstaMessApi {
       apiClient: _apiClient,
       sessionManager: _sessionManager,
     );
+
+    // Create CMS facade
+    _cmsFacade = CmsRepository(
+      apiClient: _apiClient,
+    );
+
+    // Create Menu facade
+    _menuFacade = MenuRepository(
+      apiClient: _apiClient,
+    );
   }
 
   final IStorageController _storageController;
   late final ISessionManager _sessionManager;
   late final ApiClient _apiClient;
   late final IAuthFacade _authFacade;
+  late final ICmsRepository _cmsFacade;
+  late final IMenuRepository _menuFacade;
 
   /// {@macro auth_facade}
   @override
   IAuthFacade get authFacade => _authFacade;
+
+  @override
+  ICmsRepository get cmsFacade => _cmsFacade;
+
+  @override
+  IMenuRepository get menuFacade => _menuFacade;
 
   @override
   ISessionManager get sessionManager => _sessionManager;
@@ -82,6 +105,12 @@ class MockInstaMessApi implements IInstaMessApi {
 
   @override
   IAuthFacade get authFacade => _authFacade;
+
+  @override
+  ICmsRepository get cmsFacade => throw UnimplementedError();
+
+  @override
+  IMenuRepository get menuFacade => throw UnimplementedError();
 
   @override
   DashboardRepo get dashboardRepo => throw UnimplementedError();

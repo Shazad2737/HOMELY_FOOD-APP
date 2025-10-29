@@ -6,10 +6,14 @@ abstract class AppColors {
   static const black = Color(0xFF000000);
   static const white = Color(0xFFFFFFFF);
 
+  static const appRed = Color(0xFFC21300);
+
+  static const appOrange = Color(0xFFFD9D02);
+  static const appOrangeDark = Color(0xFFFF7622);
+
   // Brand palette (extracted from provided designs)
-  // Primary (CTA background): #FD9D02
-  static const primary = Color(0xFFFD9D02);
-  static const primaryDark = Color(0xFFE58F00);
+  static const primary = appOrange;
+  static const primaryDark = appOrangeDark;
   static const primaryLight = Color(0xFFFFC766);
 
   // Link/secondary brand color: #FF7622
@@ -17,17 +21,10 @@ abstract class AppColors {
   static const accentLight = Color(0xFFFFA366);
   static const accentContainer = Color(0x4FFF7622); // See-all background
 
-  // Alternate CTA (Order Now / active tab)
-  static const ctaRed = Color(0xFFC21300);
-
-  // Gradients
-  static const gradientStart = Color(0xFFE53935); // red
-  static const gradientEnd = Color(0xFFF97316); // orange
-
   // Status colors
   static const success = Color(0xFF22C55E); // green 500
   static const successLight = Color(0xFFA7F3D0);
-  static const weekdayChip = Color(0xFF03B048);
+  static const appGreen = Color(0xFF03B048);
   static const error = Color(0xFFEF4444); // red 500
   static const errorLight = Color(0xFFFCA5A5);
   static const warning = Color(0xFFF59E0B); // amber 500

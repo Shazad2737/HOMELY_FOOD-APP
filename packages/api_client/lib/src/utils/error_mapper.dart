@@ -13,7 +13,7 @@ class ErrorMapper {
   static ApiFailure mapDioException(DioException exception, String path) {
     final statusCode = exception.response?.statusCode;
     final responseData = exception.response?.data;
-    
+
     log('Mapping DioException for $path: ${exception.type}, status: $statusCode');
 
     // Handle specific HTTP status codes first
@@ -23,9 +23,12 @@ class ErrorMapper {
           return const UnauthorizedFailure();
         case 404:
           return NotFoundFailure(
-            message: _safeParseErrorMessage(responseData) ?? 'Resource not found',
+            message:
+                _safeParseErrorMessage(responseData) ?? 'Resource not found',
           );
+        case 400:
         case 422:
+          // Both 400 and 422 can contain validation errors
           return _parseValidationFailure(responseData);
         case >= 500:
           return UnknownApiFailure(
@@ -56,7 +59,7 @@ class ErrorMapper {
           408,
           'Request timed out. Please check your connection and try again.',
         );
-      
+
       case DioExceptionType.connectionError:
         // Check if it's likely an offline condition
         if (_isLikelyOffline(exception)) {
@@ -69,19 +72,19 @@ class ErrorMapper {
           500,
           'Unable to connect to server. Please try again later.',
         );
-      
+
       case DioExceptionType.cancel:
         return const UnknownApiFailure(
           0,
           'Request was cancelled.',
         );
-      
+
       case DioExceptionType.badCertificate:
         return const UnknownApiFailure(
           495,
           'SSL certificate error. Please check your connection.',
         );
-      
+
       case DioExceptionType.badResponse:
       case DioExceptionType.unknown:
         return UnknownApiFailure(
@@ -96,7 +99,7 @@ class ErrorMapper {
   static String? _safeParseErrorMessage(dynamic responseData) {
     try {
       if (responseData == null) return null;
-      
+
       // Handle different response data types
       if (responseData is Map<String, dynamic>) {
         // Try common error message keys
@@ -107,7 +110,7 @@ class ErrorMapper {
             return value;
           }
         }
-        
+
         // Try nested error objects
         final errorObj = responseData['error'];
         if (errorObj is Map<String, dynamic>) {
@@ -119,7 +122,7 @@ class ErrorMapper {
       } else if (responseData is String && responseData.isNotEmpty) {
         return responseData;
       }
-      
+
       return null;
     } catch (e) {
       log('Error parsing response data: $e');
@@ -136,7 +139,7 @@ class ErrorMapper {
     } catch (e) {
       log('Error parsing validation failure: $e');
     }
-    
+
     // Fallback to generic validation failure
     return ApiValidationFailure(
       const [],
@@ -147,25 +150,25 @@ class ErrorMapper {
   /// Detects if the error is likely due to being offline
   static bool _isLikelyOffline(DioException exception) {
     final error = exception.error;
-    
+
     // Check for common offline error patterns
     if (error is SocketException) {
       final message = error.message.toLowerCase();
       return message.contains('network is unreachable') ||
-             message.contains('no route to host') ||
-             message.contains('host is unreachable') ||
-             message.contains('failed host lookup');
+          message.contains('no route to host') ||
+          message.contains('host is unreachable') ||
+          message.contains('failed host lookup');
     }
-    
+
     if (error is HandshakeException) {
       return true; // Often indicates network issues
     }
-    
+
     // Check exception message for offline indicators
     final message = exception.message?.toLowerCase() ?? '';
     return message.contains('network error') ||
-           message.contains('no internet') ||
-           message.contains('offline') ||
-           message.contains('connection failed');
+        message.contains('no internet') ||
+        message.contains('offline') ||
+        message.contains('connection failed');
   }
 }

@@ -9,88 +9,159 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i9;
-import 'package:flutter/material.dart' as _i10;
-import 'package:instamess_app/auth/login/view/login_screen.dart' as _i2;
-import 'package:instamess_app/auth/login/view/otp_screen.dart' as _i5;
-import 'package:instamess_app/auth/login/view/signup_screen.dart' as _i7;
-import 'package:instamess_app/home/view/home_screen.dart' as _i1;
-import 'package:instamess_app/main_shell/view/main_shell_page.dart' as _i3;
-import 'package:instamess_app/menu/view/menu_screen.dart' as _i4;
-import 'package:instamess_app/profile/view/profile_screen.dart' as _i6;
-import 'package:instamess_app/splash/view/splash_page.dart' as _i8;
+import 'package:auto_route/auto_route.dart' as _i12;
+import 'package:flutter/material.dart' as _i14;
+import 'package:instamess_api/instamess_api.dart' as _i13;
+import 'package:instamess_app/auth/delivery_address/view/delivery_address_screen.dart'
+    as _i1;
+import 'package:instamess_app/auth/login/view/login_screen.dart' as _i3;
+import 'package:instamess_app/auth/login/view/otp_screen.dart' as _i7;
+import 'package:instamess_app/auth/signup/view/signup_screen.dart' as _i9;
+import 'package:instamess_app/home/view/home_screen.dart' as _i2;
+import 'package:instamess_app/main_shell/view/main_shell_page.dart' as _i4;
+import 'package:instamess_app/menu/view/menu_screen.dart' as _i5;
+import 'package:instamess_app/order_form/view/order_form_screen.dart' as _i6;
+import 'package:instamess_app/profile/view/profile_screen.dart' as _i8;
+import 'package:instamess_app/splash/view/splash_page.dart' as _i10;
+import 'package:instamess_app/subscriptions/view/subscriptions_screen.dart'
+    as _i11;
 
 /// generated route for
-/// [_i1.HomeScreen]
-class HomeRoute extends _i9.PageRouteInfo<void> {
-  const HomeRoute({List<_i9.PageRouteInfo>? children})
+/// [_i1.DeliveryAddressPage]
+class DeliveryAddressRoute extends _i12.PageRouteInfo<void> {
+  const DeliveryAddressRoute({List<_i12.PageRouteInfo>? children})
+    : super(DeliveryAddressRoute.name, initialChildren: children);
+
+  static const String name = 'DeliveryAddressRoute';
+
+  static _i12.PageInfo page = _i12.PageInfo(
+    name,
+    builder: (data) {
+      return const _i1.DeliveryAddressPage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i2.HomeScreen]
+class HomeRoute extends _i12.PageRouteInfo<void> {
+  const HomeRoute({List<_i12.PageRouteInfo>? children})
     : super(HomeRoute.name, initialChildren: children);
 
   static const String name = 'HomeRoute';
 
-  static _i9.PageInfo page = _i9.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
-      return const _i1.HomeScreen();
+      return const _i2.HomeScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i2.LoginPage]
-class LoginRoute extends _i9.PageRouteInfo<void> {
-  const LoginRoute({List<_i9.PageRouteInfo>? children})
+/// [_i3.LoginPage]
+class LoginRoute extends _i12.PageRouteInfo<void> {
+  const LoginRoute({List<_i12.PageRouteInfo>? children})
     : super(LoginRoute.name, initialChildren: children);
 
   static const String name = 'LoginRoute';
 
-  static _i9.PageInfo page = _i9.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
-      return const _i2.LoginPage();
+      return const _i3.LoginPage();
     },
   );
 }
 
 /// generated route for
-/// [_i3.MainShellPage]
-class MainShellRoute extends _i9.PageRouteInfo<void> {
-  const MainShellRoute({List<_i9.PageRouteInfo>? children})
+/// [_i4.MainShellPage]
+class MainShellRoute extends _i12.PageRouteInfo<void> {
+  const MainShellRoute({List<_i12.PageRouteInfo>? children})
     : super(MainShellRoute.name, initialChildren: children);
 
   static const String name = 'MainShellRoute';
 
-  static _i9.PageInfo page = _i9.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
-      return const _i3.MainShellPage();
+      return const _i4.MainShellPage();
     },
   );
 }
 
 /// generated route for
-/// [_i4.MenuScreen]
-class MenuRoute extends _i9.PageRouteInfo<void> {
-  const MenuRoute({List<_i9.PageRouteInfo>? children})
-    : super(MenuRoute.name, initialChildren: children);
+/// [_i5.MenuScreen]
+class MenuRoute extends _i12.PageRouteInfo<MenuRouteArgs> {
+  MenuRoute({
+    _i13.Category? category,
+    _i14.Key? key,
+    List<_i12.PageRouteInfo>? children,
+  }) : super(
+         MenuRoute.name,
+         args: MenuRouteArgs(category: category, key: key),
+         initialChildren: children,
+       );
 
   static const String name = 'MenuRoute';
 
-  static _i9.PageInfo page = _i9.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
-      return const _i4.MenuScreen();
+      final args = data.argsAs<MenuRouteArgs>(
+        orElse: () => const MenuRouteArgs(),
+      );
+      return _i5.MenuScreen(category: args.category, key: args.key);
+    },
+  );
+}
+
+class MenuRouteArgs {
+  const MenuRouteArgs({this.category, this.key});
+
+  final _i13.Category? category;
+
+  final _i14.Key? key;
+
+  @override
+  String toString() {
+    return 'MenuRouteArgs{category: $category, key: $key}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! MenuRouteArgs) return false;
+    return category == other.category && key == other.key;
+  }
+
+  @override
+  int get hashCode => category.hashCode ^ key.hashCode;
+}
+
+/// generated route for
+/// [_i6.OrderFormScreen]
+class OrderFormRoute extends _i12.PageRouteInfo<void> {
+  const OrderFormRoute({List<_i12.PageRouteInfo>? children})
+    : super(OrderFormRoute.name, initialChildren: children);
+
+  static const String name = 'OrderFormRoute';
+
+  static _i12.PageInfo page = _i12.PageInfo(
+    name,
+    builder: (data) {
+      return const _i6.OrderFormScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i5.OtpPage]
-class OtpRoute extends _i9.PageRouteInfo<OtpRouteArgs> {
+/// [_i7.OtpPage]
+class OtpRoute extends _i12.PageRouteInfo<OtpRouteArgs> {
   OtpRoute({
     required String phone,
-    _i10.Key? key,
-    List<_i9.PageRouteInfo>? children,
+    _i14.Key? key,
+    List<_i12.PageRouteInfo>? children,
   }) : super(
          OtpRoute.name,
          args: OtpRouteArgs(phone: phone, key: key),
@@ -99,11 +170,11 @@ class OtpRoute extends _i9.PageRouteInfo<OtpRouteArgs> {
 
   static const String name = 'OtpRoute';
 
-  static _i9.PageInfo page = _i9.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<OtpRouteArgs>();
-      return _i5.OtpPage(phone: args.phone, key: args.key);
+      return _i7.OtpPage(phone: args.phone, key: args.key);
     },
   );
 }
@@ -113,7 +184,7 @@ class OtpRouteArgs {
 
   final String phone;
 
-  final _i10.Key? key;
+  final _i14.Key? key;
 
   @override
   String toString() {
@@ -132,49 +203,65 @@ class OtpRouteArgs {
 }
 
 /// generated route for
-/// [_i6.ProfileScreen]
-class ProfileRoute extends _i9.PageRouteInfo<void> {
-  const ProfileRoute({List<_i9.PageRouteInfo>? children})
+/// [_i8.ProfileScreen]
+class ProfileRoute extends _i12.PageRouteInfo<void> {
+  const ProfileRoute({List<_i12.PageRouteInfo>? children})
     : super(ProfileRoute.name, initialChildren: children);
 
   static const String name = 'ProfileRoute';
 
-  static _i9.PageInfo page = _i9.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
-      return const _i6.ProfileScreen();
+      return const _i8.ProfileScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i7.SignupPage]
-class SignupRoute extends _i9.PageRouteInfo<void> {
-  const SignupRoute({List<_i9.PageRouteInfo>? children})
+/// [_i9.SignupPage]
+class SignupRoute extends _i12.PageRouteInfo<void> {
+  const SignupRoute({List<_i12.PageRouteInfo>? children})
     : super(SignupRoute.name, initialChildren: children);
 
   static const String name = 'SignupRoute';
 
-  static _i9.PageInfo page = _i9.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
-      return const _i7.SignupPage();
+      return const _i9.SignupPage();
     },
   );
 }
 
 /// generated route for
-/// [_i8.SplashPage]
-class SplashRoute extends _i9.PageRouteInfo<void> {
-  const SplashRoute({List<_i9.PageRouteInfo>? children})
+/// [_i10.SplashPage]
+class SplashRoute extends _i12.PageRouteInfo<void> {
+  const SplashRoute({List<_i12.PageRouteInfo>? children})
     : super(SplashRoute.name, initialChildren: children);
 
   static const String name = 'SplashRoute';
 
-  static _i9.PageInfo page = _i9.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
-      return const _i8.SplashPage();
+      return const _i10.SplashPage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i11.SubscriptionsScreen]
+class SubscriptionsRoute extends _i12.PageRouteInfo<void> {
+  const SubscriptionsRoute({List<_i12.PageRouteInfo>? children})
+    : super(SubscriptionsRoute.name, initialChildren: children);
+
+  static const String name = 'SubscriptionsRoute';
+
+  static _i12.PageInfo page = _i12.PageInfo(
+    name,
+    builder: (data) {
+      return const _i11.SubscriptionsScreen();
     },
   );
 }

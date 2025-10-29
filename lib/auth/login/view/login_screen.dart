@@ -1,6 +1,14 @@
+// Name: "John Doe"
+// Email: "john@example.com"
+// Mobile: "+971501234567"
+// Password: hashed "password123"
+// Status: ACTIVE
+// Verified: true
+
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:core/core.dart';
+import 'package:core/form_inputs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_app/auth/login/bloc/login_bloc.dart';
@@ -176,9 +184,12 @@ class _LoginFormState extends State<_LoginForm> {
                 decoration: const InputDecoration(
                   hintText: 'Enter Mobile Number',
                 ),
-                initialValue: state.username,
+                initialValue: state.mobile,
+                keyboardType: TextInputType.phone,
+                validator: (value) =>
+                    Phone.dirty(value ?? '').displayError?.message,
                 onChanged: (value) => context.read<LoginBloc>().add(
-                  LoginUserNameChangedEvent(value),
+                  LoginMobileChangedEvent(value),
                 ),
               ),
               const Space(),

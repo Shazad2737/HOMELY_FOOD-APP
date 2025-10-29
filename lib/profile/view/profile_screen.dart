@@ -1,6 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instamess_app/auth/bloc/auth_bloc.dart';
 
 @RoutePage()
 class ProfileScreen extends StatelessWidget {
@@ -22,11 +24,11 @@ class ProfileScreen extends StatelessWidget {
                     child: Icon(Icons.person, color: AppColors.white, size: 44),
                   ),
                   const SizedBox(height: 12),
-                  Text('Katty Berry', style: AppTextStyles.titleLarge),
+                  Text('Katty Berry', style: context.textTheme.titleLarge),
                   const SizedBox(height: 4),
                   Text(
                     '+971 78900078',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: context.textTheme.bodyMedium?.copyWith(
                       color: AppColors.grey600,
                     ),
                   ),
@@ -34,13 +36,19 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const _Tile(icon: Icons.person_outline, title: 'My Profile'),
-            const _Tile(icon: Icons.receipt_long_outlined, title: 'My Orders'),
-            const _Tile(
-              icon: Icons.location_on_outlined,
-              title: 'Delivery Address',
+            const Card(
+              child: Column(
+                children: [
+                  _Tile(icon: Icons.person_outline, title: 'My Profile'),
+                  _Tile(icon: Icons.receipt_long_outlined, title: 'My Orders'),
+                  _Tile(
+                    icon: Icons.location_on_outlined,
+                    title: 'Delivery Address',
+                  ),
+                  _Tile(icon: Icons.settings_outlined, title: 'Setting'),
+                ],
+              ),
             ),
-            const _Tile(icon: Icons.settings_outlined, title: 'Setting'),
             const Divider(height: 32),
             const _Tile(
               icon: Icons.notifications_outlined,
@@ -51,9 +59,13 @@ class ProfileScreen extends StatelessWidget {
               leading: const Icon(Icons.logout, color: AppColors.error),
               title: Text(
                 'Log Out',
-                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.error),
+                style: context.textTheme.bodyLarge?.copyWith(
+                  color: AppColors.error,
+                ),
               ),
-              onTap: () {},
+              onTap: () {
+                context.read<AuthBloc>().add(AuthLogOutRequestedEvent());
+              },
             ),
           ],
         ),
@@ -68,13 +80,11 @@ class _Tile extends StatelessWidget {
   final String title;
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Icon(icon, color: AppColors.grey700),
-        title: Text(title, style: AppTextStyles.bodyLarge),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {},
-      ),
+    return ListTile(
+      leading: Icon(icon, color: AppColors.grey700),
+      title: Text(title, style: context.textTheme.bodyLarge),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {},
     );
   }
 }

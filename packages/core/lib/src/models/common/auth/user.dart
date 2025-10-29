@@ -7,16 +7,16 @@ class User extends Model {
   User({
     required this.id,
     this.name,
-    this.username,
+    this.mobile,
     this.active,
     this.createdAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['_id'] as String,
+      id: json['id'] as String?,
       name: json['name'] as String?,
-      username: json['username'] as String?,
+      mobile: json['mobile'] as String?,
       active: json['active'] as bool?,
       createdAt: json['created_at'] == null
           ? null
@@ -29,16 +29,16 @@ class User extends Model {
 
   final bool? active;
   final DateTime? createdAt;
-  final String? username;
-  final String id;
+  final String? mobile;
+  final String? id;
   final String? name;
 
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      '_id': id,
+      'id': id,
       'name': name,
-      'username': username,
+      'mobile': mobile,
       'active': active,
       'created_at': createdAt?.toIso8601String(),
     };

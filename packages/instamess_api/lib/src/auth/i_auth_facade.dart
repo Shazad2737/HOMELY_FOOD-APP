@@ -2,6 +2,7 @@ import 'package:api_client/api_client.dart';
 import 'package:core/core.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:instamess_api/instamess_api.dart' show ISessionManager;
+import 'package:instamess_api/src/auth/models/models.dart';
 import 'package:instamess_api/src/session/i_session_manager.dart'
     show ISessionManager;
 import 'package:instamess_api/src/session/session.dart' show ISessionManager;
@@ -16,8 +17,19 @@ abstract class IAuthFacade {
   ///
   /// Returns [User] if successful, otherwise [Failure]
   Future<Either<Failure, User>> signIn({
-    required String username,
+    required String mobile,
     required String password,
+  });
+
+  /// Signs up a new user with the given details
+  ///
+  /// Returns [User] if successful, otherwise [Failure]
+  Future<Either<Failure, User>> signUp({
+    required String name,
+    required String mobile,
+    required String password,
+    required String confirmPassword,
+    required List<SignupLocationInput> locations,
   });
 
   /// Signs out the current user.

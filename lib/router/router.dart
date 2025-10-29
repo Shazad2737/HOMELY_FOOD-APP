@@ -41,6 +41,9 @@ class AppRouter extends RootStackRouter {
       page: OtpRoute.page,
     ),
     AutoRoute(
+      page: DeliveryAddressRoute.page,
+    ),
+    AutoRoute(
       page: MainShellRoute.page,
       children: [
         AutoRoute(
@@ -48,6 +51,8 @@ class AppRouter extends RootStackRouter {
           initial: true,
         ),
         AutoRoute(page: MenuRoute.page),
+        AutoRoute(page: OrderFormRoute.page),
+        AutoRoute(page: SubscriptionsRoute.page),
         AutoRoute(page: ProfileRoute.page),
       ],
     ),

@@ -27,13 +27,13 @@ class AuthFacade implements IAuthFacade {
 
   @override
   Future<Either<Failure, User>> signIn({
-    required String username,
+    required String mobile,
     required String password,
   }) async {
-    final body = {'username': username, 'password': password};
+    final body = {'mobile': mobile, 'password': password};
 
     final resEither = await apiClient.post<Map<String, dynamic>>(
-      'auth/sign-in',
+      'auth/login',
       body: body,
       authRequired: false,
     );
@@ -45,6 +45,85 @@ class AuthFacade implements IAuthFacade {
         if (body == null) {
           return left(
             AuthFailures.unknown('Unknown Error occurred while signing in'),
+          );
+        }
+
+        try {
+          final user =
+              User.fromJson(body['data']['customer'] as Map<String, dynamic>);
+          final token = body['data']['token'] as String?;
+
+          if (token == null) {
+            return left(
+              AuthFailures.unknown('Unknown Error occurred while signing in'),
+            );
+          }
+
+          // Normalize token: store raw JWT without "Bearer " prefix
+          final rawToken =
+              token.startsWith('Bearer ') ? token.substring(7) : token;
+
+          // Use SessionManager to store session data atomically
+          final setSessionResult = await sessionManager
+              .setSession(
+                token: rawToken,
+                user: user,
+              )
+              .run();
+
+          return setSessionResult.fold(
+            (storageFailure) =>
+                left(AuthFailures.fromStorageFailure(storageFailure)),
+            (_) => right(user),
+          );
+        } catch (e, s) {
+          log('Error parsing sign-in response: $e', stackTrace: s);
+          return left(
+            AuthFailures.unknown('Unknown Error occurred while signing in'),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  Future<Either<Failure, Unit>> signOut() async {
+    final clearResult = await sessionManager.clear().run();
+    return clearResult.fold(
+      (storageFailure) => left(AuthFailures.fromStorageFailure(storageFailure)),
+      right,
+    );
+  }
+
+  @override
+  Future<Either<Failure, User>> signUp({
+    required String name,
+    required String mobile,
+    required String password,
+    required String confirmPassword,
+    required List<SignupLocationInput> locations,
+  }) async {
+    final body = {
+      'name': name,
+      'mobile': mobile,
+      'password': password,
+      'confirmPassword': confirmPassword,
+      'locations': locations.map((loc) => loc.toJson()).toList(),
+    };
+
+    final resEither = await apiClient.post<Map<String, dynamic>>(
+      'auth/signup',
+      body: body,
+      authRequired: false,
+    );
+
+    return resEither.fold(
+      (apiFailure) async => left(AuthFailures.fromApiFailure(apiFailure)),
+      (response) async {
+        final body = response.data;
+        if (body == null) {
+          return left(
+            AuthFailures.unknown('Unknown error occurred while signing up'),
           );
         }
 
@@ -70,21 +149,12 @@ class AuthFacade implements IAuthFacade {
             (_) => right(user),
           );
         } catch (e, s) {
-          log('Error parsing sign-in response: $e', stackTrace: s);
+          log('Error parsing sign-up response: $e', stackTrace: s);
           return left(
-            AuthFailures.unknown('Failed to parse sign-in response'),
+            AuthFailures.unknown('Unknown Error occurred while signing up'),
           );
         }
       },
-    );
-  }
-
-  @override
-  Future<Either<Failure, Unit>> signOut() async {
-    final clearResult = await sessionManager.clear().run();
-    return clearResult.fold(
-      (storageFailure) => left(AuthFailures.fromStorageFailure(storageFailure)),
-      right,
     );
   }
 

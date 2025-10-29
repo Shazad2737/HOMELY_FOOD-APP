@@ -62,6 +62,7 @@ class AuthGuard extends AutoRouteGuard {
         final isPublicRoute =
             routeName == LoginRoute.name ||
             routeName == SignupRoute.name ||
+            routeName == DeliveryAddressRoute.name ||
             routeName == OtpRoute.name;
         print('---isPublicRoute: $isPublicRoute');
         if (!isPublicRoute) {

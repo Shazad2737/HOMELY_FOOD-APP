@@ -21,25 +21,25 @@ class MockAuthFacade implements IAuthFacade {
   /// deterministic fake user and token. For invalid input it returns a failure.
   @override
   Future<Either<Failure, User>> signIn({
-    required String username,
+    required String mobile,
     required String password,
   }) async {
     // simulate network delay
     await Future<void>.delayed(const Duration(milliseconds: 150));
 
-    if (username.isEmpty || password.isEmpty) {
+    if (mobile.isEmpty || password.isEmpty) {
       return left(AuthFailures.validation('Invalid credentials'));
     }
 
     final user = User(
-      id: 'mock-${username.hashCode}',
+      id: 'mock-${mobile.hashCode}',
       name: 'Mock User',
-      username: username,
+      mobile: mobile,
       active: true,
       createdAt: DateTime.now(),
     );
 
-    final token = 'mock-token-${username.hashCode}';
+    final token = 'mock-token-${mobile.hashCode}';
 
     // Use SessionManager to store session data atomically
     final setSessionResult = await sessionManager
@@ -81,5 +81,34 @@ class MockAuthFacade implements IAuthFacade {
         },
       ),
     );
+  }
+
+  @override
+  Future<Either<Failure, User>> signUp({
+    required String name,
+    required String mobile,
+    required String password,
+    required String confirmPassword,
+    required List<SignupLocationInput> locations,
+  }) async {
+    // simulate network delay
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+
+    if (name.isEmpty || mobile.isEmpty || password.isEmpty) {
+      return left(AuthFailures.validation('All fields are required'));
+    }
+
+    if (password != confirmPassword) {
+      return left(AuthFailures.validation('Passwords do not match'));
+    }
+
+    // Create a mock user
+    final user = User(
+      id: 'mock-${DateTime.now().millisecondsSinceEpoch}',
+      name: name,
+      mobile: mobile,
+    );
+
+    return right(user);
   }
 }

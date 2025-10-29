@@ -3,7 +3,7 @@ part of 'login_bloc.dart';
 @immutable
 class LoginState {
   const LoginState({
-    required this.username,
+    required this.mobile,
     required this.password,
     required this.isSubmitting,
     required this.showErrorMessages,
@@ -12,7 +12,7 @@ class LoginState {
 
   factory LoginState.initial() {
     return LoginState(
-      username: '',
+      mobile: '',
       password: '',
       isSubmitting: false,
       showErrorMessages: false,
@@ -20,7 +20,7 @@ class LoginState {
     );
   }
 
-  final String username;
+  final String mobile;
   final bool isSubmitting;
   final String password;
 
@@ -29,14 +29,14 @@ class LoginState {
   final Option<Either<Failure, User>> loginFailureOrSuccessOption;
 
   LoginState copyWith({
-    String? username,
+    String? mobile,
     String? password,
     bool? isSubmitting,
     bool? showErrorMessages,
     Option<Either<Failure, User>>? loginFailureOrSuccessOption,
   }) {
     return LoginState(
-      username: username ?? this.username,
+      mobile: mobile ?? this.mobile,
       password: password ?? this.password,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       showErrorMessages: showErrorMessages ?? this.showErrorMessages,
@@ -49,7 +49,7 @@ class LoginState {
   String toString() =>
       '''
 LoginState {
-username: $username,
+mobile: $mobile,
 password: $password,
 isSubmitting: $isSubmitting,
 showErrorMessages: $showErrorMessages,

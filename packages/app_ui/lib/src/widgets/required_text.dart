@@ -21,11 +21,11 @@ class RequiredText extends StatelessWidget {
     return RichText(
       text: TextSpan(
         text: text,
-        style: style ?? Theme.of(context).textTheme.titleSmall,
+        style: style,
         children: [
           TextSpan(
             text: ' *',
-            style: (style ?? Theme.of(context).textTheme.titleSmall)?.copyWith(
+            style: (style ?? const TextStyle()).copyWith(
               color: Colors.red,
             ),
           ),

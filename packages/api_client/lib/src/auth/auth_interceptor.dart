@@ -51,10 +51,22 @@ class AuthInterceptor extends InterceptorsWrapper {
   ) async {
     // Handle 401 Unauthorized responses
     if (err.response?.statusCode == 401) {
-      log('Received 401 response, clearing session');
+      // Don't clear session for authentication endpoints where 401 is a valid
+      // business response (wrong credentials, not session expired)
+      final path = err.requestOptions.path;
+      final isAuthEndpoint = path.contains('auth/login') ||
+          path.contains('auth/signup') ||
+          path.contains('auth/register') ||
+          path.contains('auth/otp') ||
+          path.contains('auth/verify');
 
-      // Clear session and let app layer handle the state change
-      await _tokenProvider.clearOnUnauthorized().run();
+      if (!isAuthEndpoint) {
+        log('Received 401 response on protected endpoint, clearing session');
+        // Clear session and let app layer handle the state change
+        await _tokenProvider.clearOnUnauthorized().run();
+      } else {
+        log('Received 401 response on auth endpoint, not clearing session');
+      }
     }
 
     handler.next(err);

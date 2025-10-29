@@ -21,7 +21,7 @@ class AppTheme {
         secondary: AppColors.accent, // link text
         onSecondary: AppColors.white,
         secondaryContainer: AppColors.accentContainer, // see-all bg
-        tertiary: AppColors.ctaRed, // order now / active tab
+        tertiary: AppColors.appRed, // order now / active tab
         onTertiary: AppColors.white,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
@@ -47,6 +47,7 @@ class AppTheme {
       iconTheme: const IconThemeData(color: AppColors.grey700),
       bottomNavigationBarTheme: _bottomNavigationBarTheme,
       chipTheme: _chipTheme,
+      dropdownMenuTheme: _dropdownMenuTheme,
       extensions: const <ThemeExtension<dynamic>>[
         AppSemanticsTheme(),
       ],
@@ -134,6 +135,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
+        backgroundColor: const WidgetStatePropertyAll(AppColors.primary),
         foregroundColor: const WidgetStatePropertyAll(AppColors.white),
         textStyle: WidgetStatePropertyAll(AppTextStyles.labelLarge),
         padding: const WidgetStatePropertyAll(
@@ -250,7 +252,7 @@ class AppTheme {
   static BottomNavigationBarThemeData get _bottomNavigationBarTheme {
     return const BottomNavigationBarThemeData(
       backgroundColor: AppColors.white,
-      selectedItemColor: AppColors.ctaRed,
+      selectedItemColor: AppColors.appRed,
       unselectedItemColor: AppColors.grey400,
       type: BottomNavigationBarType.fixed,
       elevation: 10,
@@ -262,8 +264,8 @@ class AppTheme {
     return ChipThemeData(
       backgroundColor: AppColors.white,
       disabledColor: AppColors.grey100,
-      selectedColor: AppColors.weekdayChip,
-      secondarySelectedColor: AppColors.weekdayChip,
+      selectedColor: AppColors.appGreen,
+      secondarySelectedColor: AppColors.appGreen,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       shape: RoundedRectangleBorder(
         side: const BorderSide(color: AppColors.border),
@@ -273,6 +275,22 @@ class AppTheme {
       secondaryLabelStyle:
           AppTextStyles.labelLarge.copyWith(color: AppColors.white),
       brightness: Brightness.light,
+    );
+  }
+
+  static DropdownMenuThemeData get _dropdownMenuTheme {
+    return DropdownMenuThemeData(
+      textStyle: AppTextStyles.bodySmall,
+      inputDecorationTheme: _inputDecorationTheme,
+      menuStyle: MenuStyle(
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        elevation: const WidgetStatePropertyAll(4),
+        backgroundColor: const WidgetStatePropertyAll(AppColors.white),
+      ),
     );
   }
 }

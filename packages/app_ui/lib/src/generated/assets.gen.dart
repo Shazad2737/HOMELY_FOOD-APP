@@ -1,3 +1,5 @@
+// dart format width=80
+
 /// GENERATED CODE - DO NOT MODIFY BY HAND
 /// *****************************************************
 ///  FlutterGen
@@ -5,11 +7,12 @@
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
-// ignore_for_file: directives_ordering,unnecessary_import,implicit_dynamic_list_literal,deprecated_member_use
+// ignore_for_file: deprecated_member_use,directives_ordering,implicit_dynamic_list_literal,unnecessary_import
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart' as _svg;
+import 'package:vector_graphics/vector_graphics.dart' as _vg;
 
 class $AssetsIconsGen {
   const $AssetsIconsGen();
@@ -35,6 +38,12 @@ class $AssetsImagesGen {
   SvgGenImage get balanceCard =>
       const SvgGenImage('assets/images/balance_card.svg');
 
+  /// File path: assets/images/banner.jpg
+  AssetGenImage get banner => const AssetGenImage('assets/images/banner.jpg');
+
+  /// File path: assets/images/burger.png
+  AssetGenImage get burger => const AssetGenImage('assets/images/burger.png');
+
   /// File path: assets/images/empty_state_hand.png
   AssetGenImage get emptyStateHand =>
       const AssetGenImage('assets/images/empty_state_hand.png');
@@ -42,21 +51,75 @@ class $AssetsImagesGen {
   /// File path: assets/images/error.png
   AssetGenImage get error => const AssetGenImage('assets/images/error.png');
 
+  /// File path: assets/images/food_round_1.png
+  AssetGenImage get foodRound1 =>
+      const AssetGenImage('assets/images/food_round_1.png');
+
+  /// File path: assets/images/food_round_small_1.png
+  AssetGenImage get foodRoundSmall1 =>
+      const AssetGenImage('assets/images/food_round_small_1.png');
+
+  /// File path: assets/images/food_round_small_2.png
+  AssetGenImage get foodRoundSmall2 =>
+      const AssetGenImage('assets/images/food_round_small_2.png');
+
+  /// File path: assets/images/food_round_small_3.png
+  AssetGenImage get foodRoundSmall3 =>
+      const AssetGenImage('assets/images/food_round_small_3.png');
+
+  /// File path: assets/images/menu_header.png
+  AssetGenImage get menuHeader =>
+      const AssetGenImage('assets/images/menu_header.png');
+
+  /// File path: assets/images/popcorn.png
+  AssetGenImage get popcorn => const AssetGenImage('assets/images/popcorn.png');
+
+  /// File path: assets/images/promo_banner_bottom.png
+  AssetGenImage get promoBannerBottom =>
+      const AssetGenImage('assets/images/promo_banner_bottom.png');
+
   /// List of all assets
-  List<dynamic> get values => [appLogo, balanceCard, emptyStateHand, error];
+  List<dynamic> get values => [
+        appLogo,
+        balanceCard,
+        banner,
+        burger,
+        emptyStateHand,
+        error,
+        foodRound1,
+        foodRoundSmall1,
+        foodRoundSmall2,
+        foodRoundSmall3,
+        menuHeader,
+        popcorn,
+        promoBannerBottom
+      ];
 }
 
 class Assets {
-  Assets._();
+  const Assets._();
+
+  static const String package = 'app_ui';
 
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
 }
 
 class AssetGenImage {
-  const AssetGenImage(this._assetName);
+  const AssetGenImage(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+    this.animation,
+  });
 
   final String _assetName;
+
+  static const String package = 'app_ui';
+
+  final Size? size;
+  final Set<String> flavors;
+  final AssetGenImageAnimation? animation;
 
   Image image({
     Key? key,
@@ -76,10 +139,11 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = false,
+    bool gaplessPlayback = true,
     bool isAntiAlias = false,
-    String? package = 'app_ui',
-    FilterQuality filterQuality = FilterQuality.low,
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
+    FilterQuality filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) {
@@ -113,7 +177,8 @@ class AssetGenImage {
 
   ImageProvider provider({
     AssetBundle? bundle,
-    String? package = 'app_ui',
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
   }) {
     return AssetImage(
       _assetName,
@@ -127,16 +192,44 @@ class AssetGenImage {
   String get keyName => 'packages/app_ui/$_assetName';
 }
 
+class AssetGenImageAnimation {
+  const AssetGenImageAnimation({
+    required this.isAnimation,
+    required this.duration,
+    required this.frames,
+  });
+
+  final bool isAnimation;
+  final Duration duration;
+  final int frames;
+}
+
 class SvgGenImage {
-  const SvgGenImage(this._assetName);
+  const SvgGenImage(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  }) : _isVecFormat = false;
+
+  const SvgGenImage.vec(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  }) : _isVecFormat = true;
 
   final String _assetName;
+  final Size? size;
+  final Set<String> flavors;
+  final bool _isVecFormat;
 
-  SvgPicture svg({
+  static const String package = 'app_ui';
+
+  _svg.SvgPicture svg({
     Key? key,
     bool matchTextDirection = false,
     AssetBundle? bundle,
-    String? package = 'app_ui',
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
     double? width,
     double? height,
     BoxFit fit = BoxFit.contain,
@@ -145,19 +238,34 @@ class SvgGenImage {
     WidgetBuilder? placeholderBuilder,
     String? semanticsLabel,
     bool excludeFromSemantics = false,
-    SvgTheme theme = const SvgTheme(),
+    _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
     @deprecated BlendMode colorBlendMode = BlendMode.srcIn,
     @deprecated bool cacheColorFilter = false,
   }) {
-    return SvgPicture.asset(
-      _assetName,
+    final _svg.BytesLoader loader;
+    if (_isVecFormat) {
+      loader = _vg.AssetBytesLoader(
+        _assetName,
+        assetBundle: bundle,
+        packageName: package,
+      );
+    } else {
+      loader = _svg.SvgAssetLoader(
+        _assetName,
+        assetBundle: bundle,
+        packageName: package,
+        theme: theme,
+        colorMapper: colorMapper,
+      );
+    }
+    return _svg.SvgPicture(
+      loader,
       key: key,
       matchTextDirection: matchTextDirection,
-      bundle: bundle,
-      package: package,
       width: width,
       height: height,
       fit: fit,
@@ -166,10 +274,8 @@ class SvgGenImage {
       placeholderBuilder: placeholderBuilder,
       semanticsLabel: semanticsLabel,
       excludeFromSemantics: excludeFromSemantics,
-      theme: theme,
-      colorFilter: colorFilter,
-      color: color,
-      colorBlendMode: colorBlendMode,
+      colorFilter: colorFilter ??
+          (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,
     );

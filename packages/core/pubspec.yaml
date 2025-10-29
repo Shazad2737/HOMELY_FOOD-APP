@@ -20,6 +20,7 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_file_dialog: ^3.0.2
+  formz: ^0.7.0
   fpdart: ^1.1.1
   intl: ^0.20.2
   path_provider: ^2.1.5

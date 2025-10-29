@@ -15,21 +15,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   ) : super(LoginState.initial()) {
     on<LoginEvent>((event, emit) async {
       switch (event) {
-        case LoginUserNameChangedEvent():
-          _onUserNameChangedEvent(event, emit);
+        case LoginMobileChangedEvent():
+          _onMobileChangedEvent(event, emit);
         case LoginPasswordChangedEvent():
           _onPasswordChangedEvent(event, emit);
-        case LoginSubmittedEvent():
-          await _onSubmitEvent(event, emit);
+        case _:
+          break;
       }
     });
+    on<LoginSubmittedEvent>(_onSubmitEvent);
   }
 
-  void _onUserNameChangedEvent(
-    LoginUserNameChangedEvent event,
+  void _onMobileChangedEvent(
+    LoginMobileChangedEvent event,
     Emitter<LoginState> emit,
   ) {
-    emit(state.copyWith(username: event.username));
+    emit(state.copyWith(mobile: event.mobile));
   }
 
   void _onPasswordChangedEvent(
@@ -49,14 +50,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       state.copyWith(isSubmitting: true, loginFailureOrSuccessOption: none()),
     );
     final result = await authFacade.signIn(
-      username: state.username.trim(),
+      mobile: state.mobile.trim(),
       password: state.password,
     );
     emit(
       state.copyWith(
         isSubmitting: false,
         loginFailureOrSuccessOption: optionOf(result),
-        // username: '',
+        // mobile: '',
         password: result.isRight() ? '' : state.password,
       ),
     );

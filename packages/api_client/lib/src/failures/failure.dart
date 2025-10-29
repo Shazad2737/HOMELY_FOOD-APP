@@ -65,31 +65,50 @@ class StorageFailure extends Failure {
 
 /// {@template api_validation_failure}
 /// Api Validation Failure
-/// Thrown when the API returns a 422 response
+/// Thrown when the API returns a 400 or 422 response with validation errors
 /// {@endtemplate}
 class ApiValidationFailure extends ApiFailure {
   /// {@macro api_validation_failure}
-  const ApiValidationFailure(this.details, String message)
-      : super(422, message);
+  const ApiValidationFailure(this.errors, String message) : super(422, message);
 
   /// Create a new instance of [ApiValidationFailure] from json
+  ///
+  /// Expected format:
+  /// ```json
+  /// {
+  ///   "success": false,
+  ///   "message": "Validation error in body",
+  ///   "errors": [
+  ///     {"field": "mobile", "message": "Invalid format", "type": "string.pattern.base"},
+  ///     {"field": "password", "message": "Too short", "type": "string.min"}
+  ///   ]
+  /// }
+  /// ```
   factory ApiValidationFailure.fromJson(Map<String, dynamic> json) {
     try {
-      if (json.containsKey('error')) {
+      final message = json['message'] as String? ?? 'Validation failed';
+
+      // Handle 'error' key (simple error string)
+      if (json.containsKey('error') && json['error'] is String) {
         return ApiValidationFailure(
           const [],
           json['error'] as String,
         );
       }
-      final details = (json['details'] as List)
-          .map<ValidationFailureDetail>(
-            (e) => ValidationFailureDetail.fromJson(e as Map<String, dynamic>),
-          )
-          .toList();
-      return ApiValidationFailure(
-        details,
-        details.map((e) => '${e.context.key}: ${e.message}').join('\n'),
-      );
+
+      // Handle 'errors' array (new format)
+      if (json.containsKey('errors') && json['errors'] is List) {
+        final errors = (json['errors'] as List)
+            .map<ValidationFailureDetail>(
+              (e) =>
+                  ValidationFailureDetail.fromJson(e as Map<String, dynamic>),
+            )
+            .toList();
+        return ApiValidationFailure(errors, message);
+      }
+
+      // Fallback: no errors found
+      return ApiValidationFailure(const [], message);
     } on Exception catch (e, s) {
       log('Error parsing ApiValidationFailure: $e', stackTrace: s);
       return const ApiValidationFailure(
@@ -99,12 +118,24 @@ class ApiValidationFailure extends ApiFailure {
     }
   }
 
-  /// Details of the failure
-  final List<ValidationFailureDetail> details;
+  /// List of validation errors from the API
+  final List<ValidationFailureDetail> errors;
+
+  /// Checks if there are any validation errors
+  bool get hasErrors => errors.isNotEmpty;
+
+  /// Get error message for a specific field
+  String? getErrorForField(String field) {
+    try {
+      return errors.firstWhere((e) => e.field == field).message;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   String toString() {
-    return 'ApiValidationFailure{details: $details}';
+    return 'ApiValidationFailure{message: $message, errors: $errors}';
   }
 }
 

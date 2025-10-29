@@ -18,6 +18,7 @@ dependencies:
   core:
     path: packages/core
   equatable: ^2.0.7
+  formz: ^0.7.0
   instamess_api:
     path: packages/instamess_api
   flutter:
@@ -25,7 +26,6 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
-  flutter_staggered_grid_view: ^0.7.0
   fpdart: ^1.1.0
   google_fonts: ^6.2.1
   intl: ^0.20.2

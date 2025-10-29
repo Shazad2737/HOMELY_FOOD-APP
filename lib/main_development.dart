@@ -5,7 +5,7 @@ import 'package:instamess_app/bootstrap.dart';
 Future<void> main() async {
   await bootstrap(
     () {
-      final api = MockInstaMessApi();
+      final api = InstaMessApi(baseUrl: 'http://localhost:4000');
       return App(
         api: api,
         releaseMode: ReleaseMode.development,

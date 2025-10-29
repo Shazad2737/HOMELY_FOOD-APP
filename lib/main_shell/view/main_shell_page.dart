@@ -17,6 +17,14 @@ class MainShellPage extends StatelessWidget {
   }
 }
 
+final List<PageRouteInfo<void>> _routes = [
+  const HomeRoute(),
+  MenuRoute(),
+  const OrderFormRoute(),
+  const SubscriptionsRoute(),
+  const ProfileRoute(),
+];
+
 /// {@template main_shell_view}
 /// View for the main shell page
 /// {@endtemplate}
@@ -27,26 +35,11 @@ class MainShellView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
-      routes: const [
-        HomeRoute(),
-        MenuRoute(),
-        ProfileRoute(),
-      ],
+      routes: _routes,
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         final index = tabsRouter.activeIndex;
         return Scaffold(
-          // appBar: AppBar(
-          //   title: Text(_getPageTitle(index)),
-          //   centerTitle: false,
-          //   actions: [
-          //     IconButton(
-          //       icon: const Icon(Icons.notifications_outlined),
-          //       onPressed: () {},
-          //     ),
-          //     const SizedBox(width: 8),
-          //   ],
-          // ),
           body: child,
           bottomNavigationBar: FoodBottomNavBar(
             currentIndex: index,
@@ -55,20 +48,5 @@ class MainShellView extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _getPageTitle(int index) {
-    switch (index) {
-      case 0:
-        return 'Home';
-      case 1:
-        return 'Menu';
-      case 2:
-        return 'Orders';
-      case 3:
-        return 'Account';
-      default:
-        return 'InstaMess';
-    }
   }
 }

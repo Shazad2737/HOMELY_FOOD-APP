@@ -29,7 +29,7 @@ class _OtpPageState extends State<OtpPage> {
     final defaultPinTheme = PinTheme(
       width: 56,
       height: 56,
-      textStyle: AppTextStyles.titleMedium,
+      textStyle: context.textTheme.titleMedium,
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -82,7 +82,7 @@ class _OtpPageState extends State<OtpPage> {
               Text(
                 widget.phone,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.titleMedium,
+                style: context.textTheme.titleMedium,
               ),
               const SizedBox(height: 24),
               Center(

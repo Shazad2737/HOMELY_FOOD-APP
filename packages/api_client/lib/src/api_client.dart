@@ -26,11 +26,11 @@ class ApiClient {
   })  : _authTokenProvider = authTokenProvider,
         _dio = Dio(
           BaseOptions(
-            baseUrl: '$baseUrl/app/v1/',
-            headers: {
-              'country': 'ae',
-            },
+            baseUrl: '$baseUrl/api/v1/',
             sendTimeout: const Duration(seconds: 15),
+            headers: {
+              'brand': 'IMSS001',
+            },
             connectTimeout: const Duration(seconds: 15),
             receiveTimeout: const Duration(seconds: 15),
           ),
@@ -41,14 +41,18 @@ class ApiClient {
     }
 
     // Only add logger in debug mode to prevent sensitive data leaks in release
-    assert(() {
-      _dio.interceptors.add(
-        PrettyDioLogger(
-          requestBody: true,
-        ),
-      );
-      return true;
-    }());
+    assert(
+      () {
+        _dio.interceptors.add(
+          PrettyDioLogger(
+            requestBody: true,
+            logPrint: (object) => log(object.toString()),
+          ),
+        );
+        return true;
+      }(),
+      '',
+    );
   }
 
   /// Dio instance used by the client

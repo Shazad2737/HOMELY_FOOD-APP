@@ -8,6 +8,7 @@ class PasswordField extends StatefulWidget {
     this.validator,
     this.hintText,
     this.labelText,
+    this.errorText,
     this.initialValue,
     this.controller,
     this.iconAndCursorColor,
@@ -20,6 +21,7 @@ class PasswordField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final String? hintText;
   final String? labelText;
+  final String? errorText;
 
   final String? initialValue;
   final TextEditingController? controller;
@@ -60,6 +62,7 @@ class _PasswordFieldState extends State<PasswordField> {
       decoration: InputDecoration(
         hintText: widget.hintText,
         labelText: widget.labelText,
+        errorText: widget.errorText,
         suffixIcon: IconButton(
           icon: _isObscure
               ? appIcons.eyeSlash.svg(color: iconColor)
