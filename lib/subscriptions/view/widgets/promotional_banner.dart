@@ -1,113 +1,148 @@
-import 'package:app_ui/app_ui.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:instamess_api/instamess_api.dart' as ia;
+import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
 
 class PromotionalBanner extends StatelessWidget {
-  const PromotionalBanner({super.key});
+  const PromotionalBanner({
+    required this.banner,
+    super.key,
+  });
+
+  final ia.Banner banner;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 160,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            AppColors.appOrange,
-            AppColors.appRed,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    final image = banner.images.isNotEmpty ? banner.images.first : null;
+    final imageUrl = image?.imageUrl;
+
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final radius = BorderRadius.circular(16);
+
+    return GestureDetector(
+      onTap: () => BannerNavigationHandler.handleBannerTap(
+        context.router,
+        image?.redirectUrl,
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: _AdaptiveBannerImage(
+          imageUrl: imageUrl,
+          borderRadius: radius,
         ),
-        borderRadius: BorderRadius.circular(16),
       ),
-      child: Stack(
-        children: [
-          // Background pattern/image placeholder
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: const DecorationImage(
-                  image: CachedNetworkImageProvider(
-                    'https://images.unsplash.com/photo-1551892374-ecf87916f7f3?w=400&h=200&fit=crop&crop=center',
-                  ),
-                  fit: BoxFit.cover,
-                  opacity: 0.3,
-                ),
-              ),
+    );
+  }
+}
+
+/// A banner image that adapts its height to the intrinsic image aspect ratio
+/// while always expanding to the available width.
+class _AdaptiveBannerImage extends StatefulWidget {
+  const _AdaptiveBannerImage({
+    required this.imageUrl,
+    required this.borderRadius,
+  });
+
+  final String imageUrl;
+  final BorderRadius borderRadius;
+
+  @override
+  State<_AdaptiveBannerImage> createState() => _AdaptiveBannerImageState();
+}
+
+class _AdaptiveBannerImageState extends State<_AdaptiveBannerImage> {
+  ImageStream? _imageStream;
+  ImageStreamListener? _imageStreamListener;
+  double? _aspectRatio; // width / height
+
+  // Provide a sensible default while loading (typical banner ratio)
+  static const double _fallbackAspectRatio = 16 / 9;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveImage();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AdaptiveBannerImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imageUrl != widget.imageUrl) {
+      _aspectRatio = null;
+      _unsubscribeImageStream();
+      _resolveImage();
+    }
+  }
+
+  void _resolveImage() {
+    final provider = CachedNetworkImageProvider(widget.imageUrl);
+    final stream = provider.resolve(const ImageConfiguration());
+    _imageStream = stream;
+    _imageStreamListener = ImageStreamListener(
+      (imageInfo, _) {
+        final width = imageInfo.image.width.toDouble();
+        final height = imageInfo.image.height.toDouble();
+        if (width > 0 && height > 0) {
+          setState(() => _aspectRatio = width / height);
+        }
+      },
+      onError: (_, __) {
+        // Keep fallback aspect ratio on error
+      },
+    );
+    stream.addListener(_imageStreamListener!);
+  }
+
+  void _unsubscribeImageStream() {
+    if (_imageStream != null && _imageStreamListener != null) {
+      _imageStream!.removeListener(_imageStreamListener!);
+    }
+    _imageStream = null;
+    _imageStreamListener = null;
+  }
+
+  @override
+  void dispose() {
+    _unsubscribeImageStream();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.of(context).size.width;
+        final ar = _aspectRatio ?? _fallbackAspectRatio;
+        final targetHeight = maxWidth / ar;
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          width: double.infinity,
+          height: targetHeight,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: CachedNetworkImage(
+            imageUrl: widget.imageUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            placeholder: (context, url) => Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
+            errorWidget: (context, url, error) => Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              alignment: Alignment.center,
+              child: const Icon(Icons.broken_image_outlined),
             ),
           ),
-
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Spaghetti Specials month',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'For all spaghetti lovers, get \$10 off\nall spaghetti based meals.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: 14,
-                          color: AppColors.white.withValues(alpha: 0.9),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'Claim now',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.appOrangeDark,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Food image
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: CachedNetworkImageProvider(
-                        'https://images.unsplash.com/photo-1551892374-ecf87916f7f3?w=200&h=200&fit=crop&crop=center',
-                      ),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -76,34 +76,34 @@ class _TitleRow extends StatelessWidget {
           'Food Categories',
           style: context.textTheme.titleMedium,
         ),
-        const Spacer(),
-        ElevatedButton(
-          onPressed: () {},
+        // const Spacer(),
+        // ElevatedButton(
+        //   onPressed: () {},
 
-          style: ElevatedButton.styleFrom(
-            visualDensity: const VisualDensity(
-              horizontal: -4,
-              vertical: -4,
-            ),
-            foregroundColor: AppColors.appOrangeDark,
-            backgroundColor: AppColors.appOrangeDark.withValues(
-              alpha: 0.3,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadiusGeometry.circular(30),
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
-          ),
-          child: Text(
-            'See All',
-            style: context.textTheme.bodySmall?.semiBold.orange.copyWith(
-              height: 1,
-            ),
-          ),
-        ),
+        //   style: ElevatedButton.styleFrom(
+        //     visualDensity: const VisualDensity(
+        //       horizontal: -4,
+        //       vertical: -4,
+        //     ),
+        //     foregroundColor: AppColors.appOrangeDark,
+        //     backgroundColor: AppColors.appOrangeDark.withValues(
+        //       alpha: 0.3,
+        //     ),
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadiusGeometry.circular(30),
+        //     ),
+        //     padding: const EdgeInsets.symmetric(
+        //       horizontal: 12,
+        //       vertical: 6,
+        //     ),
+        //   ),
+        //   child: Text(
+        //     'See All',
+        //     style: context.textTheme.bodySmall?.semiBold.orange.copyWith(
+        //       height: 1,
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

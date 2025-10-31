@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:api_client/api_client.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:instamess_api/src/cms/cms_facade_interface.dart';
+import 'package:instamess_api/src/cms/i_cms_repository.dart';
 import 'package:instamess_api/src/cms/models/models.dart';
 
 /// {@template cms_facade}

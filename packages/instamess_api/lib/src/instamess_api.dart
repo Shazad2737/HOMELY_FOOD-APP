@@ -5,16 +5,17 @@ abstract class IInstaMessApi {
   /// {@macro auth_facade}
   IAuthFacade get authFacade;
 
-  /// CMS Facade
-  ICmsRepository get cmsFacade;
+  /// CMS Repository
+  ICmsRepository get cmsRepository;
 
-  /// Menu Facade
-  IMenuRepository get menuFacade;
-
-  DashboardRepo get dashboardRepo;
+  /// Menu Repository
+  IMenuRepository get menuRepository;
 
   /// Session manager for authentication state
   ISessionManager get sessionManager;
+
+  /// User Repository (orders, subscriptions, profile)
+  IUserRepository get userRepository;
 }
 
 /// {@template instamess_api}
@@ -46,44 +47,43 @@ class InstaMessApi implements IInstaMessApi {
       sessionManager: _sessionManager,
     );
 
-    // Create CMS facade
-    _cmsFacade = CmsRepository(
+    // Create CMS repository
+    _cmsRepository = CmsRepository(
       apiClient: _apiClient,
     );
 
-    // Create Menu facade
-    _menuFacade = MenuRepository(
+    // Create Menu repository
+    _menuRepository = MenuRepository(
       apiClient: _apiClient,
     );
+
+    // Create User repository
+    _userRepository = UserRepository(_apiClient);
   }
 
   final IStorageController _storageController;
   late final ISessionManager _sessionManager;
   late final ApiClient _apiClient;
   late final IAuthFacade _authFacade;
-  late final ICmsRepository _cmsFacade;
-  late final IMenuRepository _menuFacade;
+  late final ICmsRepository _cmsRepository;
+  late final IMenuRepository _menuRepository;
+  late final IUserRepository _userRepository;
 
   /// {@macro auth_facade}
   @override
   IAuthFacade get authFacade => _authFacade;
 
   @override
-  ICmsRepository get cmsFacade => _cmsFacade;
+  ICmsRepository get cmsRepository => _cmsRepository;
 
   @override
-  IMenuRepository get menuFacade => _menuFacade;
+  IMenuRepository get menuRepository => _menuRepository;
 
   @override
   ISessionManager get sessionManager => _sessionManager;
 
-  // /// Shortcut to [TransactionRepository] instance
-  // late final ITransactionRepository transactionRepository =
-  //     TransactionRepository(_apiClient);
-
-  /// Shortcut to [DashboardRepo] instance
   @override
-  late final DashboardRepo dashboardRepo = DashboardRepo(_apiClient);
+  IUserRepository get userRepository => _userRepository;
 }
 
 class MockInstaMessApi implements IInstaMessApi {
@@ -107,14 +107,14 @@ class MockInstaMessApi implements IInstaMessApi {
   IAuthFacade get authFacade => _authFacade;
 
   @override
-  ICmsRepository get cmsFacade => throw UnimplementedError();
+  ICmsRepository get cmsRepository => throw UnimplementedError();
 
   @override
-  IMenuRepository get menuFacade => throw UnimplementedError();
-
-  @override
-  DashboardRepo get dashboardRepo => throw UnimplementedError();
+  IMenuRepository get menuRepository => throw UnimplementedError();
 
   @override
   ISessionManager get sessionManager => _sessionManager;
+
+  @override
+  IUserRepository get userRepository => throw UnimplementedError();
 }

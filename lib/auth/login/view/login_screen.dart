@@ -5,6 +5,7 @@
 // Status: ACTIVE
 // Verified: true
 
+import 'package:api_client/api_client.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:core/core.dart';
@@ -161,7 +162,18 @@ class _LoginFormState extends State<_LoginForm> {
       listener: (context, state) {
         state.loginFailureOrSuccessOption.fold(() => null, (t) {
           t.fold(
-            (l) => AppSnackbar.showErrorSnackbar(context, content: l.message),
+            (failure) {
+              // Handle account not verified - redirect to OTP
+              if (failure is AccountNotVerifiedFailure) {
+                context.router.push(
+                  OtpRoute(phone: state.mobile),
+                );
+                return;
+              }
+
+              // Show generic error for other failures
+              AppSnackbar.showErrorSnackbar(context, content: failure.message);
+            },
             (user) {
               // Success handled elsewhere
             },

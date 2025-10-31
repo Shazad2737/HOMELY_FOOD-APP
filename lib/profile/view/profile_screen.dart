@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_app/auth/bloc/auth_bloc.dart';
+import 'package:instamess_app/router/router.gr.dart';
 
 @RoutePage()
 class ProfileScreen extends StatelessWidget {
@@ -36,16 +37,22 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Card(
+            Card(
               child: Column(
                 children: [
-                  _Tile(icon: Icons.person_outline, title: 'My Profile'),
-                  _Tile(icon: Icons.receipt_long_outlined, title: 'My Orders'),
+                  const _Tile(icon: Icons.person_outline, title: 'My Profile'),
                   _Tile(
+                    icon: Icons.receipt_long_outlined,
+                    title: 'My Orders',
+                    onTap: () {
+                      context.router.push(const OrdersRoute());
+                    },
+                  ),
+                  const _Tile(
                     icon: Icons.location_on_outlined,
                     title: 'Delivery Address',
                   ),
-                  _Tile(icon: Icons.settings_outlined, title: 'Setting'),
+                  const _Tile(icon: Icons.settings_outlined, title: 'Setting'),
                 ],
               ),
             ),
@@ -75,16 +82,18 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.icon, required this.title});
+  const _Tile({required this.icon, required this.title, this.onTap});
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon, color: AppColors.grey700),
       title: Text(title, style: context.textTheme.bodyLarge),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }

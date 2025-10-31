@@ -10,7 +10,7 @@ part 'delivery_address_state.dart';
 class DeliveryAddressBloc
     extends Bloc<DeliveryAddressEvent, DeliveryAddressState> {
   DeliveryAddressBloc({
-    required this.cmsFacade,
+    required this.cmsRepository,
     required this.authFacade,
   }) : super(DeliveryAddressState.initial()) {
     on<DeliveryAddressEvent>((event, emit) async {
@@ -42,7 +42,7 @@ class DeliveryAddressBloc
     on<DeliveryAddressSubmittedEvent>(_onSubmitEvent);
   }
 
-  final ICmsRepository cmsFacade;
+  final ICmsRepository cmsRepository;
   final IAuthFacade authFacade;
 
   Future<void> _onLoadedEvent(
@@ -56,7 +56,7 @@ class DeliveryAddressBloc
       ),
     );
 
-    final result = await cmsFacade.getLocations();
+    final result = await cmsRepository.getLocations();
 
     result.fold(
       (failure) {
@@ -94,7 +94,7 @@ class DeliveryAddressBloc
     );
 
     // Fetch areas for the selected location
-    final result = await cmsFacade.getAreas(event.locationId);
+    final result = await cmsRepository.getAreas(event.locationId);
 
     result.fold(
       (failure) {

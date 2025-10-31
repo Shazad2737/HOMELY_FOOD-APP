@@ -215,13 +215,38 @@ class _MenuViewState extends State<MenuView>
         children: [
           // Banner image
           AspectRatio(
-            aspectRatio: 16 / 7,
+            aspectRatio: 16 / 4,
             child: Image(
-              image: appImages.banner.provider(),
+              image: appImages.menuHeader.provider(),
               fit: BoxFit.cover,
             ),
           ),
-          // Back button
+          // menu text
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+
+              // left: 0,
+              // right: 0,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Menu',
+                  style: context.textTheme.headlineMedium?.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 8,
+                        color: AppColors.black.withValues(alpha: 0.6),
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -237,24 +262,12 @@ class _MenuViewState extends State<MenuView>
     }
 
     return SliverToBoxAdapter(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-            child: Text(
-              'Categories',
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.grey900,
-              ),
-            ),
-          ),
-          CategorySelector(
-            categories: categories,
-            selectedCategory: selectedCategory,
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: CategorySelector(
+          categories: categories,
+          selectedCategory: selectedCategory,
+        ),
       ),
     );
   }
@@ -270,21 +283,21 @@ class _MenuViewState extends State<MenuView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-            child: Text(
-              'Plans',
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.grey700,
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          //   child: Text(
+          //     'Plans',
+          //     style: context.textTheme.titleMedium?.copyWith(
+          //       fontWeight: FontWeight.w600,
+          //       color: AppColors.grey700,
+          //     ),
+          //   ),
+          // ),
           PlanSelector(
             plans: menuData.availablePlans,
             selectedPlan: selectedPlan,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 12),
         ],
       ),
     );

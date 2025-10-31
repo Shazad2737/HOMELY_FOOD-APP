@@ -10,7 +10,7 @@ part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc({
-    required this.cmsFacade,
+    required this.cmsRepository,
   }) : super(HomeState.initial()) {
     on<HomeEvent>((event, emit) async {
       switch (event) {
@@ -22,7 +22,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
   }
 
-  final ICmsRepository cmsFacade;
+  final ICmsRepository cmsRepository;
 
   Future<void> _onLoadedEvent(
     HomeLoadedEvent event,
@@ -30,7 +30,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   ) async {
     emit(state.copyWith(homePageState: DataState.loading()));
 
-    final result = await cmsFacade.getHomePage();
+    final result = await cmsRepository.getHomePage();
 
     result.fold(
       (failure) {
@@ -66,7 +66,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(state.copyWith(homePageState: DataState.loading()));
     }
 
-    final result = await cmsFacade.getHomePage();
+    final result = await cmsRepository.getHomePage();
 
     result.fold(
       (failure) {

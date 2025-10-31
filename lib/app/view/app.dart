@@ -63,13 +63,16 @@ class _AppState extends State<App> {
     final multiBlocProvider = MultiRepositoryProvider(
       providers: [
         RepositoryProvider(
-          create: (context) => widget.api.cmsFacade,
+          create: (context) => widget.api.cmsRepository,
         ),
         RepositoryProvider(
           create: (context) => widget.api.authFacade,
         ),
         RepositoryProvider(
-          create: (context) => widget.api.menuFacade,
+          create: (context) => widget.api.menuRepository,
+        ),
+        RepositoryProvider(
+          create: (context) => widget.api.userRepository,
         ),
       ],
       child: MultiBlocProvider(

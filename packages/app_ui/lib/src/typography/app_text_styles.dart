@@ -59,9 +59,18 @@ abstract class AppTextStyles {
     inherit: true,
   );
 
+  /// Headline Small - For small headings
+  static TextStyle headlineSmall = _defaultFont.copyWith(
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    height: 1,
+    // color: _defaultColor,
+    inherit: true,
+  );
+
   /// Title Large - For card titles
   static TextStyle titleLarge = _defaultFont.copyWith(
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 1.4,
     letterSpacing: 0,

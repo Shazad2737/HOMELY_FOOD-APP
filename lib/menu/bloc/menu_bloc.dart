@@ -190,7 +190,8 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
   }
 
   Future<void> _fetchMenu(Emitter<MenuState> emit) async {
-    final categoryId = state.selectedCategory?.id;
+    final categoryId =
+        state.selectedCategory?.id ?? state.categories.firstOrNull?.id;
     if (categoryId == null) {
       log('MenuBloc: Cannot fetch menu - no category selected');
       emit(

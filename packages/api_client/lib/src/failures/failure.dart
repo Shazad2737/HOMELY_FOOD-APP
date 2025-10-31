@@ -145,6 +145,35 @@ class UnauthorizedFailure extends ApiFailure {
   const UnauthorizedFailure() : super(401, 'Unauthorized');
 }
 
+/// Failure for 403 Forbidden when account needs verification
+class AccountNotVerifiedFailure extends ApiFailure {
+  /// Create a new instance of [AccountNotVerifiedFailure]
+  const AccountNotVerifiedFailure({
+    required this.redirectTo,
+    String? message,
+  }) : super(403, message ?? 'Account not verified');
+
+  /// Where the user should be redirected (e.g., 'otp-verification')
+  final String redirectTo;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AccountNotVerifiedFailure &&
+          runtimeType == other.runtimeType &&
+          code == other.code &&
+          message == other.message &&
+          redirectTo == other.redirectTo;
+
+  @override
+  int get hashCode => code.hashCode ^ message.hashCode ^ redirectTo.hashCode;
+
+  @override
+  String toString() {
+    return 'AccountNotVerifiedFailure{code: $code, message: $message, redirectTo: $redirectTo}';
+  }
+}
+
 /// Failure for 404 Not Found
 class NotFoundFailure extends ApiFailure {
   /// Create a new instance of [NotFoundFailure]

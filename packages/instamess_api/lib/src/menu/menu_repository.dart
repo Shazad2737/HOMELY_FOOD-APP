@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:api_client/api_client.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:instamess_api/src/menu/menu_repository_interface.dart';
+import 'package:instamess_api/src/menu/i_menu_repository.dart';
 import 'package:instamess_api/src/menu/models/models.dart';
 
 /// {@template menu_repository}

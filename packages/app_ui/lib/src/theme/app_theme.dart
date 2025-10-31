@@ -83,6 +83,7 @@ class AppTheme {
       displaySmall: AppTextStyles.displaySmall,
       headlineLarge: AppTextStyles.headlineLarge,
       headlineMedium: AppTextStyles.headlineMedium,
+      headlineSmall: AppTextStyles.headlineSmall,
       titleLarge: AppTextStyles.titleLarge,
       titleMedium: AppTextStyles.titleMedium,
       titleSmall: AppTextStyles.titleSmall,

@@ -1,129 +1,78 @@
-import 'dart:ui';
-
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 
 class PromoBanner {
   PromoBanner({
-    required this.title,
-    required this.subtitle,
-    this.buttonLabel,
-    this.onPressed,
-    this.image,
-    this.backgroundColor,
+    required this.imageUrl,
+    this.onTap,
   });
 
-  final String title;
-  final String subtitle;
-  final String? buttonLabel;
-  final VoidCallback? onPressed;
-  final Widget? image;
-
-  final Color? backgroundColor;
+  final String imageUrl;
+  final VoidCallback? onTap;
 }
 
-/// A promotional banner card with gradient background and CTA button.
+/// A promotional banner card displaying only an image with click functionality.
+///
+/// This card is designed to handle any image size or aspect ratio without
+/// breaking the layout. The entire card is tappable when [onTap] is provided.
+///
+/// If [aspectRatio] is provided, the card will maintain that aspect ratio.
+/// Otherwise, it adapts to fill the available space naturally.
 class PromoBannerCard extends StatelessWidget {
   const PromoBannerCard({
     required this.promoBanner,
+    this.aspectRatio,
     super.key,
   });
 
   final PromoBanner promoBanner;
+  final double? aspectRatio;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: promoBanner.backgroundColor ?? AppColors.appRed,
-      ),
+    final imageWidget = Image.network(
+      promoBanner.imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return ColoredBox(
+          color: AppColors.grey100,
+          child: Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return const ColoredBox(
+          color: AppColors.grey100,
+          child: Center(
+            child: Icon(
+              Icons.broken_image_outlined,
+              size: 48,
+              color: AppColors.grey400,
+            ),
+          ),
+        );
+      },
+    );
+
+    return GestureDetector(
+      onTap: promoBanner.onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Decorative blurred ellipse behind title
-            Positioned(
-              left: -18,
-              top: -34,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 1, sigmaY: 2),
-                child: Container(
-                  width: 124,
-                  height: 124,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xffaa2a58).withValues(alpha: 0.3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF334077).withValues(alpha: 0.3),
-                        blurRadius: 40,
-                        spreadRadius: 10,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          promoBanner.title,
-                          style: context.textTheme.titleSmall?.copyWith(
-                            color: AppColors.white,
-                          ),
-                        ),
-                        // const SizedBox(height: 6),
-                        Text(
-                          promoBanner.subtitle,
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: AppColors.white.withValues(alpha: 0.9),
-                          ),
-                        ),
-                        if (promoBanner.buttonLabel != null) ...[
-                          const SizedBox(height: 6),
-                          FilledButton(
-                            style: FilledButton.styleFrom(
-                              // backgroundColor: AppColors.white,
-                              foregroundColor: AppColors.black,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 2,
-                                horizontal: 12,
-                              ),
-                              textStyle: context.textTheme.bodySmall?.semiBold,
-                            ),
-                            onPressed: promoBanner.onPressed,
-                            child: Text(promoBanner.buttonLabel!),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (promoBanner.image != null) ...[
-                    const SizedBox(width: 16),
-                    SizedBox(
-                      height: 96,
-                      width: 120,
-                      child: FittedBox(child: promoBanner.image),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
+        child: aspectRatio != null
+            ? AspectRatio(
+                aspectRatio: aspectRatio!,
+                child: imageWidget,
+              )
+            : imageWidget,
       ),
     );
   }

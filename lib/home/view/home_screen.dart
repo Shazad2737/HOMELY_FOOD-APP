@@ -1,13 +1,13 @@
 import 'package:api_client/api_client.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/home/bloc/home_bloc.dart';
 import 'package:instamess_app/home/view/widgets/categories/categories_section.dart';
 import 'package:instamess_app/home/view/widgets/promo/promo.dart';
+import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
 
 @RoutePage()
 class HomeScreen extends StatelessWidget {
@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => HomeBloc(
-        cmsFacade: context.read<ICmsRepository>(),
+        cmsRepository: context.read<ICmsRepository>(),
       )..add(HomeLoadedEvent()),
       child: const _HomeScreenContent(),
     );
@@ -197,7 +197,9 @@ class _SuccessContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (topBanners.isNotEmpty) ...[
-              PromoCarousel(banners: topBanners),
+              PromoCarousel(
+                banners: topBanners,
+              ),
               const SizedBox(height: 16),
             ],
             if (data.categories.isNotEmpty) ...[
@@ -206,63 +208,93 @@ class _SuccessContent extends StatelessWidget {
             ],
             // Middle promo row (safe layout + presence checks)
             if (middleBanner1.isNotEmpty || middleBanner2.isNotEmpty) ...[
-              Row(
-                children: [
-                  if (middleBanner1.isNotEmpty)
-                    Expanded(
-                      child: PromoBannerCard(
-                        promoBanner: PromoBanner(
-                          title: middleBanner1.first.title ?? '',
-                          subtitle: middleBanner1.first.description ?? '',
-                          image: middleBanner1.first.images.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl:
+              SizedBox(
+                height: 120,
+                child: Row(
+                  children: [
+                    if (middleBanner1.isNotEmpty)
+                      Expanded(
+                        child: PromoBannerCard(
+                          promoBanner: PromoBanner(
+                            imageUrl: middleBanner1.first.images.isNotEmpty
+                                ? middleBanner1.first.images.first.imageUrl ??
+                                      ''
+                                : '',
+                            onTap:
+                                middleBanner1.first.images.isNotEmpty &&
+                                    middleBanner1
+                                            .first
+                                            .images
+                                            .first
+                                            .redirectUrl !=
+                                        null &&
+                                    middleBanner1
+                                        .first
+                                        .images
+                                        .first
+                                        .redirectUrl!
+                                        .isNotEmpty
+                                ? () {
+                                    BannerNavigationHandler.handleBannerTap(
+                                      context.router,
                                       middleBanner1
                                           .first
                                           .images
                                           .first
-                                          .imageUrl ??
-                                      '',
-                                  height: 96,
-                                )
-                              : null,
-                          backgroundColor: AppColors.appRed,
-                          buttonLabel: 'Order now',
+                                          .redirectUrl,
+                                    );
+                                  }
+                                : null,
+                          ),
                         ),
                       ),
-                    ),
-                  if (middleBanner1.isNotEmpty && middleBanner2.isNotEmpty)
-                    const SizedBox(width: 16),
-                  if (middleBanner2.isNotEmpty)
-                    Expanded(
-                      child: PromoBannerCard(
-                        promoBanner: PromoBanner(
-                          title: middleBanner2.first.title ?? '',
-                          subtitle: middleBanner2.first.description ?? '',
-                          image: middleBanner2.first.images.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl:
+                    if (middleBanner1.isNotEmpty && middleBanner2.isNotEmpty)
+                      const SizedBox(width: 16),
+                    if (middleBanner2.isNotEmpty)
+                      Expanded(
+                        child: PromoBannerCard(
+                          promoBanner: PromoBanner(
+                            imageUrl: middleBanner2.first.images.isNotEmpty
+                                ? middleBanner2.first.images.first.imageUrl ??
+                                      ''
+                                : '',
+                            onTap:
+                                middleBanner2.first.images.isNotEmpty &&
+                                    middleBanner2
+                                            .first
+                                            .images
+                                            .first
+                                            .redirectUrl !=
+                                        null &&
+                                    middleBanner2
+                                        .first
+                                        .images
+                                        .first
+                                        .redirectUrl!
+                                        .isNotEmpty
+                                ? () {
+                                    BannerNavigationHandler.handleBannerTap(
+                                      context.router,
                                       middleBanner2
                                           .first
                                           .images
                                           .first
-                                          .imageUrl ??
-                                      '',
-                                  height: 96,
-                                )
-                              : null,
-                          backgroundColor: AppColors.appOrange,
-                          buttonLabel: 'Invite Now',
+                                          .redirectUrl,
+                                    );
+                                  }
+                                : null,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
             ],
             if (bottomBanners.isNotEmpty) ...[
               PromoCarousel(
                 banners: bottomBanners,
+                showPageIndicatorInside: true,
                 height: 140,
               ),
             ],

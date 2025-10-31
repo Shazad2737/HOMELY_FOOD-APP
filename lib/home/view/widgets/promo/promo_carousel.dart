@@ -1,8 +1,10 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:instamess_api/src/cms/models/banner.dart' as api_models;
 import 'package:instamess_app/home/view/widgets/promo/promo.dart';
+import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 /// A carousel widget that displays multiple promotional banner cards with page indicators.
@@ -16,6 +18,7 @@ class PromoCarousel extends StatefulWidget {
     this.enableInfiniteScroll = true,
     this.viewportFraction = 1.0,
     this.onPageChanged,
+    this.showPageIndicatorInside = false,
   });
 
   final List<api_models.Banner> banners;
@@ -25,6 +28,8 @@ class PromoCarousel extends StatefulWidget {
   final bool enableInfiniteScroll;
   final double viewportFraction;
   final void Function(int, CarouselPageChangedReason)? onPageChanged;
+
+  final bool showPageIndicatorInside;
 
   @override
   State<PromoCarousel> createState() => _PromoCarouselState();
@@ -41,7 +46,8 @@ class _PromoCarouselState extends State<PromoCarousel> {
       return const SizedBox.shrink();
     }
 
-    return Column(
+    return Stack(
+      alignment: Alignment.bottomCenter,
       children: [
         CarouselSlider(
           carouselController: _carouselController,
@@ -62,36 +68,59 @@ class _PromoCarouselState extends State<PromoCarousel> {
             return Builder(
               builder: (BuildContext context) {
                 // Use first image from banner if available
-                final imageUrl = banner.images.isNotEmpty == true
-                    ? banner.images.first.imageUrl
+                final firstImage = banner.images.isNotEmpty
+                    ? banner.images.first
                     : null;
+                final imageUrl = firstImage?.imageUrl ?? '';
+                final redirectUrl = firstImage?.redirectUrl;
 
                 return PromoBannerCard(
                   promoBanner: PromoBanner(
-                    title: banner.title ?? '',
-                    subtitle: banner.description ?? '',
-                    buttonLabel: 'ORDER NOW',
-                    image: imageUrl != null
-                        ? Image.network(imageUrl, height: 96)
-                        : appImages.foodRound1.image(height: 96),
+                    imageUrl: imageUrl,
+                    onTap: redirectUrl != null && redirectUrl.isNotEmpty
+                        ? () {
+                            BannerNavigationHandler.handleBannerTap(
+                              context.router,
+                              redirectUrl,
+                            );
+                          }
+                        : null,
                   ),
                 );
               },
             );
           }).toList(),
         ),
-        const SizedBox(height: 16),
-        AnimatedSmoothIndicator(
-          activeIndex: _currentIndex,
-          count: widget.banners.length,
-          effect: const WormEffect(
-            dotHeight: 8,
-            dotWidth: 8,
-            dotColor: AppColors.grey300,
-            activeDotColor: AppColors.grey600,
+        if (widget.showPageIndicatorInside)
+          Positioned(
+            bottom: 12,
+            child: AnimatedSmoothIndicator(
+              activeIndex: _currentIndex,
+              count: widget.banners.length,
+              effect: const WormEffect(
+                dotHeight: 8,
+                dotWidth: 8,
+                dotColor: AppColors.white,
+                activeDotColor: AppColors.grey800,
+              ),
+              onDotClicked: _carouselController.animateToPage,
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: AnimatedSmoothIndicator(
+              activeIndex: _currentIndex,
+              count: widget.banners.length,
+              effect: const WormEffect(
+                dotHeight: 8,
+                dotWidth: 8,
+                dotColor: AppColors.white,
+                activeDotColor: AppColors.grey800,
+              ),
+              onDotClicked: _carouselController.animateToPage,
+            ),
           ),
-          onDotClicked: _carouselController.animateToPage,
-        ),
       ],
     );
   }

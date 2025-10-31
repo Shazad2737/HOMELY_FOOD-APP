@@ -21,6 +21,25 @@ class ErrorMapper {
       switch (statusCode) {
         case 401:
           return const UnauthorizedFailure();
+        case 403:
+          // Check for account verification redirect
+          if (responseData is Map<String, dynamic>) {
+            final errors = responseData['errors'];
+            if (errors is Map<String, dynamic> &&
+                errors.containsKey('redirectTo')) {
+              return AccountNotVerifiedFailure(
+                redirectTo: errors['redirectTo'] as String,
+                message: _safeParseErrorMessage(responseData) ??
+                    'Account not verified',
+              );
+            }
+          }
+          // Generic 403 fallback
+          return UnknownApiFailure(
+            403,
+            _safeParseErrorMessage(responseData) ?? 'Access forbidden',
+            apiErrorMessage: _safeParseErrorMessage(responseData),
+          );
         case 404:
           return NotFoundFailure(
             message:

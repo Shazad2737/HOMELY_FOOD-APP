@@ -49,7 +49,7 @@ class CategoryChip extends StatelessWidget {
               : const [
                   BoxShadow(
                     blurRadius: 4,
-                    color: Color(0xffBFCAFF),
+                    color: Color.fromARGB(65, 191, 202, 255),
                   ),
                 ],
         ),

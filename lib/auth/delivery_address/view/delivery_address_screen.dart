@@ -20,7 +20,7 @@ class DeliveryAddressPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => DeliveryAddressBloc(
-        cmsFacade: context.read<ICmsRepository>(),
+        cmsRepository: context.read<ICmsRepository>(),
         authFacade: context.read<IAuthFacade>(),
       )..add(DeliveryAddressLoadedEvent()),
       child: Scaffold(
