@@ -56,12 +56,9 @@ class _MobileWidget extends StatelessWidget {
                 constraints: const BoxConstraints(),
               ),
               const SizedBox(width: 16),
-              const Text(
+              Text(
                 'Delivery Address',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: context.tsTitleMedium18,
               ),
             ],
           ),
@@ -79,20 +76,17 @@ class _MobileWidget extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           'We offer Best Food in the Word',
-                          style: TextStyle(
+                          style: context.tsTitleMedium18.bold.copyWith(
                             color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Lorem ipsam lorem ipsam',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 14,
+                          style: context.tsBodyMedium14.copyWith(
+                            color: Colors.white.withOpacity(0.9),
                           ),
                         ),
                       ],
@@ -129,15 +123,59 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 4, bottom: 8),
-                child: Text(
+              // Location loading error banner
+              if (state.locationLoadError != null)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.error),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: AppColors.error),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Failed to load locations',
+                              style: context.tsBodyMedium14.semiBold.copyWith(
+                                color: AppColors.error,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              state.locationLoadError!,
+                              style: context.tsBodySmall12,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: () {
+                          context.read<DeliveryAddressBloc>().add(
+                            DeliveryAddressLoadedEvent(),
+                          );
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                child: RequiredText(
                   'Location',
-                  style: TextStyle(fontSize: 14),
+                  style: context.tsBodyMedium14,
                 ),
               ),
               DropdownButtonFormField<String>(
-                style: context.textTheme.bodyMedium?.grey600,
+                style: context.tsBodyMedium14.grey600,
                 icon: RotatedBox(
                   quarterTurns: 3,
                   child: Icon(
@@ -148,14 +186,13 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                   ),
                 ),
                 selectedItemBuilder: (context) {
-                  return state.areas.map((area) {
+                  return state.locations.map((location) {
                     return Text(
-                      area.name,
-                      style: context.textTheme.bodyMedium?.semiBold,
+                      location.name ?? '',
+                      style: context.tsBodyMedium14.semiBold,
                     );
                   }).toList();
                 },
-
                 decoration: const InputDecoration(
                   hintText: 'Select Location',
                   contentPadding: EdgeInsets.symmetric(
@@ -163,6 +200,12 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                     vertical: 14,
                   ),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Location ID (emirate) is required';
+                  }
+                  return null;
+                },
                 initialValue: state.locationId.isEmpty
                     ? null
                     : state.locationId,
@@ -172,7 +215,7 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                     child: Text(location.name ?? 'Unknown'),
                   );
                 }).toList(),
-                onChanged: state.isLoadingLocations
+                onChanged: state.isLoadingLocations || state.hasLocationError
                     ? null
                     : (value) {
                         if (value != null) {
@@ -183,15 +226,15 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                       },
               ),
               const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.only(left: 4, bottom: 8),
-                child: Text(
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                child: RequiredText(
                   'Area',
-                  style: TextStyle(fontSize: 14),
+                  style: context.tsBodyMedium14,
                 ),
               ),
               DropdownButtonFormField<String>(
-                style: context.textTheme.bodyMedium?.grey600,
+                style: context.tsBodyMedium14.grey600,
                 icon: RotatedBox(
                   quarterTurns: 3,
                   child: Icon(
@@ -205,17 +248,38 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                   return state.areas.map((area) {
                     return Text(
                       area.name,
-                      style: context.textTheme.bodyMedium?.semiBold,
+                      style: context.tsBodyMedium14.semiBold,
                     );
                   }).toList();
                 },
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Select Area',
-                  contentPadding: EdgeInsets.symmetric(
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
+                  errorText: state.areaLoadError,
+                  suffixIcon: state.areaLoadError != null
+                      ? IconButton(
+                          icon: const Icon(Icons.refresh, size: 20),
+                          onPressed: state.locationId.isNotEmpty
+                              ? () {
+                                  context.read<DeliveryAddressBloc>().add(
+                                    DeliveryAddressLocationChangedEvent(
+                                      state.locationId,
+                                    ),
+                                  );
+                                }
+                              : null,
+                        )
+                      : null,
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Area ID is required';
+                  }
+                  return null;
+                },
                 initialValue: state.area.isEmpty ? null : state.area,
                 items: state.areas.map((area) {
                   return DropdownMenuItem(
@@ -234,11 +298,11 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                       },
               ),
               const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.only(left: 4, bottom: 8),
-                child: Text(
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                child: RequiredText(
                   'Name',
-                  style: TextStyle(fontSize: 14),
+                  style: context.tsBodyMedium14,
                 ),
               ),
               TextFormField(
@@ -250,39 +314,32 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                   ),
                 ),
                 initialValue: state.name,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Location name is required';
+                  }
+                  return null;
+                },
                 onChanged: (value) => context.read<DeliveryAddressBloc>().add(
                   DeliveryAddressNameChangedEvent(value),
                 ),
               ),
               const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.only(left: 4, bottom: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 8),
                 child: Text(
                   'Choose Delivery Type',
-                  style: TextStyle(fontSize: 14),
+                  style: context.tsBodyMedium14,
                 ),
               ),
               DropdownButtonFormField<String>(
-                style: context.textTheme.bodyMedium?.grey600,
-                icon: RotatedBox(
+                style: context.tsBodyMedium14.grey600,
+                icon: const RotatedBox(
                   quarterTurns: 3,
-                  child: Icon(
-                    Icons.chevron_left,
-                    color: state.isLoadingAreas
-                        ? AppColors.grey400
-                        : AppColors.grey600,
-                  ),
+                  child: Icon(Icons.chevron_left, color: AppColors.grey600),
                 ),
-                selectedItemBuilder: (context) {
-                  return state.areas.map((area) {
-                    return Text(
-                      area.name,
-                      style: context.textTheme.bodyMedium?.semiBold,
-                    );
-                  }).toList();
-                },
                 decoration: const InputDecoration(
-                  hintText: 'Home',
+                  hintText: 'Select Type',
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
@@ -290,8 +347,9 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                 ),
                 initialValue: state.deliveryType,
                 items: const [
-                  DropdownMenuItem(value: 'Home', child: Text('Home')),
-                  DropdownMenuItem(value: 'Office', child: Text('Office')),
+                  DropdownMenuItem(value: 'HOME', child: Text('Home')),
+                  DropdownMenuItem(value: 'WORK', child: Text('Work')),
+                  DropdownMenuItem(value: 'OTHER', child: Text('Other')),
                 ],
                 onChanged: (value) {
                   if (value != null) {
@@ -305,51 +363,14 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
               Row(
                 children: [
                   Expanded(
-                    child: RadioListTile<String>(
-                      title: const Text('Breakfast'),
-                      value: 'Breakfast',
-                      groupValue: state.mealType,
-                      onChanged: (value) {
-                        if (value != null) {
-                          context.read<DeliveryAddressBloc>().add(
-                            DeliveryAddressMealTypeChangedEvent(value),
-                          );
-                        }
-                      },
-                      contentPadding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile<String>(
-                      title: const Text('Lunch'),
-                      value: 'Lunch',
-                      groupValue: state.mealType,
-                      onChanged: (value) {
-                        if (value != null) {
-                          context.read<DeliveryAddressBloc>().add(
-                            DeliveryAddressMealTypeChangedEvent(value),
-                          );
-                        }
-                      },
-                      contentPadding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: 4, bottom: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4, bottom: 8),
                           child: Text(
                             'Room Number',
-                            style: TextStyle(fontSize: 14),
+                            style: context.tsBodyMedium14,
                           ),
                         ),
                         TextFormField(
@@ -374,11 +395,11 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: 4, bottom: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4, bottom: 8),
                           child: Text(
                             'Building Name',
-                            style: TextStyle(fontSize: 14),
+                            style: context.tsBodyMedium14,
                           ),
                         ),
                         TextFormField(
@@ -409,11 +430,11 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: 4, bottom: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4, bottom: 8),
                           child: Text(
                             'Zip Code',
-                            style: TextStyle(fontSize: 14),
+                            style: context.tsBodyMedium14,
                           ),
                         ),
                         TextFormField(
@@ -434,42 +455,14 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: 4, bottom: 8),
-                          child: Text(
-                            'Country',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                            hintText: 'Enter Country',
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                          ),
-                          initialValue: state.country,
-                          onChanged: (value) =>
-                              context.read<DeliveryAddressBloc>().add(
-                                DeliveryAddressCountryChangedEvent(value),
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.only(left: 4, bottom: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 8),
                 child: Text(
                   'Phone Number',
-                  style: TextStyle(fontSize: 14),
+                  style: context.tsBodyMedium14,
                 ),
               ),
               TextFormField(
@@ -480,6 +473,15 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                     vertical: 14,
                   ),
                 ),
+                validator: (value) {
+                  // Mobile is optional, but when provided must match E.164-like pattern
+                  if (value == null || value.trim().isEmpty) return null;
+                  final pattern = RegExp(r'^\+?[1-9]\d{1,14}$');
+                  if (!pattern.hasMatch(value.trim())) {
+                    return 'Invalid mobile number format';
+                  }
+                  return null;
+                },
                 keyboardType: TextInputType.phone,
                 initialValue: state.phoneNumber,
                 onChanged: (value) => context.read<DeliveryAddressBloc>().add(
@@ -522,13 +524,12 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                         );
                       }
                     },
-                    success: (_) {
+                    success: (signupResponse) {
                       // Navigate to OTP screen on success
                       // Backend has sent OTP to user's phone
-                      final signupState = context.read<SignupBloc>().state;
                       context.router.push(
                         OtpRoute(
-                          phone: signupState.phone.value,
+                          phone: signupResponse.data.mobile,
                         ),
                       );
                     },
@@ -537,9 +538,18 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                 child: SizedBox(
                   width: double.infinity,
                   child: PrimaryButton(
-                    onPressed: state.isSubmitting
+                    onPressed: state.isSubmitting || state.hasLocationError
                         ? null
                         : () {
+                            // Validate form
+                            if (!_formKey.currentState!.validate()) {
+                              AppSnackbar.showErrorSnackbar(
+                                context,
+                                content: 'Please fill all required fields',
+                              );
+                              return;
+                            }
+
                             // Get signup data from SignupBloc
                             final signupState = context
                                 .read<SignupBloc>()

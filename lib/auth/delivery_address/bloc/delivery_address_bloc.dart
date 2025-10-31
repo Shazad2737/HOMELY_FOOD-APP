@@ -1,5 +1,4 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:api_client/api_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
@@ -26,8 +25,6 @@ class DeliveryAddressBloc
           _onNameChangedEvent(event, emit);
         case DeliveryAddressDeliveryTypeChangedEvent():
           _onDeliveryTypeChangedEvent(event, emit);
-        case DeliveryAddressMealTypeChangedEvent():
-          _onMealTypeChangedEvent(event, emit);
         case DeliveryAddressRoomNumberChangedEvent():
           _onRoomNumberChangedEvent(event, emit);
         case DeliveryAddressBuildingNameChangedEvent():
@@ -52,19 +49,30 @@ class DeliveryAddressBloc
     DeliveryAddressLoadedEvent event,
     Emitter<DeliveryAddressState> emit,
   ) async {
-    emit(state.copyWith(isLoadingLocations: true));
+    emit(
+      state.copyWith(
+        isLoadingLocations: true,
+        locationLoadError: () => null,
+      ),
+    );
 
     final result = await cmsFacade.getLocations();
 
     result.fold(
       (failure) {
-        emit(state.copyWith(isLoadingLocations: false));
+        emit(
+          state.copyWith(
+            isLoadingLocations: false,
+            locationLoadError: () => failure.message,
+          ),
+        );
       },
       (locations) {
         emit(
           state.copyWith(
             locations: locations,
             isLoadingLocations: false,
+            locationLoadError: () => null,
           ),
         );
       },
@@ -81,6 +89,7 @@ class DeliveryAddressBloc
         area: '', // Reset area when location changes
         areas: [], // Clear areas list
         isLoadingAreas: true,
+        areaLoadError: () => null,
       ),
     );
 
@@ -89,13 +98,19 @@ class DeliveryAddressBloc
 
     result.fold(
       (failure) {
-        emit(state.copyWith(isLoadingAreas: false));
+        emit(
+          state.copyWith(
+            isLoadingAreas: false,
+            areaLoadError: () => failure.message,
+          ),
+        );
       },
       (areas) {
         emit(
           state.copyWith(
             areas: areas,
             isLoadingAreas: false,
+            areaLoadError: () => null,
           ),
         );
       },
@@ -121,13 +136,6 @@ class DeliveryAddressBloc
     Emitter<DeliveryAddressState> emit,
   ) {
     emit(state.copyWith(deliveryType: event.deliveryType));
-  }
-
-  void _onMealTypeChangedEvent(
-    DeliveryAddressMealTypeChangedEvent event,
-    Emitter<DeliveryAddressState> emit,
-  ) {
-    emit(state.copyWith(mealType: event.mealType));
   }
 
   void _onRoomNumberChangedEvent(
@@ -173,6 +181,12 @@ class DeliveryAddressBloc
       state.copyWith(signupState: DataState.loading()),
     );
 
+    // Find the selected location to get its countryId
+    final selectedLocation = state.locations.firstWhere(
+      (loc) => loc.id == state.locationId,
+      orElse: () => state.locations.first,
+    );
+
     // Create location input from form data
     final locationInput = SignupLocationInput(
       type: state.deliveryType,
@@ -181,9 +195,9 @@ class DeliveryAddressBloc
       buildingName: state.buildingName,
       zipCode: state.zipCode,
       mobile: state.phoneNumber,
-      latitude: '0.0', // TODO: Get from location service
-      longitude: '0.0', // TODO: Get from location service
-      countryId: 'default', // TODO: Get actual country ID
+      latitude: '', // Keep empty as specified
+      longitude: '', // Keep empty as specified
+      countryId: selectedLocation.countryId ?? '',
       locationId: state.locationId,
       areaId: state.area,
       isDefault: true,
@@ -206,10 +220,10 @@ class DeliveryAddressBloc
           ),
         );
       },
-      (user) {
+      (signupResponse) {
         emit(
           state.copyWith(
-            signupState: DataState.success(user),
+            signupState: DataState.success(signupResponse),
           ),
         );
       },

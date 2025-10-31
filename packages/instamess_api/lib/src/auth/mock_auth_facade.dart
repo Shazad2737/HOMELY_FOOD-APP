@@ -84,7 +84,7 @@ class MockAuthFacade implements IAuthFacade {
   }
 
   @override
-  Future<Either<Failure, User>> signUp({
+  Future<Either<Failure, SignupResponse>> signUp({
     required String name,
     required String mobile,
     required String password,
@@ -102,13 +102,34 @@ class MockAuthFacade implements IAuthFacade {
       return left(AuthFailures.validation('Passwords do not match'));
     }
 
-    // Create a mock user
-    final user = User(
-      id: 'mock-${DateTime.now().millisecondsSinceEpoch}',
+    // Create a mock signup response (no session stored yet)
+    final signupResponse = SignupResponse(
+      customerId: 'mock-${DateTime.now().millisecondsSinceEpoch}',
       name: name,
       mobile: mobile,
+      requiresOtpVerification: true,
+      redirectTo: 'otp-verification',
     );
 
-    return right(user);
+    return right(signupResponse);
+  }
+
+  @override
+  Future<Either<Failure, String>> resendOtp({
+    required String mobile,
+    String type = 'signup',
+  }) {
+    // TODO: implement resendOtp
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Either<Failure, User>> verifyOtp({
+    required String mobile,
+    required String otp,
+    String type = 'signup',
+  }) {
+    // TODO: implement verifyOtp
+    throw UnimplementedError();
   }
 }

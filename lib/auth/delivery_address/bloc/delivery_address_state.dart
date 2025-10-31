@@ -7,7 +7,6 @@ class DeliveryAddressState {
     required this.area,
     required this.name,
     required this.deliveryType,
-    required this.mealType,
     required this.roomNumber,
     required this.buildingName,
     required this.zipCode,
@@ -19,6 +18,8 @@ class DeliveryAddressState {
     required this.isLoadingAreas,
     required this.showErrorMessages,
     required this.signupState,
+    this.locationLoadError,
+    this.areaLoadError,
   });
 
   factory DeliveryAddressState.initial() {
@@ -26,8 +27,7 @@ class DeliveryAddressState {
       locationId: '',
       area: '',
       name: '',
-      deliveryType: 'Home',
-      mealType: 'Breakfast',
+      deliveryType: 'HOME',
       roomNumber: '',
       buildingName: '',
       zipCode: '',
@@ -46,7 +46,6 @@ class DeliveryAddressState {
   final String area;
   final String name;
   final String deliveryType;
-  final String mealType;
   final String roomNumber;
   final String buildingName;
   final String zipCode;
@@ -57,16 +56,18 @@ class DeliveryAddressState {
   final bool isLoadingLocations;
   final bool isLoadingAreas;
   final bool showErrorMessages;
-  final DataState<User> signupState;
+  final DataState<SignupResponse> signupState;
+  final String? locationLoadError;
+  final String? areaLoadError;
 
   bool get isSubmitting => signupState.isLoading;
+  bool get hasLocationError => locationLoadError != null;
 
   DeliveryAddressState copyWith({
     String? locationId,
     String? area,
     String? name,
     String? deliveryType,
-    String? mealType,
     String? roomNumber,
     String? buildingName,
     String? zipCode,
@@ -77,14 +78,15 @@ class DeliveryAddressState {
     bool? isLoadingLocations,
     bool? isLoadingAreas,
     bool? showErrorMessages,
-    DataState<User>? signupState,
+    DataState<SignupResponse>? signupState,
+    String? Function()? locationLoadError,
+    String? Function()? areaLoadError,
   }) {
     return DeliveryAddressState(
       locationId: locationId ?? this.locationId,
       area: area ?? this.area,
       name: name ?? this.name,
       deliveryType: deliveryType ?? this.deliveryType,
-      mealType: mealType ?? this.mealType,
       roomNumber: roomNumber ?? this.roomNumber,
       buildingName: buildingName ?? this.buildingName,
       zipCode: zipCode ?? this.zipCode,
@@ -96,6 +98,12 @@ class DeliveryAddressState {
       isLoadingAreas: isLoadingAreas ?? this.isLoadingAreas,
       showErrorMessages: showErrorMessages ?? this.showErrorMessages,
       signupState: signupState ?? this.signupState,
+      locationLoadError: locationLoadError != null
+          ? locationLoadError()
+          : this.locationLoadError,
+      areaLoadError: areaLoadError != null
+          ? areaLoadError()
+          : this.areaLoadError,
     );
   }
 
@@ -107,7 +115,6 @@ locationId: $locationId,
 area: $area,
 name: $name,
 deliveryType: $deliveryType,
-mealType: $mealType,
 roomNumber: $roomNumber,
 buildingName: $buildingName,
 zipCode: $zipCode,
@@ -119,7 +126,9 @@ isLoadingLocations: $isLoadingLocations,
 isLoadingAreas: $isLoadingAreas,
 isSubmitting: $isSubmitting,
 showErrorMessages: $showErrorMessages,
-signupState: $signupState
+signupState: $signupState,
+locationLoadError: $locationLoadError,
+areaLoadError: $areaLoadError
 }
 ''';
 }

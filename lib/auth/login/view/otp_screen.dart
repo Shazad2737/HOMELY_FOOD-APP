@@ -1,19 +1,38 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instamess_api/instamess_api.dart';
+import 'package:instamess_app/auth/login/bloc/otp_bloc.dart';
 import 'package:instamess_app/router/router.gr.dart';
 import 'package:pinput/pinput.dart';
 
 @RoutePage()
-class OtpPage extends StatefulWidget {
+class OtpPage extends StatelessWidget {
   const OtpPage({required this.phone, super.key});
   final String phone;
 
   @override
-  State<OtpPage> createState() => _OtpPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => OtpBloc(
+        authFacade: context.read<IAuthFacade>(),
+        mobile: phone,
+      ),
+      child: _OtpScreen(phone: phone),
+    );
+  }
 }
 
-class _OtpPageState extends State<OtpPage> {
+class _OtpScreen extends StatefulWidget {
+  const _OtpScreen({required this.phone});
+  final String phone;
+
+  @override
+  State<_OtpScreen> createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<_OtpScreen> {
   final _pinController = TextEditingController();
   final _focusNode = FocusNode();
 
@@ -55,84 +74,146 @@ class _OtpPageState extends State<OtpPage> {
       ],
     );
 
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Verification',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
+    return BlocListener<OtpBloc, OtpState>(
+      listenWhen: (previous, current) =>
+          previous.verifyOtpOption != current.verifyOtpOption ||
+          previous.resendOtpMessage != current.resendOtpMessage,
+      listener: (context, state) {
+        // Handle OTP verification result
+        state.verifyOtpOption.fold(
+          () => null,
+          (either) => either.fold(
+            (failure) {
+              AppSnackbar.showErrorSnackbar(
+                context,
+                content: failure.message,
+              );
+            },
+            (user) {
+              // Successfully verified OTP, navigate to main app
+              context.router.replaceAll([const MainShellRoute()]);
+            },
+          ),
+        );
+
+        // Handle resend OTP message
+        state.resendOtpMessage.fold(
+          () => null,
+          (message) {
+            AppSnackbar.showSuccessSnackbar(
+              context,
+              content: message ?? 'OTP sent successfully',
+            );
+          },
+        );
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Verification',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'We have sent a code to your Number',
-                textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.phone,
-                textAlign: TextAlign.center,
-                style: context.textTheme.titleMedium,
-              ),
-              const SizedBox(height: 24),
-              Center(
-                child: Pinput(
-                  controller: _pinController,
-                  focusNode: _focusNode,
-                  length: 6,
-                  defaultPinTheme: defaultPinTheme,
-                  focusedPinTheme: focusedTheme,
-                  onCompleted: (_) {},
+                const SizedBox(height: 8),
+                Text(
+                  'We have sent a code to your Number',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
                 ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: PrimaryButton(
-                  text: 'Verify',
-                  onPressed: () {
-                    // On success, redirect to main shell
-                    context.router.replaceAll([const MainShellRoute()]);
+                const SizedBox(height: 8),
+                Text(
+                  widget.phone,
+                  textAlign: TextAlign.center,
+                  style: context.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: Pinput(
+                    controller: _pinController,
+                    focusNode: _focusNode,
+                    length: 6,
+                    defaultPinTheme: defaultPinTheme,
+                    focusedPinTheme: focusedTheme,
+                    onChanged: (value) {
+                      context.read<OtpBloc>().add(OtpChangedEvent(value));
+                    },
+                    onCompleted: (_) {
+                      // Auto-submit when all 6 digits are entered
+                      context.read<OtpBloc>().add(const OtpSubmittedEvent());
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                BlocBuilder<OtpBloc, OtpState>(
+                  builder: (context, state) {
+                    return SizedBox(
+                      width: double.infinity,
+                      child: PrimaryButton(
+                        text: state.isSubmitting ? 'Verifying...' : 'Verify',
+                        onPressed: state.isSubmitting
+                            ? null
+                            : () {
+                                context
+                                    .read<OtpBloc>()
+                                    .add(const OtpSubmittedEvent());
+                              },
+                      ),
+                    );
                   },
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Didn't receive the OTP? ",
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // resend action stub
-                    },
-                    child: const Text('Resend OTP'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'By Continuing you agree instamess Terms of services and Privacy Policy',
-                textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.grey500),
-              ),
-            ],
+                const SizedBox(height: 12),
+                BlocBuilder<OtpBloc, OtpState>(
+                  builder: (context, state) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Didn't receive the OTP? ",
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.grey600,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: state.canResend
+                              ? () {
+                                  context
+                                      .read<OtpBloc>()
+                                      .add(const ResendOtpEvent());
+                                }
+                              : null,
+                          child: Text(
+                            state.resendCountdown > 0
+                                ? 'Resend OTP (${state.resendCountdown}s)'
+                                : 'Resend OTP',
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'By Continuing you agree instamess Terms of services '
+                  'and Privacy Policy',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.grey500),
+                ),
+              ],
+            ),
           ),
         ),
       ),

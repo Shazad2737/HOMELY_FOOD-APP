@@ -8,16 +8,16 @@ class SignupLocationInput extends Equatable {
   const SignupLocationInput({
     required this.type,
     required this.name,
-    required this.roomNumber,
-    required this.buildingName,
-    required this.zipCode,
-    required this.mobile,
-    required this.latitude,
-    required this.longitude,
     required this.countryId,
     required this.locationId,
     required this.areaId,
     required this.isDefault,
+    this.roomNumber,
+    this.buildingName,
+    this.zipCode,
+    this.mobile,
+    this.latitude,
+    this.longitude,
   });
 
   /// Location type (HOME, WORK, OTHER)
@@ -27,22 +27,22 @@ class SignupLocationInput extends Equatable {
   final String name;
 
   /// Room number
-  final String roomNumber;
+  final String? roomNumber;
 
   /// Building name
-  final String buildingName;
+  final String? buildingName;
 
   /// Zip code
-  final String zipCode;
+  final String? zipCode;
 
   /// Mobile number
-  final String mobile;
+  final String? mobile;
 
   /// Latitude
-  final String latitude;
+  final String? latitude;
 
   /// Longitude
-  final String longitude;
+  final String? longitude;
 
   /// Country ID
   final String countryId;
@@ -59,14 +59,16 @@ class SignupLocationInput extends Equatable {
   /// Converts to JSON map
   Map<String, dynamic> toJson() {
     return {
-      'type': type,
+      if (type.isNotEmpty) 'type': type,
       'name': name,
-      'roomNumber': roomNumber,
-      'buildingName': buildingName,
-      'zipCode': zipCode,
-      'mobile': mobile,
-      'latitude': latitude,
-      'longitude': longitude,
+      if (roomNumber != null && roomNumber!.isNotEmpty)
+        'roomNumber': roomNumber,
+      if (buildingName != null && buildingName!.isNotEmpty)
+        'buildingName': buildingName,
+      if (zipCode != null && zipCode!.isNotEmpty) 'zipCode': zipCode,
+      if (mobile != null && mobile!.isNotEmpty) 'mobile': mobile,
+      if (latitude != null && latitude!.isNotEmpty) 'latitude': latitude,
+      if (longitude != null && longitude!.isNotEmpty) 'longitude': longitude,
       'countryId': countryId,
       'locationId': locationId,
       'areaId': areaId,

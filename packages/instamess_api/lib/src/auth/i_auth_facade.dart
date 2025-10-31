@@ -23,8 +23,9 @@ abstract class IAuthFacade {
 
   /// Signs up a new user with the given details
   ///
-  /// Returns [User] if successful, otherwise [Failure]
-  Future<Either<Failure, User>> signUp({
+  /// Returns [SignupResponse] if successful, otherwise [Failure]
+  /// Note: This does not authenticate the user. OTP verification is required.
+  Future<Either<Failure, SignupResponse>> signUp({
     required String name,
     required String mobile,
     required String password,
@@ -41,4 +42,21 @@ abstract class IAuthFacade {
   ///
   /// Returns user if token is valid, otherwise [Failure]
   Future<Either<Failure, User>> getAuthenticatedUser();
+
+  /// Verifies OTP for signup or password reset
+  ///
+  /// Returns [User] with token if successful, otherwise [Failure]
+  Future<Either<Failure, User>> verifyOtp({
+    required String mobile,
+    required String otp,
+    String type = 'signup',
+  });
+
+  /// Resends OTP to the user's mobile
+  ///
+  /// Returns success message if successful, otherwise [Failure]
+  Future<Either<Failure, String>> resendOtp({
+    required String mobile,
+    String type = 'signup',
+  });
 }

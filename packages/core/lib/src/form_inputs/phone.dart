@@ -34,8 +34,13 @@ class Phone extends FormzInput<String, PhoneValidationError>
   /// - 05X XXXXXXX (9 digits starting with 05)
   /// - +971 5X XXXXXXX
   /// - 00971 5X XXXXXXX
-  static final _uaePhoneRegex = RegExp(
-    r'^(\+971|00971|0)?5[0-9]{8}$',
+  // static final _uaePhoneRegex = RegExp(
+  //   r'^(\+971|00971|0)?5[0-9]{8}$',
+  // );
+
+  /// Generic international phone number pattern (7 to 15 digits, optional +)
+  static final genericPhoneRegex = RegExp(
+    r'^\+?[0-9]{7,15}$',
   );
 
   @override
@@ -44,7 +49,7 @@ class Phone extends FormzInput<String, PhoneValidationError>
 
     if (cleanedValue.isEmpty) {
       return PhoneValidationError.empty;
-    } else if (!_uaePhoneRegex.hasMatch(cleanedValue)) {
+    } else if (!genericPhoneRegex.hasMatch(cleanedValue)) {
       return PhoneValidationError.invalid;
     }
     return null;
