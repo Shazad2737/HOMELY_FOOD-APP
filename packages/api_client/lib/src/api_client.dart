@@ -12,7 +12,7 @@ typedef RequestMethod<T> = Future<Response<T>> Function(
   Map<String, dynamic>? queryParameters,
   Options? options,
   CancelToken? cancelToken,
-  void Function(int, int)? onReceiveProgress,
+  // void Function(int, int)? onReceiveProgress,
 });
 
 /// {@template api_client}
@@ -77,6 +77,23 @@ class ApiClient {
       authRequired: authRequired,
       files: files,
       body: body,
+      queryParameters: queryParameters,
+    );
+    return res;
+  }
+
+  /// Performs a DELETE request to [path]
+  ///
+  /// {@macro api_client._request}
+  Future<Either<ApiFailure, Response<T>>> delete<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    bool authRequired = true,
+  }) async {
+    final res = await _request(
+      path,
+      _dio.delete<T>,
+      authRequired: authRequired,
       queryParameters: queryParameters,
     );
     return res;

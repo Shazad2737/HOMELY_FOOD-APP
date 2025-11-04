@@ -321,7 +321,7 @@ class UserRepository implements IUserRepository {
   Future<Either<Failure, CustomerProfile>> getProfile() async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
-        '/customer/profile',
+        '/customers/profile',
       );
 
       return response.fold(
@@ -388,8 +388,8 @@ class UserRepository implements IUserRepository {
   ) async {
     try {
       final response = await _apiClient.patch<Map<String, dynamic>>(
-        '/customer/profile-picture',
-        files: {'profilePicture': filePath},
+        '/customers/profile-picture',
+        // files: {'profilePicture': filePath},
       );
 
       return response.fold(
@@ -458,7 +458,7 @@ class UserRepository implements IUserRepository {
   Future<Either<Failure, AddressesResponse>> getAddresses() async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
-        '/customer/addresses',
+        '/customers/addresses',
       );
 
       return response.fold(
@@ -525,7 +525,7 @@ class UserRepository implements IUserRepository {
   ) async {
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
-        '/customer/addresses',
+        '/customers/addresses',
         body: request.toJson(),
       );
 
@@ -604,7 +604,7 @@ class UserRepository implements IUserRepository {
   ) async {
     try {
       final response = await _apiClient.patch<Map<String, dynamic>>(
-        '/customer/addresses/$addressId',
+        '/customers/addresses/$addressId',
         body: request.toJson(),
       );
 
@@ -680,7 +680,7 @@ class UserRepository implements IUserRepository {
   Future<Either<Failure, Unit>> deleteAddress(String addressId) async {
     try {
       final response = await _apiClient.delete<Map<String, dynamic>>(
-        '/customer/addresses/$addressId',
+        '/customers/addresses/$addressId',
       );
 
       return response.fold(
@@ -721,7 +721,7 @@ class UserRepository implements IUserRepository {
   ) async {
     try {
       final response = await _apiClient.patch<Map<String, dynamic>>(
-        '/customer/addresses/$addressId/set-default',
+        '/customers/addresses/$addressId/set-default',
       );
 
       return response.fold(
@@ -735,8 +735,8 @@ class UserRepository implements IUserRepository {
 
           final success = body['success'] as bool? ?? false;
           if (!success) {
-            final message = body['message'] as String? ??
-                'Failed to set default address';
+            final message =
+                body['message'] as String? ?? 'Failed to set default address';
             log('Error in UserRepository.setDefaultAddress: $message');
             return left(
               UnknownApiFailure(r.statusCode ?? 0, message),

@@ -7,6 +7,7 @@ import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_bloc.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_event.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_state.dart';
+import 'package:instamess_app/router/router.gr.dart';
 
 @RoutePage()
 class AddressesScreen extends StatelessWidget {
@@ -112,9 +113,9 @@ class AddressesView extends StatelessWidget {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        context
-                            .read<AddressesBloc>()
-                            .add(const AddressesLoadedEvent());
+                        context.read<AddressesBloc>().add(
+                          const AddressesLoadedEvent(),
+                        );
                       },
                       child: const Text('Retry'),
                     ),
@@ -131,7 +132,7 @@ class AddressesView extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          context.router.push(const AddressFormRoute());
+          context.router.push(AddressFormRoute());
         },
         icon: const Icon(Icons.add),
         label: const Text('Add Address'),
@@ -264,8 +265,8 @@ class _AddressCard extends StatelessWidget {
                         );
                       case 'default':
                         context.read<AddressesBloc>().add(
-                              AddressSetDefaultEvent(address.id),
-                            );
+                          AddressSetDefaultEvent(address.id),
+                        );
                       case 'delete':
                         _showDeleteConfirmation(context);
                     }
@@ -360,8 +361,8 @@ class _AddressCard extends StatelessWidget {
             onPressed: () {
               Navigator.of(dialogContext).pop();
               context.read<AddressesBloc>().add(
-                    AddressDeletedEvent(address.id),
-                  );
+                AddressDeletedEvent(address.id),
+              );
             },
             style: TextButton.styleFrom(
               foregroundColor: AppColors.error,
