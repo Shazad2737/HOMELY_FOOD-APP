@@ -12,7 +12,7 @@ typedef RequestMethod<T> = Future<Response<T>> Function(
   Map<String, dynamic>? queryParameters,
   Options? options,
   CancelToken? cancelToken,
-  void Function(int, int)? onReceiveProgress,
+  // void Function(int, int)? onReceiveProgress,
 });
 
 /// {@template api_client}
@@ -61,7 +61,72 @@ class ApiClient {
   /// Auth token provider for session management
   final AuthTokenProvider? _authTokenProvider;
 
+  /// Performs a PATCH request to [path]
+  ///
+  /// Examples:
+  /// ```dart
+  /// // Regular JSON body
+  /// await patch('/user', body: {'name': 'John'});
+  ///
+  /// // File upload with custom field name
+  /// await patch('/profile-picture',
+  ///   body: {'profilePicture': multipartFile});
+  ///
+  /// // Multiple files with custom keys
+  /// await patch('/documents',
+  ///   body: {'resume': resumeFile, 'coverLetter': coverLetterFile});
+  /// ```
+  ///
+  /// {@macro api_client._request}
+  Future<Either<ApiFailure, Response<T>>> patch<T>(
+    String path, {
+    Map<String, dynamic>? body,
+    List<MultipartFile?>? files,
+    Map<String, dynamic>? queryParameters,
+    bool authRequired = true,
+  }) async {
+    final res = await _request(
+      path,
+      _dio.patch<T>,
+      authRequired: authRequired,
+      files: files,
+      body: body,
+      queryParameters: queryParameters,
+    );
+    return res;
+  }
+
+  /// Performs a DELETE request to [path]
+  ///
+  /// {@macro api_client._request}
+  Future<Either<ApiFailure, Response<T>>> delete<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    bool authRequired = true,
+  }) async {
+    final res = await _request(
+      path,
+      _dio.delete<T>,
+      authRequired: authRequired,
+      queryParameters: queryParameters,
+    );
+    return res;
+  }
+
   /// Performs a POST request to [path]
+  ///
+  /// Examples:
+  /// ```dart
+  /// // Regular JSON body
+  /// await post('/login', body: {'email': 'user@example.com'});
+  ///
+  /// // File upload with custom field name
+  /// await post('/upload-document',
+  ///   body: {'document': multipartFile, 'category': 'legal'});
+  ///
+  /// // Legacy files parameter (uses 'files' key)
+  /// await post('/upload', files: [file1, file2]);
+  /// ```
   ///
   /// {@macro api_client._request}
   Future<Either<ApiFailure, Response<T>>> post<T>(
@@ -103,7 +168,13 @@ class ApiClient {
   /// [path] should not contain the base url or leading and trailing slashes
   ///
   /// [body] should be a Map of key-value pairs to be sent as the body
-  /// of the request
+  /// of the request. If [body] contains [MultipartFile] instances, it will
+  /// automatically be converted to [FormData] with custom field names
+  /// preserved. Example: `{'profilePicture': multipartFile}` will send
+  /// the file with the field name 'profilePicture'.
+  ///
+  /// [files] is legacy support for sending files with the 'files' key.
+  /// Prefer using [body] with [MultipartFile] for custom field names.
   ///
   /// [queryParameters] should be a Map of key-value pairs to be used as
   ///  the query parameters of the request
@@ -133,12 +204,24 @@ class ApiClient {
   }) async {
     Object? bodyToSend;
     if (files != null) {
+      // Legacy support: files parameter with 'files' key
       bodyToSend = FormData.fromMap({
         'files': files,
         if (body != null) ...body,
       });
     } else if (body != null) {
-      bodyToSend = body;
+      // Check if body contains MultipartFile instances
+      final hasMultipartFiles = body.values.any(
+        (value) => value is MultipartFile || value is List<MultipartFile>,
+      );
+
+      if (hasMultipartFiles) {
+        // Convert to FormData to support multipart requests with custom keys
+        bodyToSend = FormData.fromMap(body);
+      } else {
+        // Regular JSON body
+        bodyToSend = body;
+      }
     }
 
     try {

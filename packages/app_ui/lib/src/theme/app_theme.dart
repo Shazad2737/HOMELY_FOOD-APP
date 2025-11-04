@@ -48,6 +48,19 @@ class AppTheme {
       bottomNavigationBarTheme: _bottomNavigationBarTheme,
       chipTheme: _chipTheme,
       dropdownMenuTheme: _dropdownMenuTheme,
+      popupMenuTheme: PopupMenuThemeData(
+        color: AppColors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 4,
+      ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: AppColors.white,
+      ),
       extensions: const <ThemeExtension<dynamic>>[
         AppSemanticsTheme(),
       ],

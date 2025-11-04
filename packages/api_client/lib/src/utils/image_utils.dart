@@ -33,8 +33,41 @@ Future<MultipartFile?> xFileToMultiPartFile({
   required String name,
 }) async {
   final bytes = await file.readAsBytes();
+
+  // Determine content type from file extension or mime type
+  final mimeType = file.mimeType ?? _getMimeTypeFromPath(file.path);
+  final contentType = _parseContentType(mimeType);
+
   return MultipartFile.fromBytes(
     bytes,
     filename: name,
+    contentType: contentType,
   );
+}
+
+/// Gets MIME type from file path extension
+String _getMimeTypeFromPath(String path) {
+  final extension = path.toLowerCase().split('.').last;
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'webp':
+      return 'image/webp';
+    default:
+      return 'image/jpeg'; // Default to jpeg
+  }
+}
+
+/// Parses MIME type string to MediaType
+MediaType? _parseContentType(String? mimeType) {
+  if (mimeType == null) return MediaType('image', 'jpeg');
+
+  final parts = mimeType.split('/');
+  if (parts.length == 2) {
+    return MediaType(parts[0], parts[1]);
+  }
+  return MediaType('image', 'jpeg');
 }
