@@ -28,7 +28,8 @@ class AddressFormScreen extends StatelessWidget {
       listeners: [
         // Listener for create operations
         BlocListener<AddressesBloc, AddressesState>(
-          listenWhen: (previous, current) => previous.createState != current.createState,
+          listenWhen: (previous, current) =>
+              previous.createState != current.createState,
           listener: (context, state) {
             state.createState.maybeMap(
               orElse: () {},
@@ -50,7 +51,8 @@ class AddressFormScreen extends StatelessWidget {
         ),
         // Listener for update operations
         BlocListener<AddressesBloc, AddressesState>(
-          listenWhen: (previous, current) => previous.updateState != current.updateState,
+          listenWhen: (previous, current) =>
+              previous.updateState != current.updateState,
           listener: (context, state) {
             state.updateState.maybeMap(
               orElse: () {},

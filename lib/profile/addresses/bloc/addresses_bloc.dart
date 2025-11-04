@@ -94,13 +94,15 @@ class AddressesBloc extends Bloc<AddressesEvent, AddressesState> {
     Emitter<AddressesState> emit,
   ) async {
     log('AddressesBloc: Creating address');
-    emit(state.copyWith(
-      createState: DataState.loading(),
-      // Reset other states to prevent stale state issues
-      updateState: const DataStateInitial(),
-      deleteState: const DataStateInitial(),
-      setDefaultState: const DataStateInitial(),
-    ));
+    emit(
+      state.copyWith(
+        createState: DataState.loading(),
+        // Reset other states to prevent stale state issues
+        updateState: const DataStateInitial(),
+        deleteState: const DataStateInitial(),
+        setDefaultState: const DataStateInitial(),
+      ),
+    );
 
     final result = await _userRepository.createAddress(event.request);
 
@@ -111,10 +113,12 @@ class AddressesBloc extends Bloc<AddressesEvent, AddressesState> {
       },
       (address) {
         log('AddressesBloc: Address created successfully');
-        emit(state.copyWith(
-          createState: DataState.success(address),
-          updateState: const DataStateInitial(), // Reset update state
-        ));
+        emit(
+          state.copyWith(
+            createState: DataState.success(address),
+            updateState: const DataStateInitial(), // Reset update state
+          ),
+        );
 
         // Reload addresses after successful creation
         add(const AddressesLoadedEvent());
@@ -127,13 +131,15 @@ class AddressesBloc extends Bloc<AddressesEvent, AddressesState> {
     Emitter<AddressesState> emit,
   ) async {
     log('AddressesBloc: Updating address ${event.addressId}');
-    emit(state.copyWith(
-      updateState: DataState.loading(),
-      // Reset other states to prevent stale state issues
-      createState: const DataStateInitial(),
-      deleteState: const DataStateInitial(),
-      setDefaultState: const DataStateInitial(),
-    ));
+    emit(
+      state.copyWith(
+        updateState: DataState.loading(),
+        // Reset other states to prevent stale state issues
+        createState: const DataStateInitial(),
+        deleteState: const DataStateInitial(),
+        setDefaultState: const DataStateInitial(),
+      ),
+    );
 
     final result = await _userRepository.updateAddress(
       event.addressId,
@@ -147,10 +153,12 @@ class AddressesBloc extends Bloc<AddressesEvent, AddressesState> {
       },
       (address) {
         log('AddressesBloc: Address updated successfully');
-        emit(state.copyWith(
-          updateState: DataState.success(address),
-          createState: const DataStateInitial(), // Reset create state
-        ));
+        emit(
+          state.copyWith(
+            updateState: DataState.success(address),
+            createState: const DataStateInitial(), // Reset create state
+          ),
+        );
 
         // Reload addresses after successful update
         add(const AddressesLoadedEvent());
