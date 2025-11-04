@@ -10,3 +10,4 @@ export 'holiday_banner.dart';
 export 'location_selection_bottom_sheet.dart';
 export 'meal_card.dart';
 export 'meal_cards_section.dart';
+export 'order_success_dialog.dart';

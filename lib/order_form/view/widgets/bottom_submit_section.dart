@@ -20,11 +20,14 @@ class BottomSubmitSection extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.white,
+            border: const Border(
+              top: BorderSide(color: AppColors.grey200),
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, -4),
               ),
             ],
           ),

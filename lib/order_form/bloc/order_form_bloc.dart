@@ -42,7 +42,29 @@ class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
     OrderFormLoadedEvent event,
     Emitter<OrderFormState> emit,
   ) async {
-    emit(state.copyWith(availableDaysState: DataState.loading()));
+    // Use refreshing state if we already have data (avoids flickering)
+    final hasData = state.availableDaysState.maybeMap(
+      success: (_) => true,
+      refreshing: (_) => true,
+      orElse: () => false,
+    );
+
+    if (hasData) {
+      final currentData = state.availableDaysState.maybeMap(
+        success: (s) => s.data,
+        refreshing: (r) => r.currentData,
+        orElse: () => null,
+      );
+      if (currentData != null) {
+        emit(
+          state.copyWith(
+            availableDaysState: DataState.refreshing(currentData),
+          ),
+        );
+      }
+    } else {
+      emit(state.copyWith(availableDaysState: DataState.loading()));
+    }
 
     final result = await _userRepository.getAvailableOrderDays();
 
@@ -60,19 +82,64 @@ class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
     OrderFormDateSelectedEvent event,
     Emitter<OrderFormState> emit,
   ) {
-    // If meals already selected, need to request confirmation
-    if (state.selectedMealCount > 0) {
+    // If keepSelections is true, validate and preserve selections
+    if (event.keepSelections && state.selectedMealCount > 0) {
+      final validatedSelections = _validateSelectionsForDate(
+        event.date,
+        state.mealSelections,
+      );
+
+      emit(
+        state.copyWith(
+          selectedDate: event.date,
+          mealSelections: validatedSelections,
+        ),
+      );
+      return;
+    }
+
+    // If meals already selected and not keeping them, need confirmation
+    if (state.selectedMealCount > 0 && !event.keepSelections) {
       // This will be handled in UI with a dialog
       // UI will dispatch OrderFormDateClearedEvent after confirmation
       return;
     }
 
+    // Normal date selection - clear selections
     emit(
       state.copyWith(
         selectedDate: event.date,
         mealSelections: {},
       ),
     );
+  }
+
+  /// Validates meal selections for a new date
+  /// Removes selections for unavailable meal types
+  Map<MealType, OrderItemSelection?> _validateSelectionsForDate(
+    String date,
+    Map<MealType, OrderItemSelection?> currentSelections,
+  ) {
+    final validatedSelections = <MealType, OrderItemSelection?>{};
+
+    for (final entry in currentSelections.entries) {
+      final mealType = entry.key;
+      final selection = entry.value;
+
+      if (selection != null) {
+        // Check if this meal type is available on the new date
+        final newState = state.copyWith(selectedDate: date);
+        if (newState.isMealTypeAvailable(mealType)) {
+          validatedSelections[mealType] = selection;
+        } else {
+          log(
+            '⚠️ Meal type $mealType not available on $date, removing selection',
+          );
+        }
+      }
+    }
+
+    return validatedSelections;
   }
 
   void _onDateClearRequested(

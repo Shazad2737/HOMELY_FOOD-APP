@@ -4,8 +4,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
+import 'package:instamess_api/src/user/models/models.dart' as user_models;
 import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
 import 'package:instamess_app/order_form/view/widgets/widgets.dart';
+import 'package:intl/intl.dart';
 
 /// {@template order_form_screen}
 /// Screen for creating a new food order
@@ -36,20 +38,22 @@ class OrderFormView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<OrderFormBloc, OrderFormState>(
+      listenWhen: (previous, current) {
+        // Only listen when createOrderState changes (prevents infinite loop)
+        // Listen on transitions to success or failure
+        return previous.createOrderState != current.createOrderState &&
+            current.createOrderState.maybeMap(
+              success: (_) => true,
+              failure: (_) => true,
+              orElse: () => false,
+            );
+      },
       listener: (context, state) {
         // Handle order creation success
         state.createOrderState.maybeMap(
           success: (s) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Order #${s.data.orderNumber} placed successfully!',
-                ),
-                backgroundColor: AppColors.success,
-              ),
-            );
-            // Navigate back or to orders list
-            context.router.maybePop();
+            // Show success dialog instead of just snackbar
+            _showSuccessDialog(context, s.data);
           },
           failure: (f) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -64,9 +68,13 @@ class OrderFormView extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
+          backgroundColor: AppColors.grey50,
           appBar: AppBar(
             title: const Text('New Order'),
+            centerTitle: false,
             elevation: 0,
+            backgroundColor: AppColors.white,
+            surfaceTintColor: AppColors.white,
           ),
           body: state.availableDaysState.map(
             initial: (_) => const Center(child: CircularProgressIndicator()),
@@ -130,10 +138,7 @@ class OrderFormView extends StatelessWidget {
       slivers: [
         // Calendar section
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: CalendarSection(days: data.days),
-          ),
+          child: CalendarSection(days: data.days),
         ),
 
         // Content based on selected date
@@ -163,13 +168,20 @@ class OrderFormView extends StatelessWidget {
         else if (state.canShowMealCards) ...[
           // Selected date header
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Container(
+              color: AppColors.white,
+              padding: const EdgeInsets.all(16),
               child: _buildSelectedDateHeader(context, state),
             ),
           ),
+          SliverToBoxAdapter(
+            child: Container(
+              height: 8,
+              color: AppColors.grey50,
+            ),
+          ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
             sliver: SliverToBoxAdapter(
               child: MealCardsSection(
                 availableMealTypes: _getAvailableMealTypes(state, data),
@@ -194,90 +206,93 @@ class OrderFormView extends StatelessWidget {
         '${_getMonthName(date.month)} ${date.day}, ${date.year}';
 
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
+          color: AppColors.grey200,
           width: 1.5,
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.calendar_today,
+                color: AppColors.white,
+                size: 24,
+              ),
             ),
-            child: const Icon(
-              Icons.calendar_today,
-              color: AppColors.white,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Ordering for',
-                  style: context.textTheme.labelMedium?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$dayName, $formattedDate',
-                  style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              // Allow user to change date easily
-              if (state.selectedMealCount > 0) {
-                showDialog<void>(
-                  context: context,
-                  builder: (dialogContext) => AlertDialog(
-                    title: const Text('Change Date?'),
-                    content: const Text(
-                      'This will clear your current meal selections. Continue?',
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ordering for',
+                    style: context.textTheme.labelMedium?.copyWith(
+                      color: AppColors.grey600,
+                      fontWeight: FontWeight.w500,
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(dialogContext),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(dialogContext);
-                          context.read<OrderFormBloc>().add(
-                            const OrderFormDateClearedEvent(),
-                          );
-                        },
-                        child: const Text('Change Date'),
-                      ),
-                    ],
                   ),
-                );
-              } else {
-                context.read<OrderFormBloc>().add(
-                  const OrderFormDateClearedEvent(),
-                );
-              }
-            },
-            icon: const Icon(Icons.edit, color: AppColors.primary),
-            tooltip: 'Change date',
-          ),
-        ],
+                  const SizedBox(height: 4),
+                  Text(
+                    '$dayName, $formattedDate',
+                    style: context.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                // Allow user to change date easily
+                if (state.selectedMealCount > 0) {
+                  showDialog<void>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      backgroundColor: Colors.white,
+                      title: const Text('Change Date?'),
+                      content: const Text(
+                        'This will clear your current meal selections. Continue?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dialogContext),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(dialogContext);
+                            context.read<OrderFormBloc>().add(
+                              const OrderFormDateClearedEvent(),
+                            );
+                          },
+                          child: const Text('Change Date'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  context.read<OrderFormBloc>().add(
+                    const OrderFormDateClearedEvent(),
+                  );
+                }
+              },
+              icon: const Icon(Icons.edit, color: AppColors.primary),
+              tooltip: 'Change date',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -340,5 +355,117 @@ class OrderFormView extends StatelessWidget {
     }
 
     return availableTypes;
+  }
+
+  void _showSuccessDialog(BuildContext context, CreateOrderResponse order) {
+    final bloc = context.read<OrderFormBloc>();
+
+    // Show dialog after a brief delay to ensure proper rendering
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Refresh available days to reflect the new order
+      bloc.add(const OrderFormLoadedEvent());
+
+      // Get the next available date info
+      final state = bloc.state;
+      final nextAvailableInfo = _getNextAvailableDateInfo(state);
+
+      // Capture meal selections for location display
+      // (workaround since API doesn't return deliveryLocation)
+      final mealSelections = state.mealSelections;
+
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => OrderSuccessDialog(
+          order: order,
+          mealSelections: mealSelections,
+          nextAvailableDateLabel: nextAvailableInfo.label,
+          showRepeatButton: nextAvailableInfo.canRepeat,
+          onRepeatForNextAvailable: nextAvailableInfo.canRepeat
+              ? () {
+                  Navigator.of(dialogContext).pop();
+                  // Change date while keeping selections
+                  context.read<OrderFormBloc>().add(
+                    OrderFormDateSelectedEvent(
+                      nextAvailableInfo.date,
+                      keepSelections: true,
+                    ),
+                  );
+                }
+              : null,
+          onOrderNextAvailable: () {
+            Navigator.of(dialogContext).pop();
+            // Clear current selections and select next available date
+            context.read<OrderFormBloc>()
+              ..add(const OrderFormDateClearedEvent())
+              ..add(OrderFormDateSelectedEvent(nextAvailableInfo.date));
+          },
+          onViewDetails: () {
+            Navigator.of(dialogContext).pop();
+            // TODO: Navigate to order details screen when implemented
+            // For now, just go back to home
+            context.router.maybePop();
+          },
+        ),
+      );
+    });
+  }
+
+  ({String date, String label, bool canRepeat}) _getNextAvailableDateInfo(
+    OrderFormState state,
+  ) {
+    final availableDays = state.availableDaysState.maybeMap(
+      success: (s) => s.data.days,
+      refreshing: (r) => r.currentData.days,
+      orElse: () => <user_models.OrderDay>[],
+    );
+
+    // Find the next available date (not already ordered, not a holiday)
+    final now = DateTime.now();
+    final tomorrow = now.add(const Duration(days: 1));
+
+    for (var i = 1; i <= 30; i++) {
+      // Check up to 30 days ahead
+      final checkDate = now.add(Duration(days: i));
+      final dateStr =
+          '${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}';
+
+      user_models.OrderDay? day;
+      try {
+        day = availableDays.firstWhere((d) => d.date == dateStr);
+      } catch (e) {
+        day = null;
+      }
+
+      if (day != null &&
+          day.isAvailable &&
+          !day.alreadyOrdered &&
+          day.holidayName == null) {
+        // Found an available date
+        final isTomorrow =
+            checkDate.year == tomorrow.year &&
+            checkDate.month == tomorrow.month &&
+            checkDate.day == tomorrow.day;
+
+        final label = isTomorrow
+            ? 'Tomorrow'
+            : DateFormat('MMM d').format(checkDate);
+
+        return (
+          date: dateStr,
+          label: label,
+          canRepeat: true, // Can repeat if date is available
+        );
+      }
+    }
+
+    // Fallback to tomorrow even if not available (will show banner)
+    final tomorrowDate =
+        '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
+    return (
+      date: tomorrowDate,
+      label: 'Tomorrow',
+      canRepeat: false, // Can't repeat if already ordered
+    );
   }
 }

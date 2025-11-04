@@ -29,7 +29,7 @@ class MealCardsSection extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'Choose Your Meals',
-              style: context.textTheme.titleMedium?.copyWith(
+              style: context.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),

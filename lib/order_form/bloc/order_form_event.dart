@@ -20,13 +20,16 @@ class OrderFormLoadedEvent extends OrderFormEvent {
 /// Event when a date is selected from the calendar
 class OrderFormDateSelectedEvent extends OrderFormEvent {
   /// {@macro order_form_date_selected_event}
-  const OrderFormDateSelectedEvent(this.date);
+  const OrderFormDateSelectedEvent(this.date, {this.keepSelections = false});
 
   /// The selected date (ISO 8601 format)
   final String date;
 
+  /// Whether to keep current meal selections when changing date
+  final bool keepSelections;
+
   @override
-  List<Object?> get props => [date];
+  List<Object?> get props => [date, keepSelections];
 }
 
 /// Event when date selection needs to be cleared (with confirmation)
