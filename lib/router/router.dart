@@ -57,5 +57,7 @@ class AppRouter extends RootStackRouter {
       ],
     ),
     AutoRoute(page: OrdersRoute.page, path: '/orders'),
+    AutoRoute(page: AddressesRoute.page, path: '/addresses'),
+    AutoRoute(page: AddressFormRoute.page, path: '/addresses/form'),
   ];
 }

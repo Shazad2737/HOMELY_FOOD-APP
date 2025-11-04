@@ -49,4 +49,45 @@ abstract class IUserRepository {
   Future<Either<Failure, CreateOrderResponse>> createOrder(
     CreateOrderRequest request,
   );
+
+  // Profile operations
+
+  /// Get customer profile with stats and default address
+  Future<Either<Failure, CustomerProfile>> getProfile();
+
+  /// Update profile picture
+  ///
+  /// [filePath] - Path to the image file
+  Future<Either<Failure, CustomerProfile>> updateProfilePicture(
+    String filePath,
+  );
+
+  // Address operations
+
+  /// Get all customer addresses
+  Future<Either<Failure, AddressesResponse>> getAddresses();
+
+  /// Create a new address
+  Future<Either<Failure, CustomerAddress>> createAddress(
+    CreateAddressRequest request,
+  );
+
+  /// Update an existing address
+  ///
+  /// [addressId] - ID of the address to update
+  /// [request] - Fields to update (partial update supported)
+  Future<Either<Failure, CustomerAddress>> updateAddress(
+    String addressId,
+    UpdateAddressRequest request,
+  );
+
+  /// Delete an address (soft delete)
+  ///
+  /// [addressId] - ID of the address to delete
+  Future<Either<Failure, Unit>> deleteAddress(String addressId);
+
+  /// Set an address as default
+  ///
+  /// [addressId] - ID of the address to set as default
+  Future<Either<Failure, CustomerAddress>> setDefaultAddress(String addressId);
 }

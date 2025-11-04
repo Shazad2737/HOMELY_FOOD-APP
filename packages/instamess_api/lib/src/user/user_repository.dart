@@ -314,4 +314,471 @@ class UserRepository implements IUserRepository {
       return left(UnknownFailure(message: e.toString()));
     }
   }
+
+  // Profile operations
+
+  @override
+  Future<Either<Failure, CustomerProfile>> getProfile() async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/customer/profile',
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.getProfile');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message =
+                body['message'] as String? ?? 'Failed to fetch profile';
+            log('Error in UserRepository.getProfile: $message');
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            log('No data in UserRepository.getProfile');
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'No data in response',
+              ),
+            );
+          }
+
+          try {
+            final profile = CustomerProfile.fromJson(data);
+            return right(profile);
+          } catch (e, s) {
+            log(
+              'Error parsing profile response',
+              error: e,
+              stackTrace: s,
+            );
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'Failed to parse profile data',
+              ),
+            );
+          }
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.getProfile',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, CustomerProfile>> updateProfilePicture(
+    String filePath,
+  ) async {
+    try {
+      final response = await _apiClient.patch<Map<String, dynamic>>(
+        '/customer/profile-picture',
+        files: {'profilePicture': filePath},
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.updateProfilePicture');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message = body['message'] as String? ??
+                'Failed to update profile picture';
+            log('Error in UserRepository.updateProfilePicture: $message');
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            log('No data in UserRepository.updateProfilePicture');
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'No data in response',
+              ),
+            );
+          }
+
+          try {
+            // Backend returns CustomerBasicInfoResource which has subset of fields
+            // We'll parse it as CustomerProfile for consistency
+            final profile = CustomerProfile.fromJson(data);
+            return right(profile);
+          } catch (e, s) {
+            log(
+              'Error parsing profile picture update response',
+              error: e,
+              stackTrace: s,
+            );
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'Failed to parse response',
+              ),
+            );
+          }
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.updateProfilePicture',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  // Address operations
+
+  @override
+  Future<Either<Failure, AddressesResponse>> getAddresses() async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/customer/addresses',
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.getAddresses');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message =
+                body['message'] as String? ?? 'Failed to fetch addresses';
+            log('Error in UserRepository.getAddresses: $message');
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            log('No data in UserRepository.getAddresses');
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'No data in response',
+              ),
+            );
+          }
+
+          try {
+            final addressesResponse = AddressesResponse.fromJson(data);
+            return right(addressesResponse);
+          } catch (e, s) {
+            log(
+              'Error parsing addresses response',
+              error: e,
+              stackTrace: s,
+            );
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'Failed to parse addresses data',
+              ),
+            );
+          }
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.getAddresses',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, CustomerAddress>> createAddress(
+    CreateAddressRequest request,
+  ) async {
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '/customer/addresses',
+        body: request.toJson(),
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.createAddress');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message =
+                body['message'] as String? ?? 'Failed to create address';
+            log('Error in UserRepository.createAddress: $message');
+
+            // Handle validation errors
+            if (r.statusCode == 422 || r.statusCode == 400) {
+              try {
+                return left(ApiValidationFailure.fromJson(body));
+              } catch (e) {
+                log('Failed to parse validation error: $e');
+              }
+            }
+
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            log('No data in UserRepository.createAddress');
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'No data in response',
+              ),
+            );
+          }
+
+          try {
+            final address = CustomerAddress.fromJson(data);
+            return right(address);
+          } catch (e, s) {
+            log(
+              'Error parsing create address response',
+              error: e,
+              stackTrace: s,
+            );
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'Failed to parse address data',
+              ),
+            );
+          }
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.createAddress',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, CustomerAddress>> updateAddress(
+    String addressId,
+    UpdateAddressRequest request,
+  ) async {
+    try {
+      final response = await _apiClient.patch<Map<String, dynamic>>(
+        '/customer/addresses/$addressId',
+        body: request.toJson(),
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.updateAddress');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message =
+                body['message'] as String? ?? 'Failed to update address';
+            log('Error in UserRepository.updateAddress: $message');
+
+            // Handle validation errors
+            if (r.statusCode == 422 || r.statusCode == 400) {
+              try {
+                return left(ApiValidationFailure.fromJson(body));
+              } catch (e) {
+                log('Failed to parse validation error: $e');
+              }
+            }
+
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            log('No data in UserRepository.updateAddress');
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'No data in response',
+              ),
+            );
+          }
+
+          try {
+            final address = CustomerAddress.fromJson(data);
+            return right(address);
+          } catch (e, s) {
+            log(
+              'Error parsing update address response',
+              error: e,
+              stackTrace: s,
+            );
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'Failed to parse address data',
+              ),
+            );
+          }
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.updateAddress',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteAddress(String addressId) async {
+    try {
+      final response = await _apiClient.delete<Map<String, dynamic>>(
+        '/customer/addresses/$addressId',
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.deleteAddress');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message =
+                body['message'] as String? ?? 'Failed to delete address';
+            log('Error in UserRepository.deleteAddress: $message');
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          return right(unit);
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.deleteAddress',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, CustomerAddress>> setDefaultAddress(
+    String addressId,
+  ) async {
+    try {
+      final response = await _apiClient.patch<Map<String, dynamic>>(
+        '/customer/addresses/$addressId/set-default',
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.setDefaultAddress');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message = body['message'] as String? ??
+                'Failed to set default address';
+            log('Error in UserRepository.setDefaultAddress: $message');
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            log('No data in UserRepository.setDefaultAddress');
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'No data in response',
+              ),
+            );
+          }
+
+          try {
+            final address = CustomerAddress.fromJson(data);
+            return right(address);
+          } catch (e, s) {
+            log(
+              'Error parsing set default address response',
+              error: e,
+              stackTrace: s,
+            );
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'Failed to parse address data',
+              ),
+            );
+          }
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.setDefaultAddress',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
 }
