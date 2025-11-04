@@ -13,12 +13,12 @@ class AddressFormBloc extends Bloc<AddressFormEvent, AddressFormState> {
   AddressFormBloc({
     required ICmsRepository cmsRepository,
     this.address,
-  })  : _cmsRepository = cmsRepository,
-        super(
-          address != null
-              ? AddressFormState.fromAddress(address)
-              : AddressFormState.initial(),
-        ) {
+  }) : _cmsRepository = cmsRepository,
+       super(
+         address != null
+             ? AddressFormState.fromAddress(address)
+             : AddressFormState.initial(),
+       ) {
     on<AddressFormLoadedEvent>(_onLoaded);
     on<AddressFormTypeChangedEvent>(_onTypeChanged);
     on<AddressFormLocationChangedEvent>(_onLocationChanged);

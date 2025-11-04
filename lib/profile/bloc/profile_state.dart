@@ -14,8 +14,8 @@ class ProfileState extends Equatable {
 
   /// Factory for initial state
   factory ProfileState.initial() => const ProfileState(
-        profileState: DataStateInitial(),
-      );
+    profileState: DataStateInitial(),
+  );
 
   /// Profile data state
   final DataState<CustomerProfile> profileState;
@@ -28,6 +28,32 @@ class ProfileState extends Equatable {
 
   /// Whether profile picture is uploading
   bool get isUploadingPicture => profilePictureUpdateState.isLoading;
+
+  /// Gets the displayable profile data
+  CustomerProfile? get displayProfile {
+    if (profileState is DataStateSuccess<CustomerProfile>) {
+      return (profileState as DataStateSuccess<CustomerProfile>).data;
+    }
+    if (profileState is DataStateRefreshing<CustomerProfile>) {
+      return (profileState as DataStateRefreshing<CustomerProfile>).currentData;
+    }
+    return null;
+  }
+
+  /// Gets displayable name - from profile or fallback
+  String get displayName => displayProfile?.name ?? 'User';
+
+  /// Gets displayable mobile - from profile or fallback
+  String get displayMobile => displayProfile?.mobile ?? 'Not available';
+
+  /// Gets displayable profile URL
+  String? get displayProfileUrl => displayProfile?.profileUrl;
+
+  /// Gets displayable email
+  String? get displayEmail => displayProfile?.email;
+
+  /// Whether there's an error loading profile data
+  bool get hasProfileError => profileState is DataStateFailure;
 
   /// Creates a copy with updated fields
   ProfileState copyWith({

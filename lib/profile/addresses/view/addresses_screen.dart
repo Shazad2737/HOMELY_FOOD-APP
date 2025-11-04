@@ -10,17 +10,26 @@ import 'package:instamess_app/profile/addresses/bloc/addresses_state.dart';
 import 'package:instamess_app/router/router.gr.dart';
 
 @RoutePage()
-class AddressesScreen extends StatelessWidget {
+class AddressesScreen extends StatefulWidget {
   const AddressesScreen({super.key});
 
   @override
+  State<AddressesScreen> createState() => _AddressesScreenState();
+}
+
+class _AddressesScreenState extends State<AddressesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load addresses when screen is first displayed
+    context.read<AddressesBloc>().add(const AddressesLoadedEvent());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AddressesBloc(
-        userRepository: context.read<IUserRepository>(),
-      )..add(const AddressesLoadedEvent()),
-      child: const AddressesView(),
-    );
+    // AddressesBloc is provided at the app level (see app/view/bloc_providers.dart),
+    // so the screen can directly use the existing instance.
+    return const AddressesView();
   }
 }
 
@@ -130,12 +139,12 @@ class AddressesView extends StatelessWidget {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           context.router.push(AddressFormRoute());
         },
-        icon: const Icon(Icons.add),
-        label: const Text('Add Address'),
+        child: const Icon(Icons.add),
+        // label: const Text('Add Address'),
       ),
     );
   }

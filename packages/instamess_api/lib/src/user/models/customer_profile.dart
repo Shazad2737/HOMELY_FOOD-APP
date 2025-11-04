@@ -13,53 +13,53 @@ class CustomerProfile extends Equatable {
     required this.name,
     required this.mobile,
     required this.customerCode,
+    required this.stats,
     this.email,
     this.profileUrl,
     this.status,
     this.isVerified = false,
     this.defaultAddress,
-    required this.stats,
   });
 
   /// Creates CustomerProfile from JSON
   factory CustomerProfile.fromJson(Map<String, dynamic> json) {
     return CustomerProfile(
       id: pick(json, 'id').asStringOrThrow(),
-      name: pick(json, 'name').asStringOrThrow(),
-      mobile: pick(json, 'mobile').asStringOrThrow(),
-      customerCode: pick(json, 'customerCode').asStringOrThrow(),
+      name: pick(json, 'name').asStringOrNull(),
+      mobile: pick(json, 'mobile').asStringOrNull(),
+      customerCode: pick(json, 'customerCode').asStringOrNull(),
       email: pick(json, 'email').asStringOrNull(),
       profileUrl: pick(json, 'profileUrl').asStringOrNull(),
       status: pick(json, 'status').asStringOrNull(),
       isVerified: pick(json, 'isVerified').asBoolOrFalse(),
       defaultAddress: pick(json, 'defaultAddress').asMapOrNull() != null
           ? CustomerAddress.fromJson(
-              pick(json, 'defaultAddress').asMapOrThrow(),
+              pick(json, 'defaultAddress').asMapOrEmpty(),
             )
           : null,
       stats: ProfileStats.fromJson(
-        pick(json, 'stats').asMapOrThrow(),
+        pick(json, 'stats').asMapOrEmpty(),
       ),
     );
   }
 
   /// Customer ID
-  final String id;
+  final String? id;
 
   /// Customer name
-  final String name;
+  final String? name;
 
   /// Customer email
   final String? email;
 
   /// Customer mobile number
-  final String mobile;
+  final String? mobile;
 
   /// Profile picture URL
   final String? profileUrl;
 
   /// Customer code
-  final String customerCode;
+  final String? customerCode;
 
   /// Customer account status
   final String? status;
@@ -112,9 +112,8 @@ class CustomerProfile extends Equatable {
       customerCode: customerCode ?? this.customerCode,
       status: status ?? this.status,
       isVerified: isVerified ?? this.isVerified,
-      defaultAddress: clearDefaultAddress
-          ? null
-          : (defaultAddress ?? this.defaultAddress),
+      defaultAddress:
+          clearDefaultAddress ? null : (defaultAddress ?? this.defaultAddress),
       stats: stats ?? this.stats,
     );
   }

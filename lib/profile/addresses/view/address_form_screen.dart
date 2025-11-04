@@ -1,6 +1,5 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
@@ -25,11 +24,53 @@ class AddressFormScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AddressFormBloc(
-        cmsRepository: context.read<ICmsRepository>(),
-        address: address,
-      )..add(const AddressFormLoadedEvent()),
+    return MultiBlocListener(
+      listeners: [
+        // Listener for create operations
+        BlocListener<AddressesBloc, AddressesState>(
+          listenWhen: (previous, current) => previous.createState != current.createState,
+          listener: (context, state) {
+            state.createState.maybeMap(
+              orElse: () {},
+              success: (_) {
+                AppSnackbar.showSuccessSnackbar(
+                  context,
+                  content: 'Address created successfully',
+                );
+                context.router.maybePop();
+              },
+              failure: (failure) {
+                AppSnackbar.showErrorSnackbar(
+                  context,
+                  content: failure.failure.message,
+                );
+              },
+            );
+          },
+        ),
+        // Listener for update operations
+        BlocListener<AddressesBloc, AddressesState>(
+          listenWhen: (previous, current) => previous.updateState != current.updateState,
+          listener: (context, state) {
+            state.updateState.maybeMap(
+              orElse: () {},
+              success: (_) {
+                AppSnackbar.showSuccessSnackbar(
+                  context,
+                  content: 'Address updated successfully',
+                );
+                context.router.maybePop();
+              },
+              failure: (failure) {
+                AppSnackbar.showErrorSnackbar(
+                  context,
+                  content: failure.failure.message,
+                );
+              },
+            );
+          },
+        ),
+      ],
       child: Scaffold(
         appBar: AppBar(
           title: Text(isEditing ? 'Edit Address' : 'Add Address'),
@@ -56,47 +97,7 @@ class _AddressFormViewState extends State<AddressFormView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AddressesBloc, AddressesState>(
-      listenWhen: (previous, current) =>
-          previous.createState != current.createState ||
-          previous.updateState != current.updateState,
-      listener: (context, state) {
-        // Handle successful create
-        state.createState.maybeMap(
-          orElse: () {},
-          success: (_) {
-            AppSnackbar.showSuccessSnackbar(
-              context,
-              content: 'Address created successfully',
-            );
-            context.router.maybePop();
-          },
-          failure: (failure) {
-            AppSnackbar.showErrorSnackbar(
-              context,
-              content: failure.failure.message,
-            );
-          },
-        );
-
-        // Handle successful update
-        state.updateState.maybeMap(
-          orElse: () {},
-          success: (_) {
-            AppSnackbar.showSuccessSnackbar(
-              context,
-              content: 'Address updated successfully',
-            );
-            context.router.maybePop();
-          },
-          failure: (failure) {
-            AppSnackbar.showErrorSnackbar(
-              context,
-              content: failure.failure.message,
-            );
-          },
-        );
-      },
+    return BlocBuilder<AddressesBloc, AddressesState>(
       builder: (context, addressesState) {
         final isSubmitting =
             addressesState.isCreating || addressesState.isUpdating;
@@ -473,8 +474,8 @@ class _AddressFormViewState extends State<AddressFormView> {
                                         ? null
                                         : state.mobile,
                                     isDefault: state.isDefault,
-                                    locationId: int.parse(state.locationId),
-                                    areaId: int.parse(state.areaId),
+                                    locationId: state.locationId,
+                                    areaId: state.areaId,
                                   );
 
                                   widget.addressesBloc.add(

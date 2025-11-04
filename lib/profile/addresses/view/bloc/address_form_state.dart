@@ -26,20 +26,20 @@ class AddressFormState extends Equatable {
 
   /// Factory for initial state
   factory AddressFormState.initial() => const AddressFormState(
-        type: 'HOME',
-        locationId: '',
-        areaId: '',
-        name: '',
-        roomNumber: '',
-        buildingName: '',
-        zipCode: '',
-        mobile: '',
-        isDefault: false,
-        locations: [],
-        areas: [],
-        isLoadingLocations: false,
-        isLoadingAreas: false,
-      );
+    type: 'HOME',
+    locationId: '',
+    areaId: '',
+    name: '',
+    roomNumber: '',
+    buildingName: '',
+    zipCode: '',
+    mobile: '',
+    isDefault: false,
+    locations: [],
+    areas: [],
+    isLoadingLocations: false,
+    isLoadingAreas: false,
+  );
 
   /// Factory for editing state with existing address
   factory AddressFormState.fromAddress(CustomerAddress address) =>
@@ -119,27 +119,28 @@ class AddressFormState extends Equatable {
       locationLoadError: clearLocationError
           ? null
           : (locationLoadError ?? this.locationLoadError),
-      areaLoadError:
-          clearAreaError ? null : (areaLoadError ?? this.areaLoadError),
+      areaLoadError: clearAreaError
+          ? null
+          : (areaLoadError ?? this.areaLoadError),
     );
   }
 
   @override
   List<Object?> get props => [
-        type,
-        locationId,
-        areaId,
-        name,
-        roomNumber,
-        buildingName,
-        zipCode,
-        mobile,
-        isDefault,
-        locations,
-        areas,
-        isLoadingLocations,
-        isLoadingAreas,
-        locationLoadError,
-        areaLoadError,
-      ];
+    type,
+    locationId,
+    areaId,
+    name,
+    roomNumber,
+    buildingName,
+    zipCode,
+    mobile,
+    isDefault,
+    locations,
+    areas,
+    isLoadingLocations,
+    isLoadingAreas,
+    locationLoadError,
+    areaLoadError,
+  ];
 }

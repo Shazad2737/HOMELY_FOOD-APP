@@ -15,20 +15,20 @@ class ProfileStats extends Equatable {
   /// Creates ProfileStats from JSON
   factory ProfileStats.fromJson(Map<String, dynamic> json) {
     return ProfileStats(
-      totalOrders: pick(json, 'totalOrders').asIntOrThrow(),
-      activeSubscriptions: pick(json, 'activeSubscriptions').asIntOrThrow(),
-      savedAddresses: pick(json, 'savedAddresses').asIntOrThrow(),
+      totalOrders: pick(json, 'totalOrders').asIntOrNull(),
+      activeSubscriptions: pick(json, 'activeSubscriptions').asIntOrNull(),
+      savedAddresses: pick(json, 'savedAddresses').asIntOrNull(),
     );
   }
 
   /// Total number of orders placed
-  final int totalOrders;
+  final int? totalOrders;
 
   /// Number of active subscriptions
-  final int activeSubscriptions;
+  final int? activeSubscriptions;
 
   /// Number of saved addresses
-  final int savedAddresses;
+  final int? savedAddresses;
 
   /// Converts to JSON
   Map<String, dynamic> toJson() {

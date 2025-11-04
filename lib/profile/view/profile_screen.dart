@@ -1,6 +1,5 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
@@ -16,12 +15,9 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ProfileBloc(
-        userRepository: context.read<IUserRepository>(),
-      )..add(const ProfileLoadedEvent()),
-      child: const ProfileView(),
-    );
+    // ProfileBloc is provided at the app level (see app/view/bloc_providers.dart),
+    // so the screen can directly use the existing instance.
+    return const ProfileView();
   }
 }
 
@@ -69,9 +65,9 @@ class ProfileView extends StatelessWidget {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        context
-                            .read<ProfileBloc>()
-                            .add(const ProfileLoadedEvent());
+                        context.read<ProfileBloc>().add(
+                          const ProfileLoadedEvent(),
+                        );
                       },
                       child: const Text('Retry'),
                     ),
@@ -121,10 +117,13 @@ class _ProfileContent extends StatelessWidget {
                       : null,
                 ),
                 const SizedBox(height: 12),
-                Text(profile.name, style: context.textTheme.titleLarge),
+                Text(
+                  profile.name ?? 'N/A',
+                  style: context.textTheme.titleLarge,
+                ),
                 const SizedBox(height: 4),
                 Text(
-                  profile.mobile,
+                  profile.mobile ?? 'N/A',
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: AppColors.grey600,
                   ),

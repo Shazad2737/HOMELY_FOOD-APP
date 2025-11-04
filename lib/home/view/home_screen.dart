@@ -7,6 +7,7 @@ import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/home/bloc/home_bloc.dart';
 import 'package:instamess_app/home/view/widgets/categories/categories_section.dart';
 import 'package:instamess_app/home/view/widgets/promo/promo.dart';
+import 'package:instamess_app/profile/bloc/profile_bloc.dart';
 import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
 
 @RoutePage()
@@ -63,10 +64,15 @@ class _AppBarSection extends StatelessWidget {
     final hasUnreadNotifications =
         homePageData?.hasUnreadNotifications ?? false;
 
+    // Get user name from ProfileBloc
+    final profileState = context.watch<ProfileBloc>().state;
+    final userName = profileState.displayName;
+    // Extract first name
+    final firstName = userName.split(' ').first;
+
     return SliverAppBar(
       automaticallyImplyLeading: false,
-      // TODO(bilal): Replace hard-coded name with actual user's first name when available
-      title: Text('Hi, User', style: context.textTheme.titleLarge),
+      title: Text('Hi, $firstName', style: context.textTheme.titleLarge),
       pinned: true,
       centerTitle: false,
       backgroundColor: AppColors.white,

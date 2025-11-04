@@ -48,13 +48,13 @@ class CreateAddressRequest extends Equatable {
   final bool isDefault;
 
   /// Country ID (integer on backend)
-  final int? countryId;
+  final String? countryId;
 
   /// Location/Emirate ID (integer on backend, required)
-  final int locationId;
+  final String locationId;
 
   /// Area ID (integer on backend, required)
-  final int areaId;
+  final String areaId;
 
   /// Converts to JSON for API request
   Map<String, dynamic> toJson() {
@@ -65,10 +65,8 @@ class CreateAddressRequest extends Equatable {
         'roomNumber': roomNumber,
       if (buildingName != null && buildingName!.isNotEmpty)
         'buildingName': buildingName,
-      if (zipCode != null && zipCode!.isNotEmpty)
-        'zipCode': zipCode,
-      if (mobile != null && mobile!.isNotEmpty)
-        'mobile': mobile,
+      if (zipCode != null && zipCode!.isNotEmpty) 'zipCode': zipCode,
+      if (mobile != null && mobile!.isNotEmpty) 'mobile': mobile,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
       'isDefault': isDefault,

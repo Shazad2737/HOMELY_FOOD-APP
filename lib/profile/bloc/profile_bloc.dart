@@ -13,8 +13,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   /// {@macro profile_bloc}
   ProfileBloc({
     required IUserRepository userRepository,
-  })  : _userRepository = userRepository,
-        super(ProfileState.initial()) {
+  }) : _userRepository = userRepository,
+       super(ProfileState.initial()) {
     on<ProfileLoadedEvent>(_onLoaded);
     on<ProfileRefreshedEvent>(_onRefreshed);
     on<ProfilePictureUpdatedEvent>(_onProfilePictureUpdated);

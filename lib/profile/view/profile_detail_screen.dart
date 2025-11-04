@@ -79,9 +79,9 @@ class ProfileDetailScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        context
-                            .read<ProfileBloc>()
-                            .add(const ProfileLoadedEvent());
+                        context.read<ProfileBloc>().add(
+                          const ProfileLoadedEvent(),
+                        );
                       },
                       child: const Text('Retry'),
                     ),
@@ -110,7 +110,7 @@ class _ProfileDetailContent extends StatelessWidget {
   final bool isUploadingPicture;
 
   Future<void> _pickAndUploadImage(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
+    final picker = ImagePicker();
 
     // Show options: Camera or Gallery
     final source = await showModalBottomSheet<ImageSource>(
@@ -136,7 +136,7 @@ class _ProfileDetailContent extends StatelessWidget {
     if (source == null) return;
 
     try {
-      final XFile? image = await picker.pickImage(
+      final image = await picker.pickImage(
         source: source,
         maxWidth: 1024,
         maxHeight: 1024,
@@ -164,8 +164,8 @@ class _ProfileDetailContent extends StatelessWidget {
       // Dispatch event to update profile picture
       if (context.mounted) {
         context.read<ProfileBloc>().add(
-              ProfilePictureUpdatedEvent(multipartFile),
-            );
+          ProfilePictureUpdatedEvent(multipartFile),
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -203,7 +203,7 @@ class _ProfileDetailContent extends StatelessWidget {
               if (isUploadingPicture)
                 Positioned.fill(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.black54,
                     ),
@@ -259,13 +259,13 @@ class _ProfileDetailContent extends StatelessWidget {
                   _InfoRow(
                     icon: Icons.person_outline,
                     label: 'Name',
-                    value: profile.name,
+                    value: profile.name ?? 'N/A',
                   ),
                   const Divider(height: 24),
                   _InfoRow(
                     icon: Icons.phone_outlined,
                     label: 'Mobile',
-                    value: profile.mobile,
+                    value: profile.mobile ?? 'N/A',
                   ),
                   if (profile.email != null && profile.email!.isNotEmpty) ...[
                     const Divider(height: 24),
@@ -279,15 +279,16 @@ class _ProfileDetailContent extends StatelessWidget {
                   _InfoRow(
                     icon: Icons.badge_outlined,
                     label: 'Customer Code',
-                    value: profile.customerCode,
+                    value: profile.customerCode ?? 'N/A',
                   ),
                   const Divider(height: 24),
                   _InfoRow(
                     icon: Icons.verified_outlined,
                     label: 'Status',
                     value: profile.isVerified ? 'Verified' : 'Not Verified',
-                    valueColor:
-                        profile.isVerified ? AppColors.success : AppColors.error,
+                    valueColor: profile.isVerified
+                        ? AppColors.success
+                        : AppColors.error,
                   ),
                 ],
               ),
