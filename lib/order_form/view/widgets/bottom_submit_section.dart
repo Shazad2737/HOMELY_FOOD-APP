@@ -2,6 +2,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
+import 'package:instamess_app/order_form/view/helpers/date_formatter.dart';
 
 /// Bottom section with submit button
 class BottomSubmitSection extends StatelessWidget {
@@ -14,7 +15,6 @@ class BottomSubmitSection extends StatelessWidget {
       builder: (context, state) {
         final canSubmit = state.canSubmit;
         final selectedMealCount = state.selectedMealCount;
-        final totalAmount = state.totalAmount;
 
         return Container(
           padding: const EdgeInsets.all(16),
@@ -138,25 +138,6 @@ class BottomSubmitSection extends StatelessWidget {
 
   String _formatSelectedDate(String dateString) {
     final date = DateTime.parse(dateString);
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    final dayName = days[date.weekday - 1];
-    final monthName = months[date.month - 1];
-
-    return 'for $dayName, $monthName ${date.day}';
+    return OrderFormDateFormatter.formatOrderDate(date);
   }
 }

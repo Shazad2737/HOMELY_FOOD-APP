@@ -50,6 +50,7 @@ class OrderFormState extends Equatable {
     this.orderNotes,
     this.activeBottomSheet,
     this.pendingFood,
+    this.mealTapError,
   });
 
   /// Initial state
@@ -81,43 +82,46 @@ class OrderFormState extends Equatable {
   /// Pending food item (selected but waiting for location)
   final FoodItem? pendingFood;
 
+  /// Error message from meal tap (e.g., no date selected, meal unavailable)
+  final String? mealTapError;
+
   /// Whether a date has been selected
   bool get hasSelectedDate => selectedDate != null;
 
   /// Whether meal cards can be shown
   bool get canShowMealCards {
     if (!hasSelectedDate) return false;
-    final selectedDay = _findDayByDate(selectedDate);
+    final selectedDay = findDayByDate(selectedDate);
     return selectedDay?.isAvailable ?? false;
   }
 
   /// Whether the selected date is a holiday
   bool get isSelectedDateHoliday {
-    final selectedDay = _findDayByDate(selectedDate);
+    final selectedDay = findDayByDate(selectedDate);
     return selectedDay?.holidayName != null;
   }
 
   /// Whether the selected date already has an order
   bool get isSelectedDateAlreadyOrdered {
-    final selectedDay = _findDayByDate(selectedDate);
+    final selectedDay = findDayByDate(selectedDate);
     return selectedDay?.alreadyOrdered ?? false;
   }
 
   /// Existing order number if already ordered
   String? get existingOrderNumber {
-    final selectedDay = _findDayByDate(selectedDate);
+    final selectedDay = findDayByDate(selectedDate);
     return selectedDay?.existingOrderNumber;
   }
 
   /// Existing order status if already ordered
   String? get existingOrderStatus {
-    final selectedDay = _findDayByDate(selectedDate);
+    final selectedDay = findDayByDate(selectedDate);
     return selectedDay?.existingOrderStatus;
   }
 
   /// Holiday name if applicable
   String? get holidayName {
-    final selectedDay = _findDayByDate(selectedDate);
+    final selectedDay = findDayByDate(selectedDate);
     return selectedDay?.holidayName;
   }
 
@@ -137,7 +141,7 @@ class OrderFormState extends Equatable {
 
   /// Get food items for a specific meal type
   List<FoodItem> getFoodItemsForMeal(MealType mealType) {
-    final selectedDay = _findDayByDate(selectedDate);
+    final selectedDay = findDayByDate(selectedDate);
     if (selectedDay == null) return [];
 
     switch (mealType) {
@@ -152,7 +156,7 @@ class OrderFormState extends Equatable {
 
   /// Check if a meal type is available
   bool isMealTypeAvailable(MealType mealType) {
-    final selectedDay = _findDayByDate(selectedDate);
+    final selectedDay = findDayByDate(selectedDate);
     if (selectedDay == null) return false;
 
     switch (mealType) {
@@ -186,7 +190,7 @@ class OrderFormState extends Equatable {
   }
 
   /// Find a day by date
-  user_models.OrderDay? _findDayByDate(String? date) {
+  user_models.OrderDay? findDayByDate(String? date) {
     if (date == null) return null;
     return availableDaysState.maybeMap(
       success: (data) {
@@ -220,6 +224,8 @@ class OrderFormState extends Equatable {
     bool clearActiveBottomSheet = false,
     FoodItem? pendingFood,
     bool clearPendingFood = false,
+    String? mealTapError,
+    bool clearMealTapError = false,
   }) {
     return OrderFormState(
       availableDaysState: availableDaysState ?? this.availableDaysState,
@@ -233,6 +239,9 @@ class OrderFormState extends Equatable {
           ? null
           : (activeBottomSheet ?? this.activeBottomSheet),
       pendingFood: clearPendingFood ? null : (pendingFood ?? this.pendingFood),
+      mealTapError: clearMealTapError
+          ? null
+          : (mealTapError ?? this.mealTapError),
     );
   }
 
@@ -245,5 +254,6 @@ class OrderFormState extends Equatable {
     createOrderState,
     activeBottomSheet,
     pendingFood,
+    mealTapError,
   ];
 }

@@ -1,7 +1,7 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/order_form/view/widgets/meal_card.dart';
+import 'package:instamess_app/order_form/view/widgets/meal_card/meal_card.dart';
 
 /// Section showing all meal cards
 class MealCardsSection extends StatelessWidget {

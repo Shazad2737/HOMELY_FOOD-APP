@@ -4,253 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
-import 'package:instamess_app/order_form/view/widgets/location_selection_bottom_sheet.dart';
 
-/// Bottom sheet for selecting a food item
-class FoodSelectionBottomSheet extends StatelessWidget {
+/// Individual food item tile in the selection list
+class FoodItemTile extends StatelessWidget {
   /// Constructor
-  const FoodSelectionBottomSheet({
-    required this.mealType,
-    required this.foodItems,
-    required this.selectedDay,
-    super.key,
-  });
-
-  /// The meal type being selected
-  final MealType mealType;
-
-  /// Available food items for this meal
-  final List<FoodItem> foodItems;
-
-  /// The selected day data
-  final dynamic selectedDay;
-
-  @override
-  Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
-      ),
-      padding: EdgeInsets.only(top: topPadding),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 12),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.border,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Select ${_getMealLabel(mealType)}',
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                _buildDateContextChip(context),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Divider(),
-          Flexible(
-            child: ListView.separated(
-              padding: const EdgeInsets.only(top: 8, bottom: 20),
-              itemCount: foodItems.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 4),
-              itemBuilder: (context, index) {
-                return _FoodItemTile(
-                  foodItem: foodItems[index],
-                  mealType: mealType,
-                  onSelected: (foodItem) {
-                    // Don't pop here - let _handleFoodSelected handle it
-                    _handleFoodSelected(context, foodItem);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDateContextChip(BuildContext context) {
-    if (selectedDay == null || selectedDay.date == null) {
-      return const SizedBox.shrink();
-    }
-
-    final date = DateTime.parse(selectedDay.date as String);
-    final dayName = _getDayName(date.weekday);
-    final formattedDate = '${_getMonthName(date.month)} ${date.day}';
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.calendar_today,
-            size: 14,
-            color: AppColors.primary,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            '$dayName, $formattedDate',
-            style: context.textTheme.labelMedium?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getDayName(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
-  }
-
-  String _getMealLabel(MealType type) {
-    switch (type) {
-      case MealType.breakfast:
-        return 'Breakfast';
-      case MealType.lunch:
-        return 'Lunch';
-      case MealType.dinner:
-        return 'Dinner';
-    }
-  }
-
-  void _handleFoodSelected(BuildContext context, FoodItem foodItem) {
-    final bloc = context.read<OrderFormBloc>();
-
-    // Check delivery mode
-    if (foodItem.deliveryMode == DeliveryMode.withOther) {
-      // WITH_OTHER delivery - check if paired meal is already selected
-      final pairedMealType = foodItem.deliverWith?.type;
-
-      if (pairedMealType != null) {
-        final pairedSelection = bloc.state.mealSelections[pairedMealType];
-
-        if (pairedSelection != null) {
-          // Paired meal exists - auto-use its location
-          // ignore: avoid_print
-          print('🟢 WITH_OTHER mode - paired meal found, auto-using location');
-          Navigator.pop(context);
-
-          bloc.add(
-            OrderFormFoodSelectedEvent(
-              mealType: mealType,
-              food: foodItem,
-              location: pairedSelection.location,
-            ),
-          );
-
-          // Show snackbar to inform user
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Using same location as ${_getMealLabel(pairedMealType)}',
-              ),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-          return;
-        }
-      }
-
-      // Paired meal not selected - show location picker
-      // ignore: avoid_print
-      print('� WITH_OTHER mode - no paired meal, showing location picker');
-      Navigator.pop(context);
-      _showLocationPicker(context, foodItem);
-    } else {
-      // SEPARATE delivery - always show location picker
-      // ignore: avoid_print
-      print('� SEPARATE mode - showing location picker');
-      Navigator.pop(context);
-      _showLocationPicker(context, foodItem);
-    }
-  }
-
-  void _showLocationPicker(BuildContext context, FoodItem foodItem) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: context.read<OrderFormBloc>(),
-        child: LocationSelectionBottomSheet(
-          mealType: mealType,
-          foodItem: foodItem,
-        ),
-      ),
-    );
-  }
-}
-
-class _FoodItemTile extends StatelessWidget {
-  const _FoodItemTile({
+  const FoodItemTile({
     required this.foodItem,
     required this.mealType,
     required this.onSelected,
+    super.key,
   });
 
+  /// The food item to display
   final FoodItem foodItem;
+
+  /// The meal type this food belongs to
   final MealType mealType;
+
+  /// Callback when food is selected
   final void Function(FoodItem) onSelected;
 
   @override
@@ -385,9 +156,7 @@ class _FoodItemTile extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.appGreen.withValues(
-                                    alpha: 0.1,
-                                  ),
+                                  color: AppColors.appGreen.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Row(
@@ -419,9 +188,7 @@ class _FoodItemTile extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.appGreen.withValues(
-                                    alpha: 0.2,
-                                  ),
+                                  color: AppColors.appGreen.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Row(
@@ -457,10 +224,10 @@ class _FoodItemTile extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.info.withValues(alpha: 0.1),
+                              color: AppColors.info.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: AppColors.info.withValues(alpha: 0.3),
+                                color: AppColors.info.withOpacity(0.3),
                               ),
                             ),
                             child: Row(

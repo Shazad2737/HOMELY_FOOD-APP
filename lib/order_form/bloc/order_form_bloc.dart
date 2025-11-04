@@ -29,6 +29,9 @@ class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
     on<OrderFormDateSelectedEvent>(_onDateSelected);
     on<OrderFormDateClearRequestedEvent>(_onDateClearRequested);
     on<OrderFormDateClearedEvent>(_onDateCleared);
+    on<OrderFormMealTappedEvent>(_onMealTapped);
+    on<OrderFormMealTapErrorClearedEvent>(_onMealTapErrorCleared);
+    on<OrderFormBottomSheetClearedEvent>(_onBottomSheetCleared);
     on<OrderFormFoodSelectedEvent>(_onFoodSelected);
     on<OrderFormLocationSelectedEvent>(_onLocationSelected);
     on<OrderFormMealRemovedEvent>(_onMealRemoved);
@@ -160,6 +163,73 @@ class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
         mealSelections: {},
       ),
     );
+  }
+
+  void _onMealTapped(
+    OrderFormMealTappedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    log('🔍 Meal tapped: ${event.mealType.name}');
+
+    // Validate that we have a selected date
+    if (state.selectedDate == null) {
+      log('❌ No selected date');
+      emit(
+        state.copyWith(
+          mealTapError: 'Please select a date first',
+        ),
+      );
+      return;
+    }
+
+    // Check if meal type is available
+    if (!state.isMealTypeAvailable(event.mealType)) {
+      log('❌ Meal type not available: ${event.mealType.name}');
+      emit(
+        state.copyWith(
+          mealTapError: '${event.mealType.name} is not available for this date',
+        ),
+      );
+      return;
+    }
+
+    // Get food items for this meal
+    final foodItems = state.getFoodItemsForMeal(event.mealType);
+    log('📊 Found ${foodItems.length} food items for ${event.mealType.name}');
+
+    if (foodItems.isEmpty) {
+      log('⚠️ No food items available');
+      emit(
+        state.copyWith(
+          mealTapError:
+              'No ${event.mealType.name.toLowerCase()} items available for this date',
+        ),
+      );
+      return;
+    }
+
+    // Success - store the active meal type so UI can navigate
+    log('✅ Ready to show food selection for ${event.mealType.name}');
+    emit(
+      state.copyWith(
+        activeBottomSheet: event.mealType,
+        clearMealTapError: true, // Clear any previous error
+      ),
+    );
+  }
+
+  void _onMealTapErrorCleared(
+    OrderFormMealTapErrorClearedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    emit(state.copyWith(clearMealTapError: true));
+  }
+
+  void _onBottomSheetCleared(
+    OrderFormBottomSheetClearedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    emit(state.copyWith(clearActiveBottomSheet: true));
   }
 
   /// Handles food selection with location already determined
@@ -304,7 +374,12 @@ class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
         state.copyWith(createOrderState: DataState.failure(failure)),
       ),
       (data) => emit(
-        state.copyWith(createOrderState: DataState.success(data)),
+        state.copyWith(
+          createOrderState: DataState.success(data),
+          // Clear form after successful order
+          clearSelectedDate: true,
+          mealSelections: {},
+        ),
       ),
     );
   }

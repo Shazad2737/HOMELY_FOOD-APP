@@ -56,6 +56,18 @@ class OrderFormMealTappedEvent extends OrderFormEvent {
   List<Object?> get props => [mealType];
 }
 
+/// Event to clear meal tap error
+class OrderFormMealTapErrorClearedEvent extends OrderFormEvent {
+  /// {@macro order_form_meal_tap_error_cleared_event}
+  const OrderFormMealTapErrorClearedEvent();
+}
+
+/// Event to clear active bottom sheet
+class OrderFormBottomSheetClearedEvent extends OrderFormEvent {
+  /// {@macro order_form_bottom_sheet_cleared_event}
+  const OrderFormBottomSheetClearedEvent();
+}
+
 /// Event when a food item is selected
 class OrderFormFoodSelectedEvent extends OrderFormEvent {
   /// {@macro order_form_food_selected_event}

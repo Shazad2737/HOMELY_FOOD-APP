@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
+import 'package:instamess_app/order_form/view/widgets/location_selection_bottom_sheet/widgets/location_tile.dart';
 
 /// Bottom sheet for selecting a delivery location
 class LocationSelectionBottomSheet extends StatelessWidget {
@@ -116,7 +117,7 @@ class LocationSelectionBottomSheet extends StatelessWidget {
                     shrinkWrap: true,
                     itemCount: locations.length,
                     itemBuilder: (context, index) {
-                      return _LocationTile(
+                      return LocationTile(
                         location: locations[index],
                         onSelected: (location) {
                           Navigator.pop(context);
@@ -137,99 +138,6 @@ class LocationSelectionBottomSheet extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _LocationTile extends StatelessWidget {
-  const _LocationTile({
-    required this.location,
-    required this.onSelected,
-  });
-
-  final DeliveryLocation location;
-  final void Function(DeliveryLocation) onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => onSelected(location),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: AppColors.border.withOpacity(0.5),
-            ),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.location_on,
-                color: AppColors.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          location.displayName,
-                          style: context.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      if (location.isDefault)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Default',
-                            style: context.textTheme.labelSmall?.copyWith(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    location.type,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.textSecondary,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
