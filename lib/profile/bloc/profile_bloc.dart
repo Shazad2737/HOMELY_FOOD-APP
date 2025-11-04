@@ -87,7 +87,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ),
     );
 
-    final result = await _userRepository.updateProfilePicture(event.filePath);
+    final result = await _userRepository.updateProfilePicture(event.file);
 
     result.fold(
       (failure) {

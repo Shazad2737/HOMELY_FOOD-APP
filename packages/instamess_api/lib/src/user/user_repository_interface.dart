@@ -57,9 +57,9 @@ abstract class IUserRepository {
 
   /// Update profile picture
   ///
-  /// [filePath] - Path to the image file
+  /// [file] - Image file as MultipartFile
   Future<Either<Failure, CustomerProfile>> updateProfilePicture(
-    String filePath,
+    MultipartFile file,
   );
 
   // Address operations

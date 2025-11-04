@@ -1,3 +1,4 @@
+import 'package:api_client/api_client.dart';
 import 'package:equatable/equatable.dart';
 
 /// {@template profile_event}
@@ -28,11 +29,11 @@ final class ProfileRefreshedEvent extends ProfileEvent {
 /// Event to update profile picture
 /// {@endtemplate}
 final class ProfilePictureUpdatedEvent extends ProfileEvent {
-  const ProfilePictureUpdatedEvent(this.filePath);
+  const ProfilePictureUpdatedEvent(this.file);
 
-  /// Path to the image file
-  final String filePath;
+  /// Image file as MultipartFile
+  final MultipartFile file;
 
   @override
-  List<Object?> get props => [filePath];
+  List<Object?> get props => [file];
 }

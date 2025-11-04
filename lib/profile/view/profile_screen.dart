@@ -145,7 +145,13 @@ class _ProfileContent extends StatelessWidget {
           Card(
             child: Column(
               children: [
-                const _Tile(icon: Icons.person_outline, title: 'My Profile'),
+                _Tile(
+                  icon: Icons.person_outline,
+                  title: 'My Profile',
+                  onTap: () {
+                    context.router.push(const ProfileDetailRoute());
+                  },
+                ),
                 _Tile(
                   icon: Icons.receipt_long_outlined,
                   title: 'My Orders',

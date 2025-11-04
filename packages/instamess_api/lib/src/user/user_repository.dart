@@ -321,7 +321,7 @@ class UserRepository implements IUserRepository {
   Future<Either<Failure, CustomerProfile>> getProfile() async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
-        '/customers/profile',
+        '/customer/profile',
       );
 
       return response.fold(
@@ -384,12 +384,14 @@ class UserRepository implements IUserRepository {
 
   @override
   Future<Either<Failure, CustomerProfile>> updateProfilePicture(
-    String filePath,
+    MultipartFile file,
   ) async {
     try {
       final response = await _apiClient.patch<Map<String, dynamic>>(
-        '/customers/profile-picture',
-        // files: {'profilePicture': filePath},
+        '/customer/profile-picture',
+        body: {
+          'profilePicture': file,
+        },
       );
 
       return response.fold(
@@ -458,7 +460,7 @@ class UserRepository implements IUserRepository {
   Future<Either<Failure, AddressesResponse>> getAddresses() async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
-        '/customers/addresses',
+        '/customer/addresses',
       );
 
       return response.fold(
@@ -525,7 +527,7 @@ class UserRepository implements IUserRepository {
   ) async {
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
-        '/customers/addresses',
+        '/customer/addresses',
         body: request.toJson(),
       );
 
@@ -604,7 +606,7 @@ class UserRepository implements IUserRepository {
   ) async {
     try {
       final response = await _apiClient.patch<Map<String, dynamic>>(
-        '/customers/addresses/$addressId',
+        '/customer/addresses/$addressId',
         body: request.toJson(),
       );
 
@@ -680,7 +682,7 @@ class UserRepository implements IUserRepository {
   Future<Either<Failure, Unit>> deleteAddress(String addressId) async {
     try {
       final response = await _apiClient.delete<Map<String, dynamic>>(
-        '/customers/addresses/$addressId',
+        '/customer/addresses/$addressId',
       );
 
       return response.fold(
@@ -721,7 +723,7 @@ class UserRepository implements IUserRepository {
   ) async {
     try {
       final response = await _apiClient.patch<Map<String, dynamic>>(
-        '/customers/addresses/$addressId/set-default',
+        '/customer/addresses/$addressId/set-default',
       );
 
       return response.fold(
@@ -735,8 +737,8 @@ class UserRepository implements IUserRepository {
 
           final success = body['success'] as bool? ?? false;
           if (!success) {
-            final message =
-                body['message'] as String? ?? 'Failed to set default address';
+            final message = body['message'] as String? ??
+                'Failed to set default address';
             log('Error in UserRepository.setDefaultAddress: $message');
             return left(
               UnknownApiFailure(r.statusCode ?? 0, message),
