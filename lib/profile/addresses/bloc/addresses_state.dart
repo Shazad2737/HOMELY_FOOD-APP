@@ -1,6 +1,7 @@
 import 'package:api_client/api_client.dart';
 import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:instamess_api/instamess_api.dart';
 
 /// {@template addresses_state}
@@ -18,8 +19,8 @@ class AddressesState extends Equatable {
 
   /// Factory for initial state
   factory AddressesState.initial() => const AddressesState(
-        addressesState: DataStateInitial(),
-      );
+    addressesState: DataStateInitial(),
+  );
 
   /// Addresses list data state
   final DataState<AddressesResponse> addressesState;
@@ -74,10 +75,10 @@ class AddressesState extends Equatable {
 
   @override
   List<Object?> get props => [
-        addressesState,
-        createState,
-        updateState,
-        deleteState,
-        setDefaultState,
-      ];
+    addressesState,
+    createState,
+    updateState,
+    deleteState,
+    setDefaultState,
+  ];
 }

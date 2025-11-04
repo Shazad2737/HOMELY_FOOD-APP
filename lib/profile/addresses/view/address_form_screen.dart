@@ -114,13 +114,13 @@ class _AddressFormViewState extends State<AddressFormView> {
                   children: [
                     const Icon(Icons.error_outline, size: 48),
                     const SizedBox(height: 16),
-                    Text('Failed to load locations'),
+                    const Text('Failed to load locations'),
                     const SizedBox(height: 8),
                     ElevatedButton(
                       onPressed: () {
-                        context
-                            .read<AddressFormBloc>()
-                            .add(const AddressFormLoadedEvent());
+                        context.read<AddressFormBloc>().add(
+                          const AddressFormLoadedEvent(),
+                        );
                       },
                       child: const Text('Retry'),
                     ),
@@ -145,7 +145,7 @@ class _AddressFormViewState extends State<AddressFormView> {
                       ),
                     ),
                     DropdownButtonFormField<String>(
-                      value: state.type,
+                      initialValue: state.type,
                       decoration: const InputDecoration(
                         hintText: 'Select Type',
                       ),
@@ -157,8 +157,8 @@ class _AddressFormViewState extends State<AddressFormView> {
                       onChanged: (value) {
                         if (value != null) {
                           context.read<AddressFormBloc>().add(
-                                AddressFormTypeChangedEvent(value),
-                              );
+                            AddressFormTypeChangedEvent(value),
+                          );
                         }
                       },
                       validator: (value) =>
@@ -175,7 +175,9 @@ class _AddressFormViewState extends State<AddressFormView> {
                       ),
                     ),
                     DropdownButtonFormField<String>(
-                      value: state.locationId.isEmpty ? null : state.locationId,
+                      initialValue: state.locationId.isEmpty
+                          ? null
+                          : state.locationId,
                       decoration: const InputDecoration(
                         hintText: 'Select Location',
                       ),
@@ -190,8 +192,8 @@ class _AddressFormViewState extends State<AddressFormView> {
                           : (value) {
                               if (value != null) {
                                 context.read<AddressFormBloc>().add(
-                                      AddressFormLocationChangedEvent(value),
-                                    );
+                                  AddressFormLocationChangedEvent(value),
+                                );
                               }
                             },
                       validator: (value) =>
@@ -208,7 +210,7 @@ class _AddressFormViewState extends State<AddressFormView> {
                       ),
                     ),
                     DropdownButtonFormField<String>(
-                      value: state.areaId.isEmpty ? null : state.areaId,
+                      initialValue: state.areaId.isEmpty ? null : state.areaId,
                       decoration: InputDecoration(
                         hintText: 'Select Area',
                         errorText: state.areaLoadError,
@@ -224,8 +226,8 @@ class _AddressFormViewState extends State<AddressFormView> {
                           : (value) {
                               if (value != null) {
                                 context.read<AddressFormBloc>().add(
-                                      AddressFormAreaChangedEvent(value),
-                                    );
+                                  AddressFormAreaChangedEvent(value),
+                                );
                               }
                             },
                       validator: (value) =>
@@ -246,10 +248,11 @@ class _AddressFormViewState extends State<AddressFormView> {
                       decoration: const InputDecoration(
                         hintText: 'e.g., My Home, Office',
                       ),
-                      onChanged: (value) => context
-                          .read<AddressFormBloc>()
-                          .add(AddressFormNameChangedEvent(value)),
-                      validator: (value) => value == null || value.trim().isEmpty
+                      onChanged: (value) => context.read<AddressFormBloc>().add(
+                        AddressFormNameChangedEvent(value),
+                      ),
+                      validator: (value) =>
+                          value == null || value.trim().isEmpty
                           ? 'Name is required'
                           : null,
                     ),
@@ -263,7 +266,10 @@ class _AddressFormViewState extends State<AddressFormView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                                padding: const EdgeInsets.only(
+                                  left: 4,
+                                  bottom: 8,
+                                ),
                                 child: Text(
                                   'Building Name',
                                   style: context.tsBodyMedium14,
@@ -274,9 +280,12 @@ class _AddressFormViewState extends State<AddressFormView> {
                                 decoration: const InputDecoration(
                                   hintText: 'Optional',
                                 ),
-                                onChanged: (value) => context
-                                    .read<AddressFormBloc>()
-                                    .add(AddressFormBuildingNameChangedEvent(value)),
+                                onChanged: (value) =>
+                                    context.read<AddressFormBloc>().add(
+                                      AddressFormBuildingNameChangedEvent(
+                                        value,
+                                      ),
+                                    ),
                               ),
                             ],
                           ),
@@ -287,7 +296,10 @@ class _AddressFormViewState extends State<AddressFormView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                                padding: const EdgeInsets.only(
+                                  left: 4,
+                                  bottom: 8,
+                                ),
                                 child: Text(
                                   'Room Number',
                                   style: context.tsBodyMedium14,
@@ -298,9 +310,10 @@ class _AddressFormViewState extends State<AddressFormView> {
                                 decoration: const InputDecoration(
                                   hintText: 'Optional',
                                 ),
-                                onChanged: (value) => context
-                                    .read<AddressFormBloc>()
-                                    .add(AddressFormRoomNumberChangedEvent(value)),
+                                onChanged: (value) =>
+                                    context.read<AddressFormBloc>().add(
+                                      AddressFormRoomNumberChangedEvent(value),
+                                    ),
                               ),
                             ],
                           ),
@@ -317,7 +330,10 @@ class _AddressFormViewState extends State<AddressFormView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                                padding: const EdgeInsets.only(
+                                  left: 4,
+                                  bottom: 8,
+                                ),
                                 child: Text(
                                   'Zip Code',
                                   style: context.tsBodyMedium14,
@@ -341,7 +357,10 @@ class _AddressFormViewState extends State<AddressFormView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                                padding: const EdgeInsets.only(
+                                  left: 4,
+                                  bottom: 8,
+                                ),
                                 child: Text(
                                   'Mobile',
                                   style: context.tsBodyMedium14,
@@ -380,8 +399,8 @@ class _AddressFormViewState extends State<AddressFormView> {
                       onChanged: (value) {
                         if (value != null) {
                           context.read<AddressFormBloc>().add(
-                                AddressFormIsDefaultChangedEvent(value),
-                              );
+                            AddressFormIsDefaultChangedEvent(value),
+                          );
                         }
                       },
                       title: const Text('Set as default address'),
@@ -405,8 +424,8 @@ class _AddressFormViewState extends State<AddressFormView> {
                                   return;
                                 }
 
-                                final addressFormBloc =
-                                    context.read<AddressFormBloc>();
+                                final addressFormBloc = context
+                                    .read<AddressFormBloc>();
 
                                 if (addressFormBloc.isEditing) {
                                   // Update existing address
@@ -466,8 +485,8 @@ class _AddressFormViewState extends State<AddressFormView> {
                         text: isSubmitting
                             ? 'SAVING...'
                             : (context.read<AddressFormBloc>().isEditing
-                                ? 'UPDATE ADDRESS'
-                                : 'ADD ADDRESS'),
+                                  ? 'UPDATE ADDRESS'
+                                  : 'ADD ADDRESS'),
                       ),
                     ),
                     const SizedBox(height: 24),

@@ -61,6 +61,27 @@ class ApiClient {
   /// Auth token provider for session management
   final AuthTokenProvider? _authTokenProvider;
 
+  /// Performs a PATCH request to [path]
+  ///
+  /// {@macro api_client._request}
+  Future<Either<ApiFailure, Response<T>>> patch<T>(
+    String path, {
+    Map<String, dynamic>? body,
+    List<MultipartFile?>? files,
+    Map<String, dynamic>? queryParameters,
+    bool authRequired = true,
+  }) async {
+    final res = await _request(
+      path,
+      _dio.patch<T>,
+      authRequired: authRequired,
+      files: files,
+      body: body,
+      queryParameters: queryParameters,
+    );
+    return res;
+  }
+
   /// Performs a POST request to [path]
   ///
   /// {@macro api_client._request}
