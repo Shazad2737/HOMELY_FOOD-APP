@@ -1,384 +1,344 @@
+import 'package:api_client/api_client.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instamess_api/instamess_api.dart';
+import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
+import 'package:instamess_app/order_form/view/widgets/widgets.dart';
 
+/// {@template order_form_screen}
+/// Screen for creating a new food order
+/// {@endtemplate}
 @RoutePage()
-class OrderFormScreen extends StatefulWidget {
+class OrderFormScreen extends StatelessWidget {
+  /// {@macro order_form_screen}
   const OrderFormScreen({super.key});
 
   @override
-  State<OrderFormScreen> createState() => _OrderFormScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => OrderFormBloc(
+        userRepository: context.read<IUserRepository>(),
+      )..add(const OrderFormLoadedEvent()),
+      child: const OrderFormView(),
+    );
+  }
 }
 
-class _OrderFormScreenState extends State<OrderFormScreen> {
-  // Selected meal state (breakfast, lunch, dinner)
-  int?
-  selectedMealIndex; // null means no selection, 0=breakfast, 1=lunch, 2=dinner
-
-  // Selected date state
-  int? selectedDateIndex;
+/// {@template order_form_view}
+/// View for order form screen
+/// {@endtemplate}
+class OrderFormView extends StatelessWidget {
+  /// {@macro order_form_view}
+  const OrderFormView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    return BlocConsumer<OrderFormBloc, OrderFormState>(
+      listener: (context, state) {
+        // Handle order creation success
+        state.createOrderState.maybeMap(
+          success: (s) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Order #${s.data.orderNumber} placed successfully!',
+                ),
+                backgroundColor: AppColors.success,
+              ),
+            );
+            // Navigate back or to orders list
+            context.router.maybePop();
+          },
+          failure: (f) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(f.failure.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          },
+          orElse: () {},
+        );
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('New Order'),
+            elevation: 0,
+          ),
+          body: state.availableDaysState.map(
+            initial: (_) => const Center(child: CircularProgressIndicator()),
+            loading: (_) => const Center(child: CircularProgressIndicator()),
+            success: (s) => _buildContent(context, state, s.data),
+            failure: (f) => _buildError(context, f.failure),
+            refreshing: (r) => _buildContent(context, state, r.currentData),
+          ),
+          bottomNavigationBar: const BottomSubmitSection(),
+        );
+      },
+    );
+  }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Order Form'),
-
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: ListView(
+  Widget _buildError(BuildContext context, Failure failure) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Date Selection Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Select Date from below',
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Date chips
-                  Row(
-                    children: List.generate(7, (index) {
-                      final isSelected = selectedDateIndex == index;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedDateIndex = index;
-                            });
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.appRed
-                                  : AppColors.appGreen,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  _getDayLabel(index),
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.7),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                                Text(
-                                  (20 + index).toString(),
-                                  style: textTheme.labelLarge?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Failed to load order days',
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 8),
+            Text(
+              failure.message,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                context.read<OrderFormBloc>().add(const OrderFormLoadedEvent());
+              },
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            const SizedBox(height: 24),
+  Widget _buildContent(
+    BuildContext context,
+    OrderFormState state,
+    AvailableOrderDays data,
+  ) {
+    return CustomScrollView(
+      slivers: [
+        // Calendar section
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: CalendarSection(days: data.days),
+          ),
+        ),
 
-            // Meal Selection Cards
-            ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
+        // Content based on selected date
+        if (!state.hasSelectedDate)
+          const SliverFillRemaining(
+            child: EmptyDatePrompt(),
+          )
+        else if (state.isSelectedDateHoliday && state.holidayName != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: HolidayBanner(holidayName: state.holidayName!),
+            ),
+          )
+        else if (state.isSelectedDateAlreadyOrdered &&
+            state.existingOrderNumber != null &&
+            state.existingOrderStatus != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: AlreadyOrderedBanner(
+                orderNumber: state.existingOrderNumber!,
+                orderStatus: state.existingOrderStatus!,
+              ),
+            ),
+          )
+        else if (state.canShowMealCards) ...[
+          // Selected date header
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: _buildSelectedDateHeader(context, state),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverToBoxAdapter(
+              child: MealCardsSection(
+                availableMealTypes: _getAvailableMealTypes(state, data),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSelectedDateHeader(
+    BuildContext context,
+    OrderFormState state,
+  ) {
+    final selectedDate = state.selectedDate;
+    if (selectedDate == null) return const SizedBox.shrink();
+
+    final date = DateTime.parse(selectedDate);
+    final dayName = _getDayName(date.weekday);
+    final formattedDate =
+        '${_getMonthName(date.month)} ${date.day}, ${date.year}';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.calendar_today,
+              color: AppColors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Breakfast Card (Masala Dosa)
-                _MealCard(
-                  title: 'Masala Dosa B050',
-                  subtitle: 'Chatny + Sambar + Vada',
-                  description: 'Cuisine: Kerala',
-                  style: 'Style: South Indian',
-                  deliveryTime:
-                      'Delivery is scheduled between 5:00 PM and 6:00 PM.',
-                  isSelected: selectedMealIndex == 0,
-                  onTap: () {
-                    setState(() {
-                      selectedMealIndex = 0;
-                    });
-                  },
+                Text(
+                  'Ordering for',
+                  style: context.textTheme.labelMedium?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // Lunch Card
-                _MealCard(
-                  title: 'Select Lunch',
-                  subtitle: '',
-                  description: '',
-                  style: '',
-                  deliveryTime:
-                      'Delivery is scheduled between 5:00 PM and 6:00 PM.',
-                  isSelected: selectedMealIndex == 1,
-                  onTap: () {
-                    setState(() {
-                      selectedMealIndex = 1;
-                    });
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                // Dinner Card
-                _MealCard(
-                  title: 'Select Dinner',
-                  subtitle: '',
-                  description: '',
-                  style: '',
-                  deliveryTime:
-                      'Delivery is scheduled between 5:00 PM and 6:00 PM.',
-                  isSelected: selectedMealIndex == 2,
-                  onTap: () {
-                    setState(() {
-                      selectedMealIndex = 2;
-                    });
-                  },
+                const SizedBox(height: 4),
+                Text(
+                  '$dayName, $formattedDate',
+                  style: context.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ],
             ),
-
-            // Order Button
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: ElevatedButton(
-                onPressed: selectedMealIndex != null ? () {} : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.appRed,
-                  foregroundColor: AppColors.white,
-                  minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+          ),
+          IconButton(
+            onPressed: () {
+              // Allow user to change date easily
+              if (state.selectedMealCount > 0) {
+                showDialog<void>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: const Text('Change Date?'),
+                    content: const Text(
+                      'This will clear your current meal selections. Continue?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                          context.read<OrderFormBloc>().add(
+                            const OrderFormDateClearedEvent(),
+                          );
+                        },
+                        child: const Text('Change Date'),
+                      ),
+                    ],
                   ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'ORDER NOW',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+                );
+              } else {
+                context.read<OrderFormBloc>().add(
+                  const OrderFormDateClearedEvent(),
+                );
+              }
+            },
+            icon: const Icon(Icons.edit, color: AppColors.primary),
+            tooltip: 'Change date',
+          ),
+        ],
       ),
     );
   }
 
-  String _getDayLabel(int index) {
-    switch (index) {
-      case 0:
-        return 'MON';
-      case 1:
-        return 'TUE';
-      case 2:
-        return 'WED';
-      case 3:
-        return 'THU';
-      case 4:
-        return 'FRI';
-      case 5:
-        return 'SAT';
-      case 6:
-        return 'SUN';
-      default:
-        return '';
+  String _getDayName(int weekday) {
+    const days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    return days[weekday - 1];
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[month - 1];
+  }
+
+  List<MealType> _getAvailableMealTypes(
+    OrderFormState state,
+    AvailableOrderDays data,
+  ) {
+    final selectedDate = state.selectedDate;
+    if (selectedDate == null) return [];
+
+    final selectedDay = data.days
+        .where(
+          (day) => day.date == selectedDate,
+        )
+        .firstOrNull;
+
+    if (selectedDay == null) return [];
+
+    final availableTypes = <MealType>[];
+    if (selectedDay.availableMealTypes.breakfast) {
+      availableTypes.add(MealType.breakfast);
     }
-  }
-}
+    if (selectedDay.availableMealTypes.lunch) {
+      availableTypes.add(MealType.lunch);
+    }
+    if (selectedDay.availableMealTypes.dinner) {
+      availableTypes.add(MealType.dinner);
+    }
 
-// Meal selection card widget
-class _MealCard extends StatelessWidget {
-  const _MealCard({
-    required this.title,
-    required this.subtitle,
-    required this.description,
-    required this.style,
-    required this.deliveryTime,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final String description;
-  final String style;
-  final String deliveryTime;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: isSelected ? 8 : 4,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: isSelected
-              ? const BorderSide(color: AppColors.appRed, width: 2)
-              : BorderSide.none,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Food image with favorite button
-            AspectRatio(
-              aspectRatio: 16 / 7,
-              child: Image(
-                image: appImages.banner.provider(),
-                fit: BoxFit.cover,
-              ),
-            ),
-
-            // Food details
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title with favorite icon
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? AppColors.appRed
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      if (isSelected)
-                        const Icon(
-                          Icons.favorite,
-                          color: AppColors.appRed,
-                          size: 20,
-                        ),
-                    ],
-                  ),
-
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      subtitle,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-
-                  if (description.isNotEmpty || style.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    if (description.isNotEmpty)
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.restaurant,
-                            color: AppColors.appRed,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              description,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    if (style.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.set_meal_outlined,
-                            color: AppColors.appRed,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              style,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-
-                  const SizedBox(height: 16),
-
-                  // Delivery time with icon
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.appGreen.withValues(alpha: .2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.schedule,
-                          color: AppColors.textSecondary,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            deliveryTime,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: AppColors.appGreen,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return availableTypes;
   }
 }

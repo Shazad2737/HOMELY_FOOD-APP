@@ -41,4 +41,12 @@ abstract class IUserRepository {
   /// Get user's subscription data including meal types, banner, and contact info
   Future<Either<Failure, subscription_models.SubscriptionData>>
       getSubscription();
+
+  /// Get available order days with food items and ordering rules
+  Future<Either<Failure, AvailableOrderDays>> getAvailableOrderDays();
+
+  /// Create a new order
+  Future<Either<Failure, CreateOrderResponse>> createOrder(
+    CreateOrderRequest request,
+  );
 }

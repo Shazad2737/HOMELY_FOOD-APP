@@ -79,7 +79,7 @@ class MenuFoodCard extends StatelessWidget {
                 if (foodItem.price != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                    '₹${foodItem.price!.toStringAsFixed(2)}',
+                    'AED ${foodItem.price!.toStringAsFixed(2)}',
                     style: context.textTheme.titleMedium?.copyWith(
                       color: AppColors.appOrange,
                       fontWeight: FontWeight.bold,

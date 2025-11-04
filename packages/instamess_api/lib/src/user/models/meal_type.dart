@@ -32,8 +32,8 @@ class MealType extends Equatable {
     required this.id,
     required this.name,
     required this.type,
-    required this.startTime,
-    required this.endTime,
+    this.startTime,
+    this.endTime,
   });
 
   /// Creates MealType from JSON
@@ -43,8 +43,8 @@ class MealType extends Equatable {
       name: pick(json, 'name').asStringOrThrow(),
       type: MealTypeEnum.fromString(pick(json, 'type').asStringOrNull()) ??
           MealTypeEnum.breakfast,
-      startTime: pick(json, 'startTime').asStringOrThrow(),
-      endTime: pick(json, 'endTime').asStringOrThrow(),
+      startTime: pick(json, 'startTime').asStringOrNull(),
+      endTime: pick(json, 'endTime').asStringOrNull(),
     );
   }
 
@@ -57,11 +57,11 @@ class MealType extends Equatable {
   /// Meal type enum
   final MealTypeEnum type;
 
-  /// Start time (HH:mm format)
-  final String startTime;
+  /// Start time (HH:mm format) - optional
+  final String? startTime;
 
-  /// End time (HH:mm format)
-  final String endTime;
+  /// End time (HH:mm format) - optional
+  final String? endTime;
 
   /// Converts to JSON
   Map<String, dynamic> toJson() {
@@ -69,8 +69,8 @@ class MealType extends Equatable {
       'id': id,
       'name': name,
       'type': type.name.toUpperCase(),
-      'startTime': startTime,
-      'endTime': endTime,
+      if (startTime != null) 'startTime': startTime,
+      if (endTime != null) 'endTime': endTime,
     };
   }
 

@@ -10,6 +10,10 @@ class DeliveryLocation extends Equatable {
     required this.id,
     required this.name,
     required this.type,
+    this.buildingName,
+    this.areaId,
+    this.locationId,
+    this.isDefault = false,
   });
 
   /// Creates DeliveryLocation from JSON
@@ -18,6 +22,10 @@ class DeliveryLocation extends Equatable {
       id: pick(json, 'id').asStringOrThrow(),
       name: pick(json, 'name').asStringOrThrow(),
       type: pick(json, 'type').asStringOrThrow(),
+      buildingName: pick(json, 'buildingName').asStringOrNull(),
+      areaId: pick(json, 'areaId').asStringOrNull(),
+      locationId: pick(json, 'locationId').asStringOrNull(),
+      isDefault: pick(json, 'isDefault').asBoolOrFalse(),
     );
   }
 
@@ -27,8 +35,24 @@ class DeliveryLocation extends Equatable {
   /// Location name
   final String name;
 
-  /// Location type
+  /// Location type (e.g., "HOME", "OFFICE", "OTHER")
   final String type;
+
+  /// Building name (optional)
+  final String? buildingName;
+
+  /// Area ID
+  final String? areaId;
+
+  /// Location ID reference
+  final String? locationId;
+
+  /// Whether this is the default location
+  final bool isDefault;
+
+  /// Display name for UI (includes building if available)
+  String get displayName =>
+      buildingName != null ? '$name - $buildingName' : name;
 
   /// Converts to JSON
   Map<String, dynamic> toJson() {
@@ -36,9 +60,14 @@ class DeliveryLocation extends Equatable {
       'id': id,
       'name': name,
       'type': type,
+      if (buildingName != null) 'buildingName': buildingName,
+      if (areaId != null) 'areaId': areaId,
+      if (locationId != null) 'locationId': locationId,
+      'isDefault': isDefault,
     };
   }
 
   @override
-  List<Object?> get props => [id, name, type];
+  List<Object?> get props =>
+      [id, name, type, buildingName, areaId, locationId, isDefault];
 }

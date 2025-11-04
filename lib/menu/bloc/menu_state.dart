@@ -63,7 +63,7 @@ class MenuState {
     return items.where((item) {
       return item.name.toLowerCase().contains(query) ||
           (item.description?.toLowerCase().contains(query) ?? false) ||
-          item.code.toLowerCase().contains(query);
+          (item.code?.toLowerCase().contains(query) ?? false);
     }).toList();
   }
 

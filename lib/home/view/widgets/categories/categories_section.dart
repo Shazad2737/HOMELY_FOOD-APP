@@ -64,9 +64,7 @@ class _CategorySelector extends StatelessWidget {
 }
 
 class _TitleRow extends StatelessWidget {
-  const _TitleRow({
-    super.key,
-  });
+  const _TitleRow();
 
   @override
   Widget build(BuildContext context) {

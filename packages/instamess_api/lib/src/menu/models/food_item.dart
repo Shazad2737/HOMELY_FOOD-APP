@@ -1,3 +1,4 @@
+import 'package:deep_pick/deep_pick.dart';
 import 'package:equatable/equatable.dart';
 import 'package:instamess_api/src/menu/models/available_day.dart';
 import 'package:instamess_api/src/menu/models/cuisine.dart';
@@ -5,6 +6,8 @@ import 'package:instamess_api/src/menu/models/day_of_week.dart';
 import 'package:instamess_api/src/menu/models/deliver_with.dart';
 import 'package:instamess_api/src/menu/models/delivery_mode.dart';
 import 'package:instamess_api/src/menu/models/food_style.dart';
+import 'package:instamess_api/src/menu/models/meal_type.dart';
+import 'package:instamess_api/src/user/models/delivery_location.dart';
 
 /// {@template food_item}
 /// Represents a food item in the menu
@@ -14,17 +17,19 @@ class FoodItem extends Equatable {
   const FoodItem({
     required this.id,
     required this.name,
-    required this.code,
     required this.isVegetarian,
     required this.isVegan,
     required this.deliveryMode,
     required this.availableDays,
+    this.mealTypeId,
+    this.code,
     this.description,
     this.imageUrl,
     this.cuisine,
     this.style,
     this.price,
     this.deliverWith,
+    this.availableLocations = const <DeliveryLocation>[],
   });
 
   /// Parse from JSON
@@ -43,7 +48,8 @@ class FoodItem extends Equatable {
     return FoodItem(
       id: json['id'] as String,
       name: json['name'] as String,
-      code: json['code'] as String,
+      code: json['code'] as String?,
+      mealTypeId: json['mealTypeId'] as String?,
       description: json['description'] as String?,
       imageUrl: json['imageUrl'] as String?,
       cuisine: Cuisine.fromString(json['cuisine'] as String?),
@@ -53,14 +59,39 @@ class FoodItem extends Equatable {
       isVegan: json['isVegan'] as bool? ?? false,
       deliveryMode: DeliveryMode.fromString(json['deliveryMode'] as String?) ??
           DeliveryMode.separate,
-      deliverWith: json['deliverWith'] != null
-          ? DeliverWith.fromJson(json['deliverWith'] as Map<String, dynamic>)
-          : null,
+      deliverWith: _parseDeliverWith(json['deliverWith']),
       availableDays: (json['availableDays'] as List<dynamic>?)
               ?.map((e) => AvailableDay.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      availableLocations: pick(json, 'availableLocations').asListOrEmpty(
+        (pick) => DeliveryLocation.fromJson(
+          pick.asMapOrThrow<String, dynamic>(),
+        ),
+      ),
     );
+  }
+
+  /// Parse deliverWith field - handles both string and object formats
+  static DeliverWith? _parseDeliverWith(dynamic value) {
+    if (value == null) return null;
+
+    if (value is Map<String, dynamic>) {
+      // Full object with id, name, type
+      return DeliverWith.fromJson(value);
+    } else if (value is String) {
+      // Just meal type string like "BREAKFAST"
+      final mealType = MealType.fromString(value);
+      if (mealType == null) return null;
+
+      return DeliverWith(
+        id: '', // Not provided by API
+        name: value,
+        type: mealType,
+      );
+    }
+
+    return null;
   }
 
   /// Unique identifier
@@ -70,7 +101,10 @@ class FoodItem extends Equatable {
   final String name;
 
   /// Food item code
-  final String code;
+  final String? code;
+
+  /// Meal type ID this food item belongs to
+  final String? mealTypeId;
 
   /// Optional description
   final String? description;
@@ -102,6 +136,9 @@ class FoodItem extends Equatable {
   /// Days when this item is available
   final List<AvailableDay> availableDays;
 
+  /// Locations where this item can be delivered
+  final List<DeliveryLocation> availableLocations;
+
   /// Get list of DayOfWeek from availableDays
   List<DayOfWeek> get availableDaysOfWeek {
     return availableDays.map((e) => e.dayOfWeek).toList();
@@ -117,7 +154,8 @@ class FoodItem extends Equatable {
     return {
       'id': id,
       'name': name,
-      'code': code,
+      if (code != null) 'code': code,
+      'mealTypeId': mealTypeId,
       if (description != null) 'description': description,
       if (imageUrl != null) 'imageUrl': imageUrl,
       if (cuisine != null) 'cuisine': cuisine!.toApiString(),
@@ -128,6 +166,7 @@ class FoodItem extends Equatable {
       'deliveryMode': deliveryMode.toApiString(),
       if (deliverWith != null) 'deliverWith': deliverWith!.toJson(),
       'availableDays': availableDays.map((e) => e.toJson()).toList(),
+      'availableLocations': availableLocations.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -136,6 +175,7 @@ class FoodItem extends Equatable {
         id,
         name,
         code,
+        mealTypeId,
         description,
         imageUrl,
         cuisine,
@@ -146,5 +186,6 @@ class FoodItem extends Equatable {
         deliveryMode,
         deliverWith,
         availableDays,
+        availableLocations,
       ];
 }

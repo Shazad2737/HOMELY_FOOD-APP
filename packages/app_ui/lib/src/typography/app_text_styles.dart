@@ -1,12 +1,9 @@
-import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// {@macro app_text_styles}
 /// Modern typography styles using Google Fonts
 abstract class AppTextStyles {
-  static const _defaultColor = AppColors.textPrimary;
-
   static final TextStyle _defaultFont = GoogleFonts.roboto();
 
   /// Display Large - For major headings

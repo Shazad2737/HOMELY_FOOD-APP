@@ -1,7 +1,7 @@
 import 'package:deep_pick/deep_pick.dart';
 import 'package:equatable/equatable.dart';
+import 'package:instamess_api/src/menu/models/food_item.dart';
 import 'package:instamess_api/src/user/models/delivery_location.dart';
-import 'package:instamess_api/src/user/models/food_item.dart';
 import 'package:instamess_api/src/user/models/meal_type.dart';
 
 /// {@template order_item}
@@ -13,12 +13,15 @@ class OrderItem extends Equatable {
     required this.id,
     required this.mealType,
     required this.foodItem,
-    required this.deliveryLocation,
+    this.deliveryLocation,
     this.notes,
   });
 
   /// Creates OrderItem from JSON
   factory OrderItem.fromJson(Map<String, dynamic> json) {
+    final deliveryLocationMap =
+        pick(json, 'deliveryLocation').asMapOrNull<String, dynamic>();
+
     return OrderItem(
       id: pick(json, 'id').asStringOrThrow(),
       notes: pick(json, 'notes').asStringOrNull(),
@@ -28,9 +31,9 @@ class OrderItem extends Equatable {
       foodItem: FoodItem.fromJson(
         pick(json, 'foodItem').asMapOrThrow<String, dynamic>(),
       ),
-      deliveryLocation: DeliveryLocation.fromJson(
-        pick(json, 'deliveryLocation').asMapOrThrow<String, dynamic>(),
-      ),
+      deliveryLocation: deliveryLocationMap != null
+          ? DeliveryLocation.fromJson(deliveryLocationMap)
+          : null,
     );
   }
 
@@ -46,8 +49,8 @@ class OrderItem extends Equatable {
   /// Food item details
   final FoodItem foodItem;
 
-  /// Delivery location
-  final DeliveryLocation deliveryLocation;
+  /// Delivery location (optional - may not be returned in all responses)
+  final DeliveryLocation? deliveryLocation;
 
   /// Converts to JSON
   Map<String, dynamic> toJson() {
@@ -56,7 +59,8 @@ class OrderItem extends Equatable {
       'notes': notes,
       'mealType': mealType.toJson(),
       'foodItem': foodItem.toJson(),
-      'deliveryLocation': deliveryLocation.toJson(),
+      if (deliveryLocation != null)
+        'deliveryLocation': deliveryLocation!.toJson(),
     };
   }
 

@@ -171,4 +171,147 @@ class UserRepository implements IUserRepository {
       return left(const UnknownFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, AvailableOrderDays>> getAvailableOrderDays() async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/order/available',
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.getAvailableOrderDays');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message = body['message'] as String? ??
+                'Failed to fetch available order days';
+            log('Error in UserRepository.getAvailableOrderDays: $message');
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            log('No data in UserRepository.getAvailableOrderDays');
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'No data in response',
+              ),
+            );
+          }
+
+          try {
+            final availableOrderDays = AvailableOrderDays.fromJson(data);
+            return right(availableOrderDays);
+          } catch (e, s) {
+            log(
+              'Error parsing available order days response',
+              error: e,
+              stackTrace: s,
+            );
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'Failed to parse available order days data',
+              ),
+            );
+          }
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.getAvailableOrderDays',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, CreateOrderResponse>> createOrder(
+    CreateOrderRequest request,
+  ) async {
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '/order/create',
+        body: request.toJson(),
+      );
+
+      return response.fold(
+        left,
+        (r) {
+          final body = r.data;
+          if (body == null) {
+            log('No response body in UserRepository.createOrder');
+            return left(const UnknownApiFailure(0, 'No response body'));
+          }
+
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            final message =
+                body['message'] as String? ?? 'Failed to create order';
+            log('Error in UserRepository.createOrder: $message');
+
+            // Handle validation errors
+            if (r.statusCode == 422 || r.statusCode == 400) {
+              try {
+                return left(ApiValidationFailure.fromJson(body));
+              } catch (e) {
+                log('Failed to parse validation error: $e');
+              }
+            }
+
+            return left(
+              UnknownApiFailure(r.statusCode ?? 0, message),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            log('No data in UserRepository.createOrder');
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'No data in response',
+              ),
+            );
+          }
+
+          try {
+            final createOrderResponse = CreateOrderResponse.fromJson(data);
+            return right(createOrderResponse);
+          } catch (e, s) {
+            log(
+              'Error parsing create order response',
+              error: e,
+              stackTrace: s,
+            );
+            return left(
+              UnknownApiFailure(
+                r.statusCode ?? 0,
+                'Failed to parse order data',
+              ),
+            );
+          }
+        },
+      );
+    } catch (e, s) {
+      log(
+        'Exception in UserRepository.createOrder',
+        error: e,
+        stackTrace: s,
+      );
+      return left(UnknownFailure(message: e.toString()));
+    }
+  }
 }
