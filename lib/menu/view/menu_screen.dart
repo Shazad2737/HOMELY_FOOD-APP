@@ -89,52 +89,56 @@ class _MenuViewState extends State<MenuView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: BlocBuilder<MenuBloc, MenuState>(
-          builder: (context, state) {
-            return state.menuState.map(
-              initial: (_) => _buildInitialState(context),
-              loading: (_) => _buildLoadingState(context),
-              success: (s) => _buildSuccessState(context, s.data),
-              failure: (f) => _buildFailureState(context, f.failure),
-              refreshing: (r) => _buildSuccessState(
-                context,
-                r.currentData,
-                isRefreshing: true,
-              ),
-            );
-          },
-        ),
+      body: BlocBuilder<MenuBloc, MenuState>(
+        builder: (context, state) {
+          return state.menuState.map(
+            initial: (_) => _buildInitialState(context),
+            loading: (_) => _buildLoadingState(context),
+            success: (s) => _buildSuccessState(context, s.data),
+            failure: (f) => _buildFailureState(context, f.failure),
+            refreshing: (r) => _buildSuccessState(
+              context,
+              r.currentData,
+              isRefreshing: true,
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildInitialState(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        _buildHeader(context),
-        const SliverFillRemaining(
-          hasScrollBody: false,
-          child: MenuEmptyState(
-            message: 'Select a category to view menu',
-            icon: Icons.category,
+    return SafeArea(
+      top: false,
+      child: CustomScrollView(
+        slivers: [
+          _buildHeader(context),
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: MenuEmptyState(
+              message: 'Select a category to view menu',
+              icon: Icons.category,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        _buildHeader(context),
-        const SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(
-            child: CircularProgressIndicator(),
+    return SafeArea(
+      top: false,
+      child: CustomScrollView(
+        slivers: [
+          _buildHeader(context),
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -147,107 +151,124 @@ class _MenuViewState extends State<MenuView>
     final state = bloc.state;
     final items = state.filteredItems;
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        bloc.add(MenuRefreshedEvent());
-        await bloc.stream.firstWhere((s) => !s.isRefreshing && !s.isLoading);
-      },
-      child: CustomScrollView(
-        slivers: [
-          _buildHeader(context),
-          _buildCategorySelector(context),
-          _buildPlanSelector(context, menuData),
-          _buildTabBar(context, menuData),
-          _buildSearchBar(context),
+    return SafeArea(
+      top: false,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          bloc.add(MenuRefreshedEvent());
+          await bloc.stream.firstWhere((s) => !s.isRefreshing && !s.isLoading);
+        },
+        child: CustomScrollView(
+          slivers: [
+            _buildHeader(context),
+            _buildCategorySelector(context),
+            _buildPlanSelector(context, menuData),
+            _buildTabBar(context, menuData),
+            _buildSearchBar(context),
 
-          if (items.isEmpty)
-            _buildEmptyResultsSliver(context)
-          else
-            _buildFoodItemsList(context, items),
-        ],
+            if (items.isEmpty)
+              _buildEmptyResultsSliver(context)
+            else
+              _buildFoodItemsList(context, items),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFailureState(BuildContext context, Failure failure) {
-    return CustomScrollView(
-      slivers: [
-        _buildHeader(context),
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppColors.grey500,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    failure.message,
-                    style: context.textTheme.bodyLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      context.read<MenuBloc>().add(MenuRefreshedEvent());
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Stack(
-        children: [
-          // Banner image
-          AspectRatio(
-            aspectRatio: 16 / 4,
-            child: Image(
-              image: appImages.menuHeader.provider(),
-              fit: BoxFit.cover,
-            ),
-          ),
-          // menu text
-          Positioned.fill(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-
-              // left: 0,
-              // right: 0,
+    return SafeArea(
+      top: false,
+      child: CustomScrollView(
+        slivers: [
+          _buildHeader(context),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  'Menu',
-                  style: context.textTheme.headlineMedium?.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 8,
-                        color: AppColors.black.withValues(alpha: 0.6),
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: AppColors.grey500,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      failure.message,
+                      style: context.textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        context.read<MenuBloc>().add(MenuRefreshedEvent());
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Calculate height based on aspect ratio
+    final aspectRatioHeight = screenWidth / (16 / 4);
+    // Ensure minimum height to clear notch with some visible content
+    final baseHeight = aspectRatioHeight > topPadding + 40
+        ? aspectRatioHeight
+        : topPadding + 60;
+
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: baseHeight,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Banner image - extends above to fill behind the notch
+            Positioned(
+              top: -topPadding, // Extend image upward behind notch
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Image(
+                image: appImages.menuHeader.provider(),
+                fit: BoxFit.cover,
+              ),
+            ),
+            // menu text - positioned at bottom of visible area
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 16,
+              child: Text(
+                'Menu',
+                textAlign: TextAlign.center,
+                style: context.textTheme.headlineMedium?.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 8,
+                      color: AppColors.black.withValues(alpha: 0.6),
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

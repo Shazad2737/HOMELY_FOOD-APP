@@ -4,6 +4,7 @@ import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/auth/bloc/auth_bloc.dart';
 import 'package:instamess_app/auth/login/bloc/login_bloc.dart';
 import 'package:instamess_app/auth/signup/bloc/signup_bloc.dart';
+import 'package:instamess_app/notifications/bloc/notifications_bloc.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_bloc.dart';
 import 'package:instamess_app/profile/bloc/profile_bloc.dart';
 import 'package:instamess_app/profile/bloc/profile_event.dart';
@@ -36,6 +37,13 @@ List<BlocProvider> getBlocProviders(
       create: (context) => AddressesBloc(
         userRepository: context.read<IUserRepository>(),
       ),
+    ),
+    // Provide NotificationsBloc at the app level to maintain notification
+    // state across the app and enable reactive badge updates
+    BlocProvider<NotificationsBloc>(
+      create: (context) => NotificationsBloc(
+        notificationRepository: context.read<INotificationRepository>(),
+      )..add(NotificationsInitializedEvent()),
     ),
   ];
 }

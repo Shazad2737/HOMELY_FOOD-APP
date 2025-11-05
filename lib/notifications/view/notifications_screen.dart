@@ -8,19 +8,28 @@ import 'package:instamess_app/notifications/bloc/notifications_bloc.dart';
 import 'package:instamess_app/notifications/view/widgets/notification_item_widget.dart';
 
 @RoutePage()
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen>
+    with AutoRouteAwareStateMixin<NotificationsScreen> {
+  @override
+  void didPop() {
+    super.didPop();
+    // Mark all notifications as read when user leaves the screen
+    // This ensures they've had a chance to view them
+    if (mounted) {
+      context.read<NotificationsBloc>().add(NotificationsMarkAllAsReadEvent());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => NotificationsBloc(
-        notificationRepository: context.read<INotificationRepository>(),
-      )
-        ..add(NotificationsInitializedEvent())
-        ..add(NotificationsMarkAllAsReadEvent()),
-      child: const NotificationsView(),
-    );
+    return const NotificationsView();
   }
 }
 
@@ -83,9 +92,9 @@ class _ErrorState extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              context
-                  .read<NotificationsBloc>()
-                  .add(NotificationsRefreshedEvent());
+              context.read<NotificationsBloc>().add(
+                NotificationsRefreshedEvent(),
+              );
             },
             child: const Text('Retry'),
           ),
@@ -113,13 +122,13 @@ class _SuccessState extends StatelessWidget {
             Icon(
               Icons.notifications_outlined,
               size: 64,
-              color: AppColors.grey.withOpacity(0.5),
+              color: AppColors.grey400.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
               'No notifications',
               style: context.textTheme.titleMedium?.copyWith(
-                color: AppColors.grey,
+                color: AppColors.grey400,
               ),
             ),
           ],
@@ -135,36 +144,47 @@ class _SuccessState extends StatelessWidget {
         );
       },
       child: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
           if (grouped.today.isNotEmpty) ...[
-            _SectionHeader(title: 'Today'),
-            ...grouped.today.map((notification) => NotificationItemWidget(
-                  notification: notification,
-                )),
+            const _SectionHeader(title: 'Today'),
+            ...grouped.today.map(
+              (notification) => NotificationItemWidget(
+                notification: notification,
+              ),
+            ),
           ],
           if (grouped.yesterday.isNotEmpty) ...[
-            _SectionHeader(title: 'Yesterday'),
-            ...grouped.yesterday.map((notification) => NotificationItemWidget(
-                  notification: notification,
-                )),
+            const _SectionHeader(title: 'Yesterday'),
+            ...grouped.yesterday.map(
+              (notification) => NotificationItemWidget(
+                notification: notification,
+              ),
+            ),
           ],
           if (grouped.thisWeek.isNotEmpty) ...[
-            _SectionHeader(title: 'This Week'),
-            ...grouped.thisWeek.map((notification) => NotificationItemWidget(
-                  notification: notification,
-                )),
+            const _SectionHeader(title: 'This Week'),
+            ...grouped.thisWeek.map(
+              (notification) => NotificationItemWidget(
+                notification: notification,
+              ),
+            ),
           ],
           if (grouped.thisMonth.isNotEmpty) ...[
-            _SectionHeader(title: 'This Month'),
-            ...grouped.thisMonth.map((notification) => NotificationItemWidget(
-                  notification: notification,
-                )),
+            const _SectionHeader(title: 'This Month'),
+            ...grouped.thisMonth.map(
+              (notification) => NotificationItemWidget(
+                notification: notification,
+              ),
+            ),
           ],
           if (grouped.older.isNotEmpty) ...[
-            _SectionHeader(title: 'Older'),
-            ...grouped.older.map((notification) => NotificationItemWidget(
-                  notification: notification,
-                )),
+            const _SectionHeader(title: 'Older'),
+            ...grouped.older.map(
+              (notification) => NotificationItemWidget(
+                notification: notification,
+              ),
+            ),
           ],
         ],
       ),
@@ -180,13 +200,24 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-      child: Text(
-        title,
-        style: context.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: AppColors.grey,
-        ),
+      padding: const EdgeInsets.fromLTRB(0, 20, 16, 16),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: context.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.grey600,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.only(left: 16),
+              height: 1,
+              color: AppColors.grey200,
+            ),
+          ),
+        ],
       ),
     );
   }

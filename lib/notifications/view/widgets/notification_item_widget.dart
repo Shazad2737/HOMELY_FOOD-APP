@@ -17,7 +17,21 @@ class NotificationItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: notification.isRead
+          ? null
+          : BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.black.withOpacity(0.08),
+                  blurRadius: 30,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -45,7 +59,7 @@ class NotificationItemWidget extends StatelessWidget {
                     Text(
                       notification.timeAgo,
                       style: context.textTheme.bodySmall?.copyWith(
-                        color: AppColors.grey,
+                        color: AppColors.grey600,
                       ),
                     ),
                   ],
@@ -56,10 +70,10 @@ class NotificationItemWidget extends StatelessWidget {
                   Text(
                     notification.description!,
                     style: context.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.grey,
+                      color: AppColors.grey600,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    // maxLines: 2,
+                    // overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ],
@@ -114,7 +128,7 @@ class NotificationItemWidget extends StatelessWidget {
         backgroundColor = Colors.orange.withOpacity(0.1);
       default:
         iconData = Icons.notifications_outlined;
-        backgroundColor = AppColors.grey.withOpacity(0.1);
+        backgroundColor = AppColors.grey600.withOpacity(0.1);
     }
 
     return Container(
@@ -129,10 +143,10 @@ class NotificationItemWidget extends StatelessWidget {
         color: backgroundColor == AppColors.primary.withOpacity(0.1)
             ? AppColors.primary
             : backgroundColor == Colors.green.withOpacity(0.1)
-                ? Colors.green
-                : backgroundColor == Colors.orange.withOpacity(0.1)
-                    ? Colors.orange
-                    : AppColors.grey,
+            ? Colors.green
+            : backgroundColor == Colors.orange.withOpacity(0.1)
+            ? Colors.orange
+            : AppColors.grey600,
       ),
     );
   }
