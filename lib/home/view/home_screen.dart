@@ -81,7 +81,7 @@ class _AppBarSection extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () {
-                // TODO: Navigate to notifications
+                context.router.pushNamed('/notifications');
               },
               style: IconButton.styleFrom(
                 foregroundColor: AppColors.appBarIcon,
