@@ -11,6 +11,9 @@ abstract class IInstaMessApi {
   /// Menu Repository
   IMenuRepository get menuRepository;
 
+  /// Notification Repository
+  INotificationRepository get notificationRepository;
+
   /// Session manager for authentication state
   ISessionManager get sessionManager;
 
@@ -57,6 +60,11 @@ class InstaMessApi implements IInstaMessApi {
       apiClient: _apiClient,
     );
 
+    // Create Notification repository
+    _notificationRepository = NotificationRepository(
+      apiClient: _apiClient,
+    );
+
     // Create User repository
     _userRepository = UserRepository(_apiClient);
   }
@@ -67,6 +75,7 @@ class InstaMessApi implements IInstaMessApi {
   late final IAuthFacade _authFacade;
   late final ICmsRepository _cmsRepository;
   late final IMenuRepository _menuRepository;
+  late final INotificationRepository _notificationRepository;
   late final IUserRepository _userRepository;
 
   /// {@macro auth_facade}
@@ -78,6 +87,9 @@ class InstaMessApi implements IInstaMessApi {
 
   @override
   IMenuRepository get menuRepository => _menuRepository;
+
+  @override
+  INotificationRepository get notificationRepository => _notificationRepository;
 
   @override
   ISessionManager get sessionManager => _sessionManager;
@@ -111,6 +123,10 @@ class MockInstaMessApi implements IInstaMessApi {
 
   @override
   IMenuRepository get menuRepository => throw UnimplementedError();
+
+  @override
+  INotificationRepository get notificationRepository =>
+      throw UnimplementedError();
 
   @override
   ISessionManager get sessionManager => _sessionManager;

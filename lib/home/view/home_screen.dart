@@ -7,6 +7,7 @@ import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/home/bloc/home_bloc.dart';
 import 'package:instamess_app/home/view/widgets/categories/categories_section.dart';
 import 'package:instamess_app/home/view/widgets/promo/promo.dart';
+import 'package:instamess_app/notifications/bloc/notifications_bloc.dart';
 import 'package:instamess_app/profile/bloc/profile_bloc.dart';
 import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
 
@@ -25,8 +26,24 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _HomeScreenContent extends StatelessWidget {
+class _HomeScreenContent extends StatefulWidget {
   const _HomeScreenContent();
+
+  @override
+  State<_HomeScreenContent> createState() => _HomeScreenContentState();
+}
+
+class _HomeScreenContentState extends State<_HomeScreenContent>
+    with AutoRouteAwareStateMixin<_HomeScreenContent> {
+  @override
+  void didChangeTabRoute(TabPageRoute previousRoute) {
+    super.didChangeTabRoute(previousRoute);
+    // When home tab becomes visible, trigger smart refresh
+    // This ensures fresh notifications when switching tabs
+    if (mounted) {
+      context.read<NotificationsBloc>().add(NotificationsSmartRefreshedEvent());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,15 +77,15 @@ class _AppBarSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homePageData = state.homePageData;
-    final hasUnreadNotifications =
-        homePageData?.hasUnreadNotifications ?? false;
-
     // Get user name from ProfileBloc
     final profileState = context.watch<ProfileBloc>().state;
     final userName = profileState.displayName;
     // Extract first name
     final firstName = userName.split(' ').first;
+
+    // Get notification badge state from NotificationsBloc
+    final notificationsState = context.watch<NotificationsBloc>().state;
+    final hasUnreadNotifications = notificationsState.hasUnreadNotifications;
 
     return SliverAppBar(
       automaticallyImplyLeading: false,
@@ -81,7 +98,7 @@ class _AppBarSection extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () {
-                // TODO: Navigate to notifications
+                context.router.pushNamed('/notifications');
               },
               style: IconButton.styleFrom(
                 foregroundColor: AppColors.appBarIcon,

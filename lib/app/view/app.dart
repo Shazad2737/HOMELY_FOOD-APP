@@ -72,6 +72,9 @@ class _AppState extends State<App> {
           create: (context) => widget.api.menuRepository,
         ),
         RepositoryProvider(
+          create: (context) => widget.api.notificationRepository,
+        ),
+        RepositoryProvider(
           create: (context) => widget.api.userRepository,
         ),
       ],
