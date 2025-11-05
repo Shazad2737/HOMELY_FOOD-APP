@@ -24,61 +24,69 @@ class AddressFormScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        // Listener for create operations
-        BlocListener<AddressesBloc, AddressesState>(
-          listenWhen: (previous, current) =>
-              previous.createState != current.createState,
-          listener: (context, state) {
-            state.createState.maybeMap(
-              orElse: () {},
-              success: (_) {
-                AppSnackbar.showSuccessSnackbar(
-                  context,
-                  content: 'Address created successfully',
-                );
-                context.router.maybePop();
-              },
-              failure: (failure) {
-                AppSnackbar.showErrorSnackbar(
-                  context,
-                  content: failure.failure.message,
-                );
-              },
-            );
-          },
-        ),
-        // Listener for update operations
-        BlocListener<AddressesBloc, AddressesState>(
-          listenWhen: (previous, current) =>
-              previous.updateState != current.updateState,
-          listener: (context, state) {
-            state.updateState.maybeMap(
-              orElse: () {},
-              success: (_) {
-                AppSnackbar.showSuccessSnackbar(
-                  context,
-                  content: 'Address updated successfully',
-                );
-                context.router.maybePop();
-              },
-              failure: (failure) {
-                AppSnackbar.showErrorSnackbar(
-                  context,
-                  content: failure.failure.message,
-                );
-              },
-            );
-          },
-        ),
-      ],
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(isEditing ? 'Edit Address' : 'Add Address'),
-        ),
-        body: SafeArea(
-          child: AddressFormView(addressesBloc: context.read<AddressesBloc>()),
+    return BlocProvider<AddressFormBloc>(
+      create: (context) => AddressFormBloc(
+        cmsRepository: context.read<ICmsRepository>(),
+        address: address,
+      )..add(const AddressFormLoadedEvent()),
+      child: MultiBlocListener(
+        listeners: [
+          // Listener for create operations
+          BlocListener<AddressesBloc, AddressesState>(
+            listenWhen: (previous, current) =>
+                previous.createState != current.createState,
+            listener: (context, state) {
+              state.createState.maybeMap(
+                orElse: () {},
+                success: (_) {
+                  AppSnackbar.showSuccessSnackbar(
+                    context,
+                    content: 'Address created successfully',
+                  );
+                  context.router.maybePop();
+                },
+                failure: (failure) {
+                  AppSnackbar.showErrorSnackbar(
+                    context,
+                    content: failure.failure.message,
+                  );
+                },
+              );
+            },
+          ),
+          // Listener for update operations
+          BlocListener<AddressesBloc, AddressesState>(
+            listenWhen: (previous, current) =>
+                previous.updateState != current.updateState,
+            listener: (context, state) {
+              state.updateState.maybeMap(
+                orElse: () {},
+                success: (_) {
+                  AppSnackbar.showSuccessSnackbar(
+                    context,
+                    content: 'Address updated successfully',
+                  );
+                  context.router.maybePop();
+                },
+                failure: (failure) {
+                  AppSnackbar.showErrorSnackbar(
+                    context,
+                    content: failure.failure.message,
+                  );
+                },
+              );
+            },
+          ),
+        ],
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(isEditing ? 'Edit Address' : 'Add Address'),
+          ),
+          body: SafeArea(
+            child: AddressFormView(
+              addressesBloc: context.read<AddressesBloc>(),
+            ),
+          ),
         ),
       ),
     );
