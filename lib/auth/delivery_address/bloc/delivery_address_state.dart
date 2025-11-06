@@ -1,56 +1,47 @@
 part of 'delivery_address_bloc.dart';
 
 @immutable
-class DeliveryAddressState {
-  const DeliveryAddressState({
-    required this.locationId,
-    required this.area,
-    required this.name,
-    required this.deliveryType,
-    required this.roomNumber,
-    required this.buildingName,
-    required this.zipCode,
-    required this.country,
-    required this.phoneNumber,
-    required this.locations,
-    required this.areas,
-    required this.isLoadingLocations,
-    required this.isLoadingAreas,
-    required this.showErrorMessages,
+class DeliveryAddressState with FormzMixin {
+  DeliveryAddressState({
     required this.signupState,
+    RequiredString? locationId,
+    RequiredString? area,
+    Name? name,
+    this.deliveryType = 'HOME',
+    this.roomNumber = '',
+    this.buildingName = '',
+    this.zipCode = '',
+    this.country = '',
+    Phone? phone,
+    List<Location>? locations,
+    List<Area>? areas,
+    this.isLoadingLocations = false,
+    this.isLoadingAreas = false,
+    this.showErrorMessages = false,
     this.locationLoadError,
     this.areaLoadError,
-  });
+  }) : locationId = locationId ?? RequiredString.pure(),
+       area = area ?? RequiredString.pure(),
+       name = name ?? Name.pure(),
+       phone = phone ?? Phone.pure(),
+       locations = locations ?? const [],
+       areas = areas ?? const [];
 
   factory DeliveryAddressState.initial() {
     return DeliveryAddressState(
-      locationId: '',
-      area: '',
-      name: '',
-      deliveryType: 'HOME',
-      roomNumber: '',
-      buildingName: '',
-      zipCode: '',
-      country: '',
-      phoneNumber: '',
-      locations: const [],
-      areas: const [],
-      isLoadingLocations: false,
-      isLoadingAreas: false,
-      showErrorMessages: false,
       signupState: DataState.initial(),
     );
   }
 
-  final String locationId;
-  final String area;
-  final String name;
+  final RequiredString locationId;
+  final RequiredString area;
+  final Name name;
   final String deliveryType;
   final String roomNumber;
   final String buildingName;
   final String zipCode;
   final String country;
-  final String phoneNumber;
+  final Phone phone;
   final List<Location> locations;
   final List<Area> areas;
   final bool isLoadingLocations;
@@ -63,16 +54,23 @@ class DeliveryAddressState {
   bool get isSubmitting => signupState.isLoading;
   bool get hasLocationError => locationLoadError != null;
 
+  @override
+  List<FormzInput<dynamic, dynamic>> get inputs => [
+    locationId,
+    area,
+    name,
+  ];
+
   DeliveryAddressState copyWith({
-    String? locationId,
-    String? area,
-    String? name,
+    RequiredString? locationId,
+    RequiredString? area,
+    Name? name,
     String? deliveryType,
     String? roomNumber,
     String? buildingName,
     String? zipCode,
     String? country,
-    String? phoneNumber,
+    Phone? phone,
     List<Location>? locations,
     List<Area>? areas,
     bool? isLoadingLocations,
@@ -91,7 +89,7 @@ class DeliveryAddressState {
       buildingName: buildingName ?? this.buildingName,
       zipCode: zipCode ?? this.zipCode,
       country: country ?? this.country,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
+      phone: phone ?? this.phone,
       locations: locations ?? this.locations,
       areas: areas ?? this.areas,
       isLoadingLocations: isLoadingLocations ?? this.isLoadingLocations,
@@ -111,22 +109,22 @@ class DeliveryAddressState {
   String toString() =>
       '''
 DeliveryAddressState {
-locationId: $locationId,
-area: $area,
-name: $name,
+locationId: ${locationId.value},
+area: ${area.value},
+name: ${name.value},
 deliveryType: $deliveryType,
 roomNumber: $roomNumber,
 buildingName: $buildingName,
 zipCode: $zipCode,
 country: $country,
-phoneNumber: $phoneNumber,
+phoneNumber: ${phone.value},
 locations: ${locations.length} items,
 areas: ${areas.length} items,
 isLoadingLocations: $isLoadingLocations,
 isLoadingAreas: $isLoadingAreas,
 isSubmitting: $isSubmitting,
 showErrorMessages: $showErrorMessages,
-signupState: $signupState,
+
 locationLoadError: $locationLoadError,
 areaLoadError: $areaLoadError
 }

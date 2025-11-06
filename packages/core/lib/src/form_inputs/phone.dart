@@ -16,7 +16,7 @@ extension PhoneValidationErrorX on PhoneValidationError {
       case PhoneValidationError.empty:
         return 'Phone number is required';
       case PhoneValidationError.invalid:
-        return 'Please enter a valid UAE phone number (e.g., 0501234567)';
+        return 'Please enter a valid phone number';
     }
   }
 }

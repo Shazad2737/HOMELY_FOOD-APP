@@ -1,7 +1,11 @@
 import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_app/auth/bloc/auth_bloc.dart';
+import 'package:instamess_app/auth/signup/bloc/signup_bloc.dart';
+import 'package:instamess_app/auth/signup/view/signup_screen.dart';
 import 'package:instamess_app/router/guards/auth_guard.dart';
 import 'package:instamess_app/router/router.gr.dart';
 

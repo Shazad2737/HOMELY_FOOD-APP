@@ -52,7 +52,8 @@ class ErrorMapper {
         case >= 500:
           return UnknownApiFailure(
             statusCode,
-            'Server error occurred. Please try again later.',
+            _safeParseErrorMessage(responseData) ??
+                'Server error occurred. Please try again later.',
             apiErrorMessage: _safeParseErrorMessage(responseData),
           );
         default:

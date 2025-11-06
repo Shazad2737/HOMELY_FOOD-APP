@@ -57,6 +57,9 @@ class _PromoCarouselState extends State<PromoCarousel> {
             autoPlayInterval: widget.autoPlayInterval,
             enableInfiniteScroll: widget.enableInfiniteScroll,
             viewportFraction: widget.viewportFraction,
+            scrollPhysics: widget.banners.length > 1
+                ? const BouncingScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
             onPageChanged: (int index, CarouselPageChangedReason reason) {
               setState(() {
                 _currentIndex = index;
@@ -91,36 +94,37 @@ class _PromoCarouselState extends State<PromoCarousel> {
             );
           }).toList(),
         ),
-        if (widget.showPageIndicatorInside)
-          Positioned(
-            bottom: 12,
-            child: AnimatedSmoothIndicator(
-              activeIndex: _currentIndex,
-              count: widget.banners.length,
-              effect: const WormEffect(
-                dotHeight: 8,
-                dotWidth: 8,
-                dotColor: AppColors.white,
-                activeDotColor: AppColors.grey800,
+        if (widget.banners.length > 1)
+          if (widget.showPageIndicatorInside)
+            Positioned(
+              bottom: 12,
+              child: AnimatedSmoothIndicator(
+                activeIndex: _currentIndex,
+                count: widget.banners.length,
+                effect: const WormEffect(
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  dotColor: AppColors.white,
+                  activeDotColor: AppColors.grey800,
+                ),
+                onDotClicked: _carouselController.animateToPage,
               ),
-              onDotClicked: _carouselController.animateToPage,
-            ),
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 8),
-            child: AnimatedSmoothIndicator(
-              activeIndex: _currentIndex,
-              count: widget.banners.length,
-              effect: const WormEffect(
-                dotHeight: 8,
-                dotWidth: 8,
-                dotColor: AppColors.white,
-                activeDotColor: AppColors.grey800,
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 8),
+              child: AnimatedSmoothIndicator(
+                activeIndex: _currentIndex,
+                count: widget.banners.length,
+                effect: const WormEffect(
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  dotColor: AppColors.white,
+                  activeDotColor: AppColors.grey800,
+                ),
+                onDotClicked: _carouselController.animateToPage,
               ),
-              onDotClicked: _carouselController.animateToPage,
             ),
-          ),
       ],
     );
   }

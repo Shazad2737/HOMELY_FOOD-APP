@@ -9,6 +9,8 @@ import 'package:instamess_app/auth/models/auth_error_classifier.dart';
 import 'package:instamess_app/auth/models/validation_error_groups.dart';
 import 'package:instamess_app/auth/signup/bloc/signup_bloc.dart';
 import 'package:instamess_app/router/router.gr.dart';
+import 'package:formz/formz.dart';
+import 'package:core/form_inputs.dart';
 
 @RoutePage()
 class DeliveryAddressPage extends StatelessWidget {
@@ -18,19 +20,36 @@ class DeliveryAddressPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // If a DeliveryAddressBloc is already provided higher in the tree (e.g., by SignupPage),
+    // reuse it. Otherwise create a new instance here.
+    DeliveryAddressBloc? existingBloc;
+    try {
+      existingBloc = context.read<DeliveryAddressBloc>();
+    } catch (_) {
+      existingBloc = null;
+    }
+
+    final scaffold = Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: _MobileWidget(
+          phone: context.read<SignupBloc>().state.phone.value,
+        ),
+      ),
+    );
+
+    if (existingBloc != null) {
+      // Reuse existing bloc
+      return scaffold;
+    }
+
+    // No existing bloc found — create one local to this page
     return BlocProvider(
       create: (context) => DeliveryAddressBloc(
         cmsRepository: context.read<ICmsRepository>(),
         authFacade: context.read<IAuthFacade>(),
       )..add(DeliveryAddressLoadedEvent()),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: _MobileWidget(
-            phone: context.read<SignupBloc>().state.phone.value,
-          ),
-        ),
-      ),
+      child: scaffold,
     );
   }
 }
@@ -63,37 +82,37 @@ class _MobileWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          Expanded(
+          const Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.appRed,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'We offer Best Food in the Word',
-                          style: context.tsTitleMedium18.bold.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Lorem ipsam lorem ipsam',
-                          style: context.tsBodyMedium14.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const _DeliveryAddressForm(),
+                  // Container(
+                  //   padding: const EdgeInsets.all(20),
+                  //   decoration: BoxDecoration(
+                  //     color: AppColors.appRed,
+                  //     borderRadius: BorderRadius.circular(12),
+                  //   ),
+                  //   child: Column(
+                  //     children: [
+                  //       Text(
+                  //         'We offer Best Food in the Word',
+                  //         style: context.tsTitleMedium18.bold.copyWith(
+                  //           color: Colors.white,
+                  //         ),
+                  //       ),
+                  //       const SizedBox(height: 4),
+                  //       Text(
+                  //         'Lorem ipsam lorem ipsam',
+                  //         style: context.tsBodyMedium14.copyWith(
+                  //           color: Colors.white.withOpacity(0.9),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 24),
+                  _DeliveryAddressForm(),
                 ],
               ),
             ),
@@ -119,6 +138,8 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
     return BlocBuilder<DeliveryAddressBloc, DeliveryAddressState>(
       builder: (context, state) {
         return Form(
+          // Re-run validators on user interaction so errors clear as soon as user fixes fields
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,22 +214,28 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                     );
                   }).toList();
                 },
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Select Location',
-                  contentPadding: EdgeInsets.symmetric(
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
+                  // Show validation error coming from Formz/BLoC when appropriate
+                  errorText:
+                      state.showErrorMessages && state.locationId.error != null
+                      ? state.locationId.error!.message
+                      : null,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Location ID (emirate) is required';
+                    return 'Location ID is required';
                   }
                   return null;
                 },
-                initialValue: state.locationId.isEmpty
+                // Validation is handled by Formz in the bloc state.
+                initialValue: state.locationId.value.isEmpty
                     ? null
-                    : state.locationId,
+                    : state.locationId.value,
                 items: state.locations.map((location) {
                   return DropdownMenuItem(
                     value: location.id,
@@ -222,8 +249,88 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                           context.read<DeliveryAddressBloc>().add(
                             DeliveryAddressLocationChangedEvent(value),
                           );
+
+                          // Re-validate the form immediately so any 'location required' error clears
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _formKey.currentState?.validate();
+                          });
                         }
                       },
+              ),
+              const SizedBox(height: 8),
+              // Inline feedback about areas being dependent on selected location
+              Builder(
+                builder: (context) {
+                  // Resolve selected location name if available
+                  String? selectedLocationName;
+                  if (state.locationId.value.isNotEmpty) {
+                    try {
+                      selectedLocationName = state.locations
+                          .firstWhere((l) => l.id == state.locationId.value)
+                          .name;
+                    } catch (_) {
+                      selectedLocationName = null;
+                    }
+                  }
+
+                  if (state.locationId.value.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        'Select a location above to load its areas.',
+                        style: context.tsBodySmall12.copyWith(
+                          color: AppColors.grey600,
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (state.isLoadingAreas) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Loading areas${selectedLocationName != null ? ' for $selectedLocationName' : ''}...',
+                              style: context.tsBodySmall12.copyWith(
+                                color: AppColors.grey600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (state.areas.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        'No areas found for ${selectedLocationName ?? 'this location'}.',
+                        style: context.tsBodySmall12.copyWith(
+                          color: AppColors.grey600,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 8),
+                    child: Text(
+                      'Select an area from the list below.',
+                      style: context.tsBodySmall12.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               Padding(
@@ -253,7 +360,12 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                   }).toList();
                 },
                 decoration: InputDecoration(
-                  hintText: 'Select Area',
+                  // Show dynamic hint depending on state
+                  hintText: state.locationId.value.isEmpty
+                      ? 'Select location first'
+                      : state.isLoadingAreas
+                      ? 'Loading areas...'
+                      : 'Select Area',
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
@@ -262,11 +374,11 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                   suffixIcon: state.areaLoadError != null
                       ? IconButton(
                           icon: const Icon(Icons.refresh, size: 20),
-                          onPressed: state.locationId.isNotEmpty
+                          onPressed: state.locationId.value.isNotEmpty
                               ? () {
                                   context.read<DeliveryAddressBloc>().add(
                                     DeliveryAddressLocationChangedEvent(
-                                      state.locationId,
+                                      state.locationId.value,
                                     ),
                                   );
                                 }
@@ -280,20 +392,30 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                   }
                   return null;
                 },
-                initialValue: state.area.isEmpty ? null : state.area,
+                initialValue: state.area.value.isEmpty
+                    ? null
+                    : state.area.value,
                 items: state.areas.map((area) {
                   return DropdownMenuItem(
                     value: area.id,
                     child: Text(area.name),
                   );
                 }).toList(),
-                onChanged: state.isLoadingAreas
+                // Disable selection while loading areas or when no location selected
+                onChanged:
+                    state.isLoadingAreas || state.locationId.value.isEmpty
                     ? null
                     : (value) {
                         if (value != null) {
                           context.read<DeliveryAddressBloc>().add(
                             DeliveryAddressAreaChangedEvent(value),
                           );
+
+                          // Re-validate the form immediately so the required-area error clears
+                          // (useful when users fix a validation error by selecting an area)
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _formKey.currentState?.validate();
+                          });
                         }
                       },
               ),
@@ -306,20 +428,17 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                 ),
               ),
               TextFormField(
-                decoration: const InputDecoration(
+                initialValue: state.name.value,
+                decoration: InputDecoration(
                   hintText: 'Enter Name',
-                  contentPadding: EdgeInsets.symmetric(
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
+                  errorText: state.showErrorMessages && state.name.error != null
+                      ? state.name.error!.message
+                      : null,
                 ),
-                initialValue: state.name,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Location name is required';
-                  }
-                  return null;
-                },
                 onChanged: (value) => context.read<DeliveryAddressBloc>().add(
                   DeliveryAddressNameChangedEvent(value),
                 ),
@@ -466,24 +585,19 @@ class _DeliveryAddressFormState extends State<_DeliveryAddressForm> {
                 ),
               ),
               TextFormField(
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Enter Number',
-                  contentPadding: EdgeInsets.symmetric(
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
+                  errorText:
+                      state.showErrorMessages && state.phone.error != null
+                      ? state.phone.error!.message
+                      : null,
                 ),
-                validator: (value) {
-                  // Mobile is optional, but when provided must match E.164-like pattern
-                  if (value == null || value.trim().isEmpty) return null;
-                  final pattern = RegExp(r'^\+?[1-9]\d{1,14}$');
-                  if (!pattern.hasMatch(value.trim())) {
-                    return 'Invalid mobile number format';
-                  }
-                  return null;
-                },
                 keyboardType: TextInputType.phone,
-                initialValue: state.phoneNumber,
+                initialValue: state.phone.value,
                 onChanged: (value) => context.read<DeliveryAddressBloc>().add(
                   DeliveryAddressPhoneNumberChangedEvent(value),
                 ),

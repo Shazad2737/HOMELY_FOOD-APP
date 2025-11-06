@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bloc/bloc.dart';
 import 'package:core/core.dart';
+import 'package:formz/formz.dart';
+import 'package:core/form_inputs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:instamess_api/instamess_api.dart';
 
@@ -85,8 +87,8 @@ class DeliveryAddressBloc
   ) async {
     emit(
       state.copyWith(
-        locationId: event.locationId,
-        area: '', // Reset area when location changes
+        locationId: RequiredString.dirty(event.locationId),
+        area: RequiredString.pure(), // Reset area when location changes
         areas: [], // Clear areas list
         isLoadingAreas: true,
         areaLoadError: () => null,
@@ -121,14 +123,14 @@ class DeliveryAddressBloc
     DeliveryAddressAreaChangedEvent event,
     Emitter<DeliveryAddressState> emit,
   ) {
-    emit(state.copyWith(area: event.area));
+    emit(state.copyWith(area: RequiredString.dirty(event.area)));
   }
 
   void _onNameChangedEvent(
     DeliveryAddressNameChangedEvent event,
     Emitter<DeliveryAddressState> emit,
   ) {
-    emit(state.copyWith(name: event.name));
+    emit(state.copyWith(name: Name.dirty(event.name)));
   }
 
   void _onDeliveryTypeChangedEvent(
@@ -170,36 +172,42 @@ class DeliveryAddressBloc
     DeliveryAddressPhoneNumberChangedEvent event,
     Emitter<DeliveryAddressState> emit,
   ) {
-    emit(state.copyWith(phoneNumber: event.phoneNumber));
+    emit(state.copyWith(phone: Phone.dirty(event.phoneNumber)));
   }
 
   Future<void> _onSubmitEvent(
     DeliveryAddressSubmittedEvent event,
     Emitter<DeliveryAddressState> emit,
   ) async {
+    // Validate form inputs before submitting
+    if (!state.isValid) {
+      emit(state.copyWith(showErrorMessages: true));
+      return;
+    }
+
     emit(
       state.copyWith(signupState: DataState.loading()),
     );
 
     // Find the selected location to get its countryId
     final selectedLocation = state.locations.firstWhere(
-      (loc) => loc.id == state.locationId,
+      (loc) => loc.id == state.locationId.value,
       orElse: () => state.locations.first,
     );
 
     // Create location input from form data
     final locationInput = SignupLocationInput(
       type: state.deliveryType,
-      name: state.name,
+      name: state.name.value,
       roomNumber: state.roomNumber,
       buildingName: state.buildingName,
       zipCode: state.zipCode,
-      mobile: state.phoneNumber,
+      mobile: state.phone.value,
       latitude: '', // Keep empty as specified
       longitude: '', // Keep empty as specified
       countryId: selectedLocation.countryId ?? '',
-      locationId: state.locationId,
-      areaId: state.area,
+      locationId: state.locationId.value,
+      areaId: state.area.value,
       isDefault: true,
     );
 

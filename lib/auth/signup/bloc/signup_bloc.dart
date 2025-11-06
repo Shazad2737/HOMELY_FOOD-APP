@@ -38,7 +38,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     Emitter<SignupState> emit,
   ) {
     final name = Name.dirty(event.name);
-    emit(state.copyWith(name: name));
+    emit(state.copyWith(name: name, signupState: DataState.initial()));
   }
 
   void _onPhoneChangedEvent(
@@ -46,7 +46,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     Emitter<SignupState> emit,
   ) {
     final phone = Phone.dirty(event.phone);
-    emit(state.copyWith(phone: phone));
+    emit(state.copyWith(phone: phone, signupState: DataState.initial()));
   }
 
   void _onPasswordChangedEvent(
@@ -62,6 +62,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       state.copyWith(
         password: password,
         confirmPassword: confirmPassword,
+        signupState: DataState.initial(),
       ),
     );
   }
@@ -74,7 +75,12 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       password: state.password.value,
       value: event.confirmPassword,
     );
-    emit(state.copyWith(confirmPassword: confirmPassword));
+    emit(
+      state.copyWith(
+        confirmPassword: confirmPassword,
+        signupState: DataState.initial(),
+      ),
+    );
   }
 
   Future<void> _onSubmitEvent(
@@ -84,6 +90,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     // Mark all fields as "dirty" to show validation errors
     emit(
       state.copyWith(
+        signupState: DataState.initial(),
         name: Name.dirty(state.name.value),
         phone: Phone.dirty(state.phone.value),
         password: Password.dirty(state.password.value),

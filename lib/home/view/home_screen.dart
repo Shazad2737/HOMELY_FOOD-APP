@@ -9,6 +9,7 @@ import 'package:instamess_app/home/view/widgets/categories/categories_section.da
 import 'package:instamess_app/home/view/widgets/promo/promo.dart';
 import 'package:instamess_app/notifications/bloc/notifications_bloc.dart';
 import 'package:instamess_app/profile/bloc/profile_bloc.dart';
+import 'package:instamess_app/profile/bloc/profile_event.dart';
 import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
 
 @RoutePage()
@@ -169,6 +170,10 @@ class _ErrorContent extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 context.read<HomeBloc>().add(HomeLoadedEvent());
+                context.read<NotificationsBloc>().add(
+                  NotificationsSmartRefreshedEvent(),
+                );
+                context.read<ProfileBloc>().add(const ProfileLoadedEvent());
               },
               child: const Text('Retry'),
             ),
@@ -232,7 +237,7 @@ class _SuccessContent extends StatelessWidget {
             // Middle promo row (safe layout + presence checks)
             if (middleBanner1.isNotEmpty || middleBanner2.isNotEmpty) ...[
               SizedBox(
-                height: 120,
+                height: 170,
                 child: Row(
                   children: [
                     if (middleBanner1.isNotEmpty)
@@ -318,7 +323,6 @@ class _SuccessContent extends StatelessWidget {
               PromoCarousel(
                 banners: bottomBanners,
                 showPageIndicatorInside: true,
-                height: 140,
               ),
             ],
           ],
