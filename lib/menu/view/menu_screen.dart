@@ -44,6 +44,8 @@ class _MenuViewState extends State<MenuView>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  String? _lastCategoryId;
 
   @override
   void initState() {
@@ -64,12 +66,24 @@ class _MenuViewState extends State<MenuView>
         MenuSearchQueryChangedEvent(query: _searchController.text),
       );
     });
+
+    _scrollController.addListener(() {
+      final shouldShowImage = _scrollController.offset <= 90;
+      if (shouldShowImage != _showScaffoldImage) {
+        setState(() {
+          _showScaffoldImage = shouldShowImage;
+        });
+      }
+    });
   }
+
+  bool _showScaffoldImage = true;
 
   @override
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -111,6 +125,7 @@ class _MenuViewState extends State<MenuView>
     return SafeArea(
       top: false,
       child: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           _buildHeader(context),
           const SliverFillRemaining(
@@ -129,6 +144,7 @@ class _MenuViewState extends State<MenuView>
     return SafeArea(
       top: false,
       child: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           _buildHeader(context),
           const SliverFillRemaining(
@@ -150,29 +166,59 @@ class _MenuViewState extends State<MenuView>
     final bloc = context.read<MenuBloc>();
     final state = bloc.state;
     final items = state.filteredItems;
+    final selectedCategoryId = state.selectedCategory?.id ?? 'default';
 
-    return SafeArea(
-      top: false,
-      child: RefreshIndicator(
-        onRefresh: () async {
-          bloc.add(MenuRefreshedEvent());
-          await bloc.stream.firstWhere((s) => !s.isRefreshing && !s.isLoading);
-        },
-        child: CustomScrollView(
-          slivers: [
-            _buildHeader(context),
-            _buildCategorySelector(context),
-            _buildPlanSelector(context, menuData),
-            _buildTabBar(context, menuData),
-            _buildSearchBar(context),
+    // Reset scroll position when category changes
+    if (_lastCategoryId != null && _lastCategoryId != selectedCategoryId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(0);
+        }
+      });
+    }
+    _lastCategoryId = selectedCategoryId;
 
-            if (items.isEmpty)
-              _buildEmptyResultsSliver(context)
-            else
-              _buildFoodItemsList(context, items),
-          ],
+    return Stack(
+      children: [
+        Positioned(
+          // top: -MediaQuery.of(context).padding.top,
+          left: 0,
+          right: 0,
+          child: _showScaffoldImage
+              ? Image(
+                  image: appImages.menuHeader.provider(),
+                  fit: BoxFit.cover,
+                )
+              : const SizedBox(),
         ),
-      ),
+        SafeArea(
+          // top: false,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              bloc.add(MenuRefreshedEvent());
+              await bloc.stream.firstWhere(
+                (s) => !s.isRefreshing && !s.isLoading,
+              );
+            },
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                _buildHeader(context),
+                _buildCategorySelector(context),
+                _buildPlanSelector(context, menuData),
+                _buildTabBar(context, menuData),
+                _buildSearchBar(context),
+
+                if (items.isEmpty)
+                  _buildEmptyResultsSliver(context)
+                else
+                  _buildFoodItemsList(context, items),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -180,6 +226,7 @@ class _MenuViewState extends State<MenuView>
     return SafeArea(
       top: false,
       child: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           _buildHeader(context),
           SliverFillRemaining(
@@ -433,16 +480,112 @@ class _MenuViewState extends State<MenuView>
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final isLast = index == items.length - 1;
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: isLast ? 8 : 16,
-              ),
-              child: MenuFoodCard(
-                foodItem: items[index],
-              ),
+            return _AnimatedFoodCard(
+              key: ValueKey('food_${items[index].id}'),
+              index: index,
+              isLast: isLast,
+              foodItem: items[index],
             );
           },
           childCount: items.length,
+        ),
+      ),
+    );
+  }
+}
+
+/// Animated wrapper for food cards with staggered fade-in effect
+class _AnimatedFoodCard extends StatefulWidget {
+  const _AnimatedFoodCard({
+    required this.index,
+    required this.isLast,
+    required this.foodItem,
+    super.key,
+  });
+
+  final int index;
+  final bool isLast;
+  final FoodItem foodItem;
+
+  @override
+  State<_AnimatedFoodCard> createState() => _AnimatedFoodCardState();
+}
+
+class _AnimatedFoodCardState extends State<_AnimatedFoodCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    // Stagger the animation based on index (max 50ms delay per item)
+    final delay = (widget.index * 50).clamp(0, 300);
+
+    _fadeAnimation =
+        Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Interval(
+              delay / 700, // Convert delay to fraction of total animation
+              1,
+              curve: Curves.easeOut,
+            ),
+          ),
+        );
+
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, 0.1),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Interval(
+              delay / 700,
+              1,
+              curve: Curves.easeOutCubic,
+            ),
+          ),
+        );
+
+    // Start animation after a frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _controller.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: widget.isLast ? 8 : 16,
+          ),
+          child: MenuFoodCard(
+            foodItem: widget.foodItem,
+          ),
         ),
       ),
     );

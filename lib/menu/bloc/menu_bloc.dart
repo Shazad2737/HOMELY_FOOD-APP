@@ -93,12 +93,23 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
       return; // Same category, no-op
     }
 
-    emit(
-      state.copyWith(
-        selectedCategory: event.category,
-        menuState: DataState.loading(),
-      ),
-    );
+    // Use refreshing state if we have existing data to avoid jarring UI jumps
+    final currentState = state.menuState;
+    if (currentState is DataStateSuccess<MenuData>) {
+      emit(
+        state.copyWith(
+          selectedCategory: event.category,
+          menuState: DataState.refreshing(currentState.data),
+        ),
+      );
+    } else {
+      emit(
+        state.copyWith(
+          selectedCategory: event.category,
+          menuState: DataState.loading(),
+        ),
+      );
+    }
 
     await _fetchMenu(emit);
   }

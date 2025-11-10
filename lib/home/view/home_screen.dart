@@ -37,6 +37,12 @@ class _HomeScreenContent extends StatefulWidget {
 class _HomeScreenContentState extends State<_HomeScreenContent>
     with AutoRouteAwareStateMixin<_HomeScreenContent> {
   @override
+  void initState() {
+    context.read<ProfileBloc>().add(const ProfileLoadedEvent());
+    super.initState();
+  }
+
+  @override
   void didChangeTabRoute(TabPageRoute previousRoute) {
     super.didChangeTabRoute(previousRoute);
     // When home tab becomes visible, trigger smart refresh
@@ -54,6 +60,10 @@ class _HomeScreenContentState extends State<_HomeScreenContent>
           return RefreshIndicator(
             onRefresh: () async {
               context.read<HomeBloc>().add(HomeRefreshedEvent());
+              context.read<NotificationsBloc>().add(
+                NotificationsSmartRefreshedEvent(),
+              );
+              context.read<ProfileBloc>().add(const ProfileLoadedEvent());
               await context.read<HomeBloc>().stream.firstWhere(
                 (state) => !state.isRefreshing,
               );
