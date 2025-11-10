@@ -6,45 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_app/auth/signup/bloc/signup_bloc.dart';
 import 'package:instamess_app/router/router.gr.dart';
-import 'package:instamess_app/auth/delivery_address/bloc/delivery_address_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
 
 @RoutePage()
-class SignupPage extends StatefulWidget {
+class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
 
   @override
-  State<SignupPage> createState() => _SignupPageState();
-}
-
-class _SignupPageState extends State<SignupPage> {
-  DeliveryAddressBloc? _deliveryBloc;
-  var _initialized = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      // Create the DeliveryAddressBloc once and keep it alive while the signup flow is active
-      _deliveryBloc = DeliveryAddressBloc(
-        cmsRepository: context.read<ICmsRepository>(),
-        authFacade: context.read<IAuthFacade>(),
-      )..add(DeliveryAddressLoadedEvent());
-      _initialized = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    _deliveryBloc?.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Provide the delivery bloc to the signup subtree so the same instance is reused
-    return BlocProvider.value(
-      value: _deliveryBloc!,
+    return BlocProvider(
+      create: (context) => SignupBloc(
+        authFacade: context.read<IAuthFacade>(),
+      ),
       child: const Scaffold(
         body: SafeArea(
           child: _MobileWidget(),
@@ -182,9 +155,12 @@ class _SignupFormState extends State<_SignupForm> {
               content: failure.failure.message,
             );
           },
-          success: (_) {
+          success: (signupResponse) {
+            // Navigate to OTP screen with phone number
             context.router.push(
-              const DeliveryAddressRoute(),
+              OtpRoute(
+                phone: signupResponse.data.mobile,
+              ),
             );
           },
         );

@@ -6,8 +6,12 @@ import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
 import 'package:instamess_app/order_form/view/helpers/next_available_date_calculator.dart';
 import 'package:instamess_app/order_form/view/widgets/error_content_widget.dart';
+import 'package:instamess_app/order_form/view/widgets/no_address_screen.dart';
 import 'package:instamess_app/order_form/view/widgets/order_form_content/order_form_content_widget.dart';
 import 'package:instamess_app/order_form/view/widgets/widgets.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_bloc.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_event.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_state.dart';
 
 /// {@template order_form_screen}
 /// Screen for creating a new food order
@@ -19,11 +23,67 @@ class OrderFormScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Load addresses when order form screen is opened
+    context.read<AddressesBloc>().add(const AddressesLoadedEvent());
+
     return BlocProvider(
       create: (context) => OrderFormBloc(
         userRepository: context.read<IUserRepository>(),
       )..add(const OrderFormLoadedEvent()),
-      child: const OrderFormView(),
+      child: const _OrderFormGuard(),
+    );
+  }
+}
+
+/// {@template order_form_guard}
+/// Guard that checks if user has addresses before showing order form
+/// {@endtemplate}
+class _OrderFormGuard extends StatelessWidget {
+  /// {@macro order_form_guard}
+  const _OrderFormGuard();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AddressesBloc, AddressesState>(
+      builder: (context, addressesState) {
+        // Check if user has any addresses
+        final hasAddresses = addressesState.addressesState.maybeMap(
+          success: (s) => s.data.addresses.isNotEmpty,
+          refreshing: (r) => r.currentData.addresses.isNotEmpty,
+          orElse: () => false,
+        );
+
+        // Show loading while checking addresses
+        final isLoadingAddresses = addressesState.addressesState.maybeMap(
+          initial: (_) => true,
+          loading: (_) => true,
+          orElse: () => false,
+        );
+
+        if (isLoadingAddresses) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('New Order'),
+              centerTitle: false,
+            ),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // Block order form if user has no addresses
+        if (!hasAddresses) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('New Order'),
+              centerTitle: false,
+            ),
+            body: const NoAddressScreen(),
+          );
+        }
+
+        // User has addresses, show normal order form
+        return const OrderFormView();
+      },
     );
   }
 }

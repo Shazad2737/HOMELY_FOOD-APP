@@ -25,12 +25,13 @@ abstract class IAuthFacade {
   ///
   /// Returns [SignupResponse] if successful, otherwise [Failure]
   /// Note: This does not authenticate the user. OTP verification is required.
+  /// [locations] is optional - users can add delivery addresses later
   Future<Either<Failure, SignupResponse>> signUp({
     required String name,
     required String mobile,
     required String password,
     required String confirmPassword,
-    required List<SignupLocationInput> locations,
+    List<SignupLocationInput>? locations,
   });
 
   /// Signs out the current user.

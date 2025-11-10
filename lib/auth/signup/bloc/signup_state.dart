@@ -29,7 +29,7 @@ class SignupState with FormzMixin {
   final SignupLocationInput? location;
 
   final bool showErrorMessages;
-  final DataState<Unit> signupState;
+  final DataState<SignupResponse> signupState;
 
   bool get isSubmitting => signupState.isLoading;
 
@@ -48,7 +48,7 @@ class SignupState with FormzMixin {
     Password? password,
     ConfirmedPassword? confirmPassword,
     bool? showErrorMessages,
-    DataState<Unit>? signupState,
+    DataState<SignupResponse>? signupState,
     SignupLocationInput? location,
   }) {
     return SignupState(
