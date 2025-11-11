@@ -20,10 +20,10 @@ class SubscriptionCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: isSubscribed
-            ? AppColors.appOrange.withValues(alpha: 0.1)
+            ? AppColors.successLight.withValues(alpha: 0.1)
             : AppColors.textSecondary.withValues(alpha: 0.05),
         border: Border.all(
-          color: isSubscribed ? AppColors.appRed : AppColors.textSecondary,
+          color: isSubscribed ? AppColors.success : AppColors.textSecondary,
           width: 2,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -57,7 +57,7 @@ class SubscriptionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.appRed,
+                color: AppColors.success,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
