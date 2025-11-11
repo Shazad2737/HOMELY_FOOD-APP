@@ -79,10 +79,26 @@ class OrderFormView extends StatelessWidget {
           body: state.availableDaysState.map(
             initial: (_) => const Center(child: CircularProgressIndicator()),
             loading: (_) => const Center(child: CircularProgressIndicator()),
-            success: (s) => OrderFormContentWidget(state: state, data: s.data),
+            success: (s) => RefreshIndicator(
+              onRefresh: () async {
+                context.read<OrderFormBloc>().add(const OrderFormRefreshedEvent());
+                // Wait for the refresh to complete
+                await context.read<OrderFormBloc>().stream.firstWhere(
+                  (state) => !state.availableDaysState.isRefreshing,
+                );
+              },
+              child: OrderFormContentWidget(state: state, data: s.data),
+            ),
             failure: (f) => ErrorContentWidget(failure: f.failure),
-            refreshing: (r) =>
-                OrderFormContentWidget(state: state, data: r.currentData),
+            refreshing: (r) => RefreshIndicator(
+              onRefresh: () async {
+                // Already refreshing, just wait for completion
+                await context.read<OrderFormBloc>().stream.firstWhere(
+                  (state) => !state.availableDaysState.isRefreshing,
+                );
+              },
+              child: OrderFormContentWidget(state: state, data: r.currentData),
+            ),
           ),
           bottomNavigationBar: const BottomSubmitSection(),
         );

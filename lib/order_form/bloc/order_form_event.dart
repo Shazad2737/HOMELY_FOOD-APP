@@ -17,6 +17,12 @@ class OrderFormLoadedEvent extends OrderFormEvent {
   const OrderFormLoadedEvent();
 }
 
+/// Event when the order form is refreshed (pull to refresh)
+class OrderFormRefreshedEvent extends OrderFormEvent {
+  /// {@macro order_form_refreshed_event}
+  const OrderFormRefreshedEvent();
+}
+
 /// Event when a date is selected from the calendar
 class OrderFormDateSelectedEvent extends OrderFormEvent {
   /// {@macro order_form_date_selected_event}

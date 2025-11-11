@@ -26,6 +26,7 @@ class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
   }) : _userRepository = userRepository,
        super(OrderFormState.initial()) {
     on<OrderFormLoadedEvent>(_onLoaded);
+    on<OrderFormRefreshedEvent>(_onRefreshed);
     on<OrderFormDateSelectedEvent>(_onDateSelected);
     on<OrderFormDateClearRequestedEvent>(_onDateClearRequested);
     on<OrderFormDateClearedEvent>(_onDateCleared);
@@ -79,6 +80,14 @@ class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
         state.copyWith(availableDaysState: DataState.success(data)),
       ),
     );
+  }
+
+  Future<void> _onRefreshed(
+    OrderFormRefreshedEvent event,
+    Emitter<OrderFormState> emit,
+  ) async {
+    // Refresh logic is the same as loading
+    add(const OrderFormLoadedEvent());
   }
 
   void _onDateSelected(
