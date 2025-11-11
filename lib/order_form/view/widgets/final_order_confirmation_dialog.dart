@@ -109,7 +109,7 @@ class FinalOrderConfirmationDialog extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'This order cannot be modified or cancelled once confirmed.',
+                    'This order cannot be modified or cancelled once confirmed. For any changes, please contact customer support.',
                     style: context.textTheme.bodySmall?.copyWith(
                       color: AppColors.grey800,
                       fontWeight: FontWeight.w600,

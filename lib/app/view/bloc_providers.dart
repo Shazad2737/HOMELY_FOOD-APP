@@ -21,7 +21,7 @@ List<BlocProvider> getBlocProviders(
       create: (context) => LoginBloc(apiClient.authFacade),
     ),
     BlocProvider<SignupBloc>(
-      create: (context) => SignupBloc(),
+      create: (context) => SignupBloc(authFacade: apiClient.authFacade),
     ),
     // Provide a long-lived ProfileBloc at the app level so screens and
     // detail routes can access the same instance. This prevents Provider
