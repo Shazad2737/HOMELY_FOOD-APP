@@ -89,7 +89,7 @@ class MockAuthFacade implements IAuthFacade {
     required String mobile,
     required String password,
     required String confirmPassword,
-    required List<SignupLocationInput> locations,
+    List<SignupLocationInput>? locations,
   }) async {
     // simulate network delay
     await Future<void>.delayed(const Duration(milliseconds: 200));

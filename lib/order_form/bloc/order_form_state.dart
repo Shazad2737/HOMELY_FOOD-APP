@@ -169,6 +169,30 @@ class OrderFormState extends Equatable {
     }
   }
 
+  /// Get list of available but unselected meal types
+  List<MealType> get unselectedAvailableMealTypes {
+    if (selectedDate == null) return [];
+
+    final unselected = <MealType>[];
+
+    for (final mealType in MealType.values) {
+      // Check if meal type is available
+      if (isMealTypeAvailable(mealType)) {
+        // Check if it's not selected
+        final isSelected = mealSelections.containsKey(mealType) &&
+            mealSelections[mealType] != null;
+        if (!isSelected) {
+          unselected.add(mealType);
+        }
+      }
+    }
+
+    return unselected;
+  }
+
+  /// Whether user has unselected available meals
+  bool get hasUnselectedAvailableMeals => unselectedAvailableMealTypes.isNotEmpty;
+
   /// Get available locations
   List<DeliveryLocation> get availableLocations {
     return availableDaysState.maybeMap(

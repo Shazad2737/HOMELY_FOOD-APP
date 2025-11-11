@@ -8,8 +8,12 @@ import 'package:instamess_app/home/bloc/home_bloc.dart';
 import 'package:instamess_app/home/view/widgets/categories/categories_section.dart';
 import 'package:instamess_app/home/view/widgets/promo/promo.dart';
 import 'package:instamess_app/notifications/bloc/notifications_bloc.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_bloc.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_event.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_state.dart';
 import 'package:instamess_app/profile/bloc/profile_bloc.dart';
 import 'package:instamess_app/profile/bloc/profile_event.dart';
+import 'package:instamess_app/router/router.gr.dart';
 import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
 
 @RoutePage()
@@ -39,6 +43,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent>
   @override
   void initState() {
     context.read<ProfileBloc>().add(const ProfileLoadedEvent());
+    context.read<AddressesBloc>().add(const AddressesLoadedEvent());
     super.initState();
   }
 
@@ -71,6 +76,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent>
             child: CustomScrollView(
               slivers: [
                 _AppBarSection(state: state),
+                const _AddAddressBannerSection(),
                 _ContentSection(state: state),
               ],
             ),
@@ -374,6 +380,122 @@ class _EmptyContent extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Banner prompting users to add delivery address if they don't have one
+class _AddAddressBannerSection extends StatefulWidget {
+  const _AddAddressBannerSection();
+
+  @override
+  State<_AddAddressBannerSection> createState() =>
+      _AddAddressBannerSectionState();
+}
+
+class _AddAddressBannerSectionState extends State<_AddAddressBannerSection> {
+  bool _isDismissed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isDismissed) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    return BlocBuilder<AddressesBloc, AddressesState>(
+      builder: (context, addressesState) {
+        // Check if user has any addresses
+        final hasAddresses = addressesState.addressesState.maybeMap(
+          success: (s) => s.data.addresses.isNotEmpty,
+          refreshing: (r) => r.currentData.addresses.isNotEmpty,
+          orElse: () => true, // Don't show banner if loading or error
+        );
+
+        // Don't show banner if user has addresses
+        if (hasAddresses) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        return SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: AppDims.screenPadding,
+              vertical: 8,
+            ),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.location_on,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Add Delivery Address',
+                        style: context.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Add your address to start ordering meals',
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: AppColors.grey700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () {
+                    context.router.push(AddressFormRoute());
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                  ),
+                  child: const Text('Add Now'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: () {
+                    setState(() {
+                      _isDismissed = true;
+                    });
+                  },
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                  color: AppColors.grey600,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

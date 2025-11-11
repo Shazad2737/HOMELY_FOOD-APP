@@ -101,14 +101,15 @@ class AuthFacade implements IAuthFacade {
     required String mobile,
     required String password,
     required String confirmPassword,
-    required List<SignupLocationInput> locations,
+    List<SignupLocationInput>? locations,
   }) async {
     final body = {
       'name': name,
       'mobile': mobile,
       'password': password,
       'confirmPassword': confirmPassword,
-      'locations': locations.map((loc) => loc.toJson()).toList(),
+      if (locations != null && locations.isNotEmpty)
+        'locations': locations.map((loc) => loc.toJson()).toList(),
     };
 
     final resEither = await apiClient.post<Map<String, dynamic>>(

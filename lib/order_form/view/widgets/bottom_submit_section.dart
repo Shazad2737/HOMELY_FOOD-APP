@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
 import 'package:instamess_app/order_form/view/helpers/date_formatter.dart';
+import 'package:instamess_app/order_form/view/widgets/final_order_confirmation_dialog.dart';
+import 'package:instamess_app/order_form/view/widgets/unselected_meals_warning_dialog.dart';
 
 /// Bottom section with submit button
 class BottomSubmitSection extends StatelessWidget {
@@ -91,11 +93,7 @@ class BottomSubmitSection extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: canSubmit
-                        ? () {
-                            context.read<OrderFormBloc>().add(
-                              const OrderFormSubmittedEvent(),
-                            );
-                          }
+                        ? () => _handleSubmit(context, state)
                         : null,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -139,5 +137,56 @@ class BottomSubmitSection extends StatelessWidget {
   String _formatSelectedDate(String dateString) {
     final date = DateTime.parse(dateString);
     return OrderFormDateFormatter.formatOrderDate(date);
+  }
+
+  /// Handles submit button press with warning chain
+  void _handleSubmit(BuildContext context, OrderFormState state) {
+    // Check if there are unselected available meals
+    if (state.hasUnselectedAvailableMeals) {
+      // First warning: Show unselected meals warning
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => UnselectedMealsWarningDialog(
+          unselectedMeals: state.unselectedAvailableMealTypes,
+          onProceed: () {
+            // Close unselected meals dialog
+            Navigator.of(dialogContext).pop();
+            // Show final confirmation (second warning)
+            _showFinalConfirmation(context, state);
+          },
+          onCancel: () {
+            // Just close dialog, user stays on form
+            Navigator.of(dialogContext).pop();
+          },
+        ),
+      );
+    } else {
+      // No unselected meals, show final confirmation directly
+      _showFinalConfirmation(context, state);
+    }
+  }
+
+  /// Shows final confirmation dialog before submitting order
+  /// This is ALWAYS shown as the last step before submission
+  void _showFinalConfirmation(BuildContext context, OrderFormState state) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must make a choice
+      builder: (dialogContext) => FinalOrderConfirmationDialog(
+        state: state,
+        onConfirm: () {
+          // Close dialog
+          Navigator.of(dialogContext).pop();
+          // Actually submit the order
+          context.read<OrderFormBloc>().add(
+            const OrderFormSubmittedEvent(),
+          );
+        },
+        onCancel: () {
+          // Just close dialog, user stays on form
+          Navigator.of(dialogContext).pop();
+        },
+      ),
+    );
   }
 }

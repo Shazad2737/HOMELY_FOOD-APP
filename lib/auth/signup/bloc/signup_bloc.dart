@@ -12,7 +12,10 @@ part 'signup_event.dart';
 part 'signup_state.dart';
 
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
-  SignupBloc() : super(SignupState.initial()) {
+  SignupBloc({
+    required IAuthFacade authFacade,
+  })  : _authFacade = authFacade,
+        super(SignupState.initial()) {
     on<SignupEvent>((event, emit) async {
       switch (event) {
         case SignupNameChangedEvent():
@@ -32,6 +35,8 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       }
     });
   }
+
+  final IAuthFacade _authFacade;
 
   void _onNameChangedEvent(
     SignupNameChangedEvent event,
@@ -116,11 +121,32 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       return;
     }
 
-    // Form is valid, allow navigation
-    emit(
-      state.copyWith(
-        signupState: DataState.success(unit),
-      ),
+    // Form is valid, call signup API without address
+    emit(state.copyWith(signupState: DataState.loading()));
+
+    final result = await _authFacade.signUp(
+      name: state.name.value,
+      mobile: state.phone.value,
+      password: state.password.value,
+      confirmPassword: state.confirmPassword.value,
+      // No locations - users can add address later
+    );
+
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            signupState: DataState.failure(failure),
+          ),
+        );
+      },
+      (signupResponse) {
+        emit(
+          state.copyWith(
+            signupState: DataState.success(signupResponse),
+          ),
+        );
+      },
     );
   }
 
