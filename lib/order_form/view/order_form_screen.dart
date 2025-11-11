@@ -81,7 +81,9 @@ class OrderFormView extends StatelessWidget {
             loading: (_) => const Center(child: CircularProgressIndicator()),
             success: (s) => RefreshIndicator(
               onRefresh: () async {
-                context.read<OrderFormBloc>().add(const OrderFormRefreshedEvent());
+                context.read<OrderFormBloc>().add(
+                  const OrderFormRefreshedEvent(),
+                );
                 // Wait for the refresh to complete
                 await context.read<OrderFormBloc>().stream.firstWhere(
                   (state) => !state.availableDaysState.isRefreshing,
