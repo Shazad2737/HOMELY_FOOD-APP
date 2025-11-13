@@ -185,9 +185,11 @@ class _SignupFormState extends State<_SignupForm> {
                 decoration: InputDecoration(
                   hintText: 'Enter Name',
                   errorText:
-                      state.showErrorMessages && state.name.displayError != null
-                      ? state.name.displayError!.message
-                      : null,
+                      state.serverErrors['name'] ??
+                      (state.showErrorMessages &&
+                              state.name.displayError != null
+                          ? state.name.displayError!.message
+                          : null),
                 ),
                 initialValue: state.name.value,
                 onChanged: (value) => context.read<SignupBloc>().add(
@@ -213,10 +215,11 @@ class _SignupFormState extends State<_SignupForm> {
                 decoration: InputDecoration(
                   hintText: 'Enter Mobile Number',
                   errorText:
-                      state.showErrorMessages &&
-                          state.phone.displayError != null
-                      ? state.phone.displayError!.message
-                      : null,
+                      state.serverErrors['mobile'] ??
+                      (state.showErrorMessages &&
+                              state.phone.displayError != null
+                          ? state.phone.displayError!.message
+                          : null),
                 ),
               ),
               const Space(),
@@ -238,10 +241,11 @@ class _SignupFormState extends State<_SignupForm> {
                 },
                 hintText: 'Enter password',
                 errorText:
-                    state.showErrorMessages &&
-                        state.password.displayError != null
-                    ? state.password.displayError!.message
-                    : null,
+                    state.serverErrors['password'] ??
+                    (state.showErrorMessages &&
+                            state.password.displayError != null
+                        ? state.password.displayError!.message
+                        : null),
               ),
               const Space(),
               Padding(
@@ -262,10 +266,11 @@ class _SignupFormState extends State<_SignupForm> {
                 },
                 hintText: 'Enter Confirm password',
                 errorText:
-                    state.showErrorMessages &&
-                        state.confirmPassword.displayError != null
-                    ? state.confirmPassword.displayError!.message
-                    : null,
+                    state.serverErrors['confirmPassword'] ??
+                    (state.showErrorMessages &&
+                            state.confirmPassword.displayError != null
+                        ? state.confirmPassword.displayError!.message
+                        : null),
               ),
               const Space(3),
               SizedBox(

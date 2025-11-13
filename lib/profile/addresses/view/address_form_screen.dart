@@ -157,6 +157,7 @@ class _AddressFormViewState extends State<AddressFormView> {
                     ),
                     DropdownButtonFormField<String>(
                       initialValue: state.type,
+                      style: context.tsBodyMedium14,
                       decoration: const InputDecoration(
                         hintText: 'Select Type',
                       ),
@@ -189,9 +190,11 @@ class _AddressFormViewState extends State<AddressFormView> {
                       initialValue: state.locationId.isEmpty
                           ? null
                           : state.locationId,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Select Location',
+                        hintStyle: context.tsBodySmall12,
                       ),
+                      style: context.tsBodyMedium14,
                       items: state.locations.map((location) {
                         return DropdownMenuItem(
                           value: location.id,
@@ -222,6 +225,7 @@ class _AddressFormViewState extends State<AddressFormView> {
                     ),
                     DropdownButtonFormField<String>(
                       initialValue: state.areaId.isEmpty ? null : state.areaId,
+                      style: context.tsBodyMedium14,
                       decoration: InputDecoration(
                         hintText: 'Select Area',
                         errorText: state.areaLoadError,

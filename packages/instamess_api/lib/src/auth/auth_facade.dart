@@ -108,8 +108,8 @@ class AuthFacade implements IAuthFacade {
       'mobile': mobile,
       'password': password,
       'confirmPassword': confirmPassword,
-      if (locations != null && locations.isNotEmpty)
-        'locations': locations.map((loc) => loc.toJson()).toList(),
+      // if (locations != null && locations.isNotEmpty)
+      //   'locations': locations.map((loc) => loc.toJson()).toList(),
     };
 
     final resEither = await apiClient.post<Map<String, dynamic>>(
@@ -189,7 +189,8 @@ class AuthFacade implements IAuthFacade {
         if (body == null) {
           return left(
             AuthFailures.unknown(
-                'Unknown error occurred during OTP verification'),
+              'Unknown error occurred during OTP verification',
+            ),
           );
         }
 
@@ -202,7 +203,8 @@ class AuthFacade implements IAuthFacade {
           if (token == null) {
             return left(
               AuthFailures.unknown(
-                  'Token not found in OTP verification response'),
+                'Token not found in OTP verification response',
+              ),
             );
           }
 
@@ -227,7 +229,8 @@ class AuthFacade implements IAuthFacade {
           log('Error parsing OTP verification response: $e', stackTrace: s);
           return left(
             AuthFailures.unknown(
-                'Unknown error occurred during OTP verification'),
+              'Unknown error occurred during OTP verification',
+            ),
           );
         }
       },

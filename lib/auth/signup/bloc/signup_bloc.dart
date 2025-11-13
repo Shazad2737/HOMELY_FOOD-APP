@@ -14,8 +14,8 @@ part 'signup_state.dart';
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
   SignupBloc({
     required IAuthFacade authFacade,
-  })  : _authFacade = authFacade,
-        super(SignupState.initial()) {
+  }) : _authFacade = authFacade,
+       super(SignupState.initial()) {
     on<SignupEvent>((event, emit) async {
       switch (event) {
         case SignupNameChangedEvent():
@@ -43,7 +43,13 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     Emitter<SignupState> emit,
   ) {
     final name = Name.dirty(event.name);
-    emit(state.copyWith(name: name, signupState: DataState.initial()));
+    emit(
+      state.copyWith(
+        name: name,
+        signupState: DataState.initial(),
+        serverErrors: Map.from(state.serverErrors)..remove('name'),
+      ),
+    );
   }
 
   void _onPhoneChangedEvent(
@@ -51,7 +57,13 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     Emitter<SignupState> emit,
   ) {
     final phone = Phone.dirty(event.phone);
-    emit(state.copyWith(phone: phone, signupState: DataState.initial()));
+    emit(
+      state.copyWith(
+        phone: phone,
+        signupState: DataState.initial(),
+        serverErrors: Map.from(state.serverErrors)..remove('mobile'),
+      ),
+    );
   }
 
   void _onPasswordChangedEvent(
@@ -68,6 +80,9 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
         password: password,
         confirmPassword: confirmPassword,
         signupState: DataState.initial(),
+        serverErrors: Map.from(state.serverErrors)
+          ..remove('password')
+          ..remove('confirmPassword'),
       ),
     );
   }
@@ -84,6 +99,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       state.copyWith(
         confirmPassword: confirmPassword,
         signupState: DataState.initial(),
+        serverErrors: Map.from(state.serverErrors)..remove('confirmPassword'),
       ),
     );
   }
@@ -134,16 +150,56 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
 
     result.fold(
       (failure) {
-        emit(
-          state.copyWith(
-            signupState: DataState.failure(failure),
-          ),
-        );
+        if (failure is ApiValidationFailure) {
+          final serverErrors = <String, String>{};
+          const knownFields = {'name', 'mobile', 'password', 'confirmPassword'};
+          var hasUnknownErrors = false;
+
+          for (final error in failure.errors) {
+            if (knownFields.contains(error.field)) {
+              serverErrors[error.field] = error.message;
+            } else {
+              hasUnknownErrors = true;
+            }
+          }
+
+          if (hasUnknownErrors || serverErrors.isEmpty) {
+            // Show snackbar with detailed error messages
+            final errorMessages = failure.errors
+                .map((e) => '${e.field}: ${e.message}')
+                .join('\n');
+            emit(
+              state.copyWith(
+                signupState: DataState.failure(
+                  UnknownFailure(message: errorMessages),
+                ),
+                serverErrors: const {},
+              ),
+            );
+          } else {
+            // Show errors in form fields
+            emit(
+              state.copyWith(
+                serverErrors: serverErrors,
+                showErrorMessages: true,
+                signupState: DataState.initial(),
+              ),
+            );
+          }
+        } else {
+          emit(
+            state.copyWith(
+              signupState: DataState.failure(failure),
+              serverErrors: const {},
+            ),
+          );
+        }
       },
       (signupResponse) {
         emit(
           state.copyWith(
             signupState: DataState.success(signupResponse),
+            serverErrors: const {},
           ),
         );
       },

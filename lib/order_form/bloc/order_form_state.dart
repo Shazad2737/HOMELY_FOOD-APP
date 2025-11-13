@@ -179,7 +179,8 @@ class OrderFormState extends Equatable {
       // Check if meal type is available
       if (isMealTypeAvailable(mealType)) {
         // Check if it's not selected
-        final isSelected = mealSelections.containsKey(mealType) &&
+        final isSelected =
+            mealSelections.containsKey(mealType) &&
             mealSelections[mealType] != null;
         if (!isSelected) {
           unselected.add(mealType);
@@ -191,7 +192,8 @@ class OrderFormState extends Equatable {
   }
 
   /// Whether user has unselected available meals
-  bool get hasUnselectedAvailableMeals => unselectedAvailableMealTypes.isNotEmpty;
+  bool get hasUnselectedAvailableMeals =>
+      unselectedAvailableMealTypes.isNotEmpty;
 
   /// Get available locations
   List<DeliveryLocation> get availableLocations {
@@ -200,17 +202,6 @@ class OrderFormState extends Equatable {
       refreshing: (data) => data.currentData.locations,
       orElse: () => [],
     );
-  }
-
-  /// Calculate total amount from selected meals
-  double get totalAmount {
-    var total = 0.0;
-    for (final selection in mealSelections.values) {
-      if (selection != null) {
-        total += selection.food.price ?? 0.0;
-      }
-    }
-    return total;
   }
 
   /// Find a day by date

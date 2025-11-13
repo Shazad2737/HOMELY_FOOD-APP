@@ -10,6 +10,7 @@ class SignupState with FormzMixin {
     ConfirmedPassword? confirmPassword,
     this.showErrorMessages = false,
     this.location,
+    this.serverErrors = const <String, String>{},
   }) : name = name ?? Name.pure(),
        phone = phone ?? Phone.pure(),
        password = password ?? Password.pure(),
@@ -30,6 +31,7 @@ class SignupState with FormzMixin {
 
   final bool showErrorMessages;
   final DataState<SignupResponse> signupState;
+  final Map<String, String> serverErrors;
 
   bool get isSubmitting => signupState.isLoading;
 
@@ -50,6 +52,7 @@ class SignupState with FormzMixin {
     bool? showErrorMessages,
     DataState<SignupResponse>? signupState,
     SignupLocationInput? location,
+    Map<String, String>? serverErrors,
   }) {
     return SignupState(
       name: name ?? this.name,
@@ -59,6 +62,7 @@ class SignupState with FormzMixin {
       showErrorMessages: showErrorMessages ?? this.showErrorMessages,
       signupState: signupState ?? this.signupState,
       location: location,
+      serverErrors: serverErrors ?? this.serverErrors,
     );
   }
 
@@ -72,7 +76,8 @@ password: ${password.value},
 confirmPassword: ${confirmPassword.value},
 showErrorMessages: $showErrorMessages,
 isValid: $isValid,
-signupState: $signupState
+signupState: $signupState,
+serverErrors: $serverErrors
 }
 ''';
 }

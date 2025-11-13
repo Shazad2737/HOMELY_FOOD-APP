@@ -7,7 +7,7 @@ import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/menu/bloc/menu_bloc.dart';
 import 'package:instamess_app/menu/view/widgets/category_selector.dart';
 import 'package:instamess_app/menu/view/widgets/empty_state.dart';
-import 'package:instamess_app/menu/view/widgets/food_card.dart';
+import 'package:instamess_app/menu/view/widgets/food_card/food_card.dart';
 import 'package:instamess_app/menu/view/widgets/plan_selector.dart';
 import 'package:instamess_app/menu/view/widgets/sticky_tab_bar_delegate.dart';
 
@@ -180,42 +180,39 @@ class _MenuViewState extends State<MenuView>
 
     return Stack(
       children: [
-        Positioned(
-          // top: -MediaQuery.of(context).padding.top,
-          left: 0,
-          right: 0,
-          child: _showScaffoldImage
-              ? Image(
-                  image: appImages.menuHeader.provider(),
-                  fit: BoxFit.cover,
-                )
-              : const SizedBox(),
-        ),
-        SafeArea(
-          // top: false,
-          child: RefreshIndicator(
-            onRefresh: () async {
-              bloc.add(MenuRefreshedEvent());
-              await bloc.stream.firstWhere(
-                (s) => !s.isRefreshing && !s.isLoading,
-              );
-            },
-            child: CustomScrollView(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                _buildHeader(context),
-                _buildCategorySelector(context),
-                _buildPlanSelector(context, menuData),
-                _buildTabBar(context, menuData),
-                _buildSearchBar(context),
+        // Positioned(
+        //   // top: -MediaQuery.of(context).padding.top,
+        //   left: 0,
+        //   right: 0,
+        //   child: _showScaffoldImage
+        //       ? Image(
+        //           image: appImages.menuHeader.provider(),
+        //           fit: BoxFit.cover,
+        //         )
+        //       : const SizedBox(),
+        // ),
+        RefreshIndicator(
+          onRefresh: () async {
+            bloc.add(MenuRefreshedEvent());
+            await bloc.stream.firstWhere(
+              (s) => !s.isRefreshing && !s.isLoading,
+            );
+          },
+          child: CustomScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              _buildHeader(context),
+              _buildCategorySelector(context),
+              _buildPlanSelector(context, menuData),
+              _buildTabBar(context, menuData),
+              _buildSearchBar(context),
 
-                if (items.isEmpty)
-                  _buildEmptyResultsSliver(context)
-                else
-                  _buildFoodItemsList(context, items),
-              ],
-            ),
+              if (items.isEmpty)
+                _buildEmptyResultsSliver(context)
+              else
+                _buildFoodItemsList(context, items),
+            ],
           ),
         ),
       ],
@@ -413,7 +410,7 @@ class _MenuViewState extends State<MenuView>
           child: TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'What do you want to eat?',
+              hintText: 'Search by name, code or cuisine',
               hintStyle: context.textTheme.bodyMedium?.copyWith(
                 color: AppColors.grey500,
               ),
@@ -480,7 +477,7 @@ class _MenuViewState extends State<MenuView>
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final isLast = index == items.length - 1;
-            return _AnimatedFoodCard(
+            return MenuFoodCard(
               key: ValueKey('food_${items[index].id}'),
               index: index,
               isLast: isLast,
@@ -488,104 +485,6 @@ class _MenuViewState extends State<MenuView>
             );
           },
           childCount: items.length,
-        ),
-      ),
-    );
-  }
-}
-
-/// Animated wrapper for food cards with staggered fade-in effect
-class _AnimatedFoodCard extends StatefulWidget {
-  const _AnimatedFoodCard({
-    required this.index,
-    required this.isLast,
-    required this.foodItem,
-    super.key,
-  });
-
-  final int index;
-  final bool isLast;
-  final FoodItem foodItem;
-
-  @override
-  State<_AnimatedFoodCard> createState() => _AnimatedFoodCardState();
-}
-
-class _AnimatedFoodCardState extends State<_AnimatedFoodCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-
-    // Stagger the animation based on index (max 50ms delay per item)
-    final delay = (widget.index * 50).clamp(0, 300);
-
-    _fadeAnimation =
-        Tween<double>(
-          begin: 0,
-          end: 1,
-        ).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: Interval(
-              delay / 700, // Convert delay to fraction of total animation
-              1,
-              curve: Curves.easeOut,
-            ),
-          ),
-        );
-
-    _slideAnimation =
-        Tween<Offset>(
-          begin: const Offset(0, 0.1),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: Interval(
-              delay / 700,
-              1,
-              curve: Curves.easeOutCubic,
-            ),
-          ),
-        );
-
-    // Start animation after a frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _controller.forward();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: widget.isLast ? 8 : 16,
-          ),
-          child: MenuFoodCard(
-            foodItem: widget.foodItem,
-          ),
         ),
       ),
     );
