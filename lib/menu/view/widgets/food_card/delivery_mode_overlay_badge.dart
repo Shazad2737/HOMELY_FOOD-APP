@@ -1,17 +1,23 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:instamess_api/instamess_api.dart';
 
-/// A badge indicating that a food item is vegetarian,
+/// A badge indicating that a food item is delivered with another meal type,
 /// styled for overlay on images.
-class VegBadge extends StatelessWidget {
-  const VegBadge({super.key});
+class DeliveryModeOverlayBadge extends StatelessWidget {
+  const DeliveryModeOverlayBadge({
+    required this.deliverWith,
+    super.key,
+  });
+
+  final DeliverWith deliverWith;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.appGreen.withValues(alpha: 0.9),
+        color: AppColors.info.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: Colors.white,
@@ -26,10 +32,10 @@ class VegBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.eco, size: 14, color: Colors.white),
+          const Icon(Icons.access_time, size: 14, color: Colors.white),
           const SizedBox(width: 4),
           Text(
-            'Veg',
+            'Available With ${deliverWith.name}',
             style: context.textTheme.labelSmall?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w600,

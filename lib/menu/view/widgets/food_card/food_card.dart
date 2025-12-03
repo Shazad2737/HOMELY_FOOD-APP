@@ -2,8 +2,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/menu/view/widgets/day_chip.dart';
-import 'package:instamess_app/menu/view/widgets/food_card/delivery_info_badge.dart';
-import 'package:instamess_app/menu/view/widgets/food_card/dietary_badges.dart';
 import 'package:instamess_app/menu/view/widgets/food_card/food_image.dart';
 import 'package:instamess_app/menu/view/widgets/info_row.dart';
 
@@ -91,14 +89,18 @@ class _MenuFoodCardState extends State<MenuFoodCard>
 
   @override
   Widget build(BuildContext context) {
+    final cuisineText = widget.foodItem.cuisine;
     final card = Card(
       elevation: 10,
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Food image with veg badge
-          FoodImage(foodItem: widget.foodItem),
+          // Food image with veg badge and delivery mode badge
+          FoodImage(
+            foodItem: widget.foodItem,
+            showDeliveryModeBadge: true,
+          ),
 
           // Food details
           Padding(
@@ -123,30 +125,26 @@ class _MenuFoodCardState extends State<MenuFoodCard>
                     text: widget.foodItem.description!,
                     iconColor: AppColors.appRed,
                   ),
+                  const SizedBox(height: 4),
                 ],
 
-                // Cuisine
-                if (widget.foodItem.cuisine != null)
+                // Cuisine (use raw cuisine string)
+                if (cuisineText != null && cuisineText.isNotEmpty) ...[
                   InfoRow(
                     icon: Icons.location_on_outlined,
-                    text: 'Cuisine: ${widget.foodItem.cuisine!.displayName}',
+                    text: 'Cuisine: $cuisineText',
                     iconColor: AppColors.appRed,
                   ),
+                  const SizedBox(height: 4),
+                ],
 
                 // Style
                 if (widget.foodItem.style != null)
                   InfoRow(
                     icon: Icons.set_meal_outlined,
-                    text: 'Style: ${widget.foodItem.style!.displayName}',
+                    text: 'Style: ${widget.foodItem.style}',
                     iconColor: AppColors.appRed,
                   ),
-
-                // Delivery mode info
-                if (widget.foodItem.deliveryMode == DeliveryMode.withOther &&
-                    widget.foodItem.deliverWith != null) ...[
-                  const SizedBox(height: 12),
-                  DeliveryInfoBadge(foodItem: widget.foodItem),
-                ],
 
                 const SizedBox(height: 12),
 

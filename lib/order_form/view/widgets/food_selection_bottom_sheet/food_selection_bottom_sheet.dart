@@ -155,7 +155,7 @@ class _FoodSelectionBottomSheetContentState
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: 'Search food items...',
+          hintText: 'Search by name, code or cuisine',
           hintStyle: context.textTheme.bodyMedium?.copyWith(
             color: AppColors.grey500,
           ),

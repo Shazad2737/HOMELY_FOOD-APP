@@ -121,7 +121,10 @@ class MealCard extends StatelessWidget {
                       ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -150,6 +153,41 @@ class MealCard extends StatelessWidget {
                                   color: AppColors.textSecondary,
                                   size: 20,
                                 ),
+                              // Delete button for selected meals
+                              if (isSelected)
+                                Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(20),
+                                    onTap: () {
+                                      HapticFeedback.lightImpact();
+                                      context.read<OrderFormBloc>().add(
+                                        OrderFormMealRemovedEvent(mealType),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.error.withOpacity(0.9),
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(
+                                              0.2,
+                                            ),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.delete_outline,
+                                        size: 18,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                           AnimatedSwitcher(
@@ -160,8 +198,22 @@ class MealCard extends StatelessWidget {
                                 ? Padding(
                                     key: const ValueKey('selected-details'),
                                     padding: const EdgeInsets.only(top: 12),
-                                    child: MealSelectionDetails(
-                                      selection: selection,
+                                    child: Builder(
+                                      builder: (context) {
+                                        // Determine if the paired meal (if any) is also selected
+                                        final paired =
+                                            selection.food.deliverWith;
+                                        final pairedMealSelected =
+                                            paired != null &&
+                                            state.mealSelections[paired.type] !=
+                                                null;
+
+                                        return MealSelectionDetails(
+                                          selection: selection,
+                                          pairedMealSelected:
+                                              pairedMealSelected,
+                                        );
+                                      },
                                     ),
                                   )
                                 : Padding(
@@ -218,44 +270,6 @@ class MealCard extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Delete button for selected meals
-              if (isSelected)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        context.read<OrderFormBloc>().add(
-                          OrderFormMealRemovedEvent(mealType),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withOpacity(0.9),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.delete_outline,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
             ],
           ),
         );

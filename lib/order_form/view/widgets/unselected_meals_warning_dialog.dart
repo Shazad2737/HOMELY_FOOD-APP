@@ -37,7 +37,7 @@ class UnselectedMealsWarningDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'You have ${unselectedMeals.length} available meal${unselectedMeals.length == 1 ? '' : 's'} that you haven\'t selected:',
+            "You have ${unselectedMeals.length} available meal${unselectedMeals.length == 1 ? '' : 's'} that you haven't selected:",
             style: context.textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
@@ -80,9 +80,9 @@ class UnselectedMealsWarningDialog extends StatelessWidget {
               ),
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   Icons.info_outline,
                   size: 20,
                   color: AppColors.info,
@@ -90,7 +90,7 @@ class UnselectedMealsWarningDialog extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'You can still add these meals to your order if you go back.',
+                    "You can't modify your meal selections after placing the order. Please review your choices carefully.",
                     style: context.textTheme.bodySmall?.copyWith(
                       color: AppColors.grey700,
                     ),

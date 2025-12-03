@@ -61,26 +61,26 @@ class CalendarSection extends StatelessWidget {
               },
             ),
           ),
-          if (days.length > 10)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.swipe,
-                    size: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Swipe to see more dates',
-                    style: context.textTheme.labelSmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // if (days.length > 10)
+          //   Padding(
+          //     padding: const EdgeInsets.only(top: 8),
+          //     child: Row(
+          //       children: [
+          //         const Icon(
+          //           Icons.swipe,
+          //           size: 14,
+          //           color: AppColors.textSecondary,
+          //         ),
+          //         const SizedBox(width: 4),
+          //         Text(
+          //           'Swipe to see more dates',
+          //           style: context.textTheme.labelSmall?.copyWith(
+          //             color: AppColors.textSecondary,
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
         ],
       ),
     );

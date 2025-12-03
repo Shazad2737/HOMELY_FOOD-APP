@@ -23,7 +23,7 @@ class DateChip extends StatelessWidget {
         final isSelected = state.selectedDate == day.date;
         final isHoliday = day.holidayName != null;
         final isOrdered = day.alreadyOrdered;
-        final isDisabled = !day.isAvailable && !isHoliday && !isOrdered;
+        final isDisabled = !day.isAvailable;
 
         return GestureDetector(
           onTap: () {
@@ -74,7 +74,12 @@ class DateChip extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.25),
+                        color: _getBorderColor(
+                          isSelected,
+                          isHoliday,
+                          isOrdered,
+                          isDisabled,
+                        ).withOpacity(0.25),
                         blurRadius: 10,
                         offset: const Offset(0, 3),
                       ),
@@ -143,13 +148,13 @@ class DateChip extends StatelessWidget {
     bool isOrdered,
     bool isDisabled,
   ) {
+    if (isOrdered) return AppColors.success;
     if (isDisabled) return AppColors.grey200;
     // Selected state should be visually prominent: solid primary fill
     if (isSelected) {
       return AppColors.primary;
     }
     // Already ordered stays as solid success
-    if (isOrdered) return AppColors.success;
     // Holidays (when not selected) should have white background with
     // a warning-colored border and warning text so they contrast with
     // the selected state.
@@ -164,9 +169,9 @@ class DateChip extends StatelessWidget {
     bool isOrdered,
     bool isDisabled,
   ) {
+    if (isOrdered) return AppColors.success;
     if (isDisabled) return AppColors.grey300;
     if (isSelected) return AppColors.primary;
-    if (isOrdered) return AppColors.success;
     if (isHoliday) return AppColors.warning;
     return AppColors.grey300;
   }
@@ -177,10 +182,10 @@ class DateChip extends StatelessWidget {
     bool isHoliday,
     bool isOrdered,
   ) {
+    if (isOrdered) return AppColors.white;
     if (isDisabled) return AppColors.grey500;
     // Selected uses white text over primary
     if (isSelected) return AppColors.white;
-    if (isOrdered) return AppColors.white;
     if (isHoliday) return AppColors.warning;
     return AppColors.textPrimary;
   }

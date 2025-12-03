@@ -21,6 +21,7 @@ dependencies:
   google_fonts: ^6.3.1
   image_picker: ^1.2.0
   intl: ^0.20.2
+  intl_phone_number_input: ^0.7.4
   modal_bottom_sheet: ^3.0.0
   pasteboard: ^0.4.0
   path_provider: ^2.1.5

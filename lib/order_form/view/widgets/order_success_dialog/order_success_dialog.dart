@@ -16,7 +16,8 @@ class OrderSuccessDialog extends StatelessWidget {
     required this.nextAvailableDateLabel,
     required this.showRepeatButton,
     required this.onOrderNextAvailable,
-    required this.onViewDetails,
+    required this.onViewAllOrders,
+    this.onCloseSelectNextAvailable,
     this.onRepeatForNextAvailable,
     super.key,
   });
@@ -39,8 +40,12 @@ class OrderSuccessDialog extends StatelessWidget {
   /// Callback when user wants to order next available date (fresh)
   final VoidCallback onOrderNextAvailable;
 
-  /// Callback when user wants to view order details
-  final VoidCallback onViewDetails;
+  /// Callback when user wants to view all orders
+  final VoidCallback onViewAllOrders;
+
+  /// Callback when user closes the dialog — should select next available date
+  /// without any other navigation. If null, Close just pops the dialog.
+  final VoidCallback? onCloseSelectNextAvailable;
 
   @override
   Widget build(BuildContext context) {
@@ -123,45 +128,68 @@ class OrderSuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // Primary Action - Repeat Order (only if next date is available)
-            if (showRepeatButton && onRepeatForNextAvailable != null) ...[
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onRepeatForNextAvailable,
-                  child: Text('Repeat Order for $nextAvailableDateLabel'),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
+            // both of these actions are commented out for now as client
+            // requested simpler dialog with just view orders and close options.
+            // we are keeping the code here for future reference.
 
-            // Secondary Action - Order Next Available Date (New)
+            // // Primary Action - Repeat Order (only if next date is available)
+            // if (showRepeatButton && onRepeatForNextAvailable != null) ...[
+            //   SizedBox(
+            //     width: double.infinity,
+            //     child: ElevatedButton(
+            //       onPressed: onRepeatForNextAvailable,
+            //       child: Text('Repeat Order for $nextAvailableDateLabel'),
+            //     ),
+            //   ),
+            //   const SizedBox(height: 12),
+            // ],
+
+            // // Secondary Action - Order Next Available Date (New)
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: OutlinedButton(
+            //     onPressed: onOrderNextAvailable,
+            //     child: Text(
+            //       showRepeatButton
+            //           ? 'Order $nextAvailableDateLabel (New)'
+            //           : 'Order $nextAvailableDateLabel',
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
+
+            // // Tertiary Actions
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //   children: [
+            //     TextButton(
+            //       onPressed: onViewAllOrders,
+            //       child: const Text('View all orders'),
+            //     ),
+            //     TextButton(
+            //       onPressed: () => Navigator.of(context).pop(),
+            //       child: const Text('Close'),
+            //     ),
+            //   ],
+            // ),
+
+            // new layout with primary close action and
+            //secondary view orders action
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton(
-                onPressed: onOrderNextAvailable,
-                child: Text(
-                  showRepeatButton
-                      ? 'Order $nextAvailableDateLabel (New)'
-                      : 'Order $nextAvailableDateLabel',
-                ),
+              child: ElevatedButton(
+                onPressed:
+                    onCloseSelectNextAvailable ??
+                    () {
+                      Navigator.of(context).pop();
+                    },
+                child: const Text('Close'),
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Tertiary Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton(
-                  onPressed: onViewDetails,
-                  child: const Text('View Details'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
-                ),
-              ],
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: onViewAllOrders,
+              child: const Text('View all orders'),
             ),
           ],
         ),

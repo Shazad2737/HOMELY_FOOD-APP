@@ -1,8 +1,12 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Banner;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:instamess_app/profile/addresses/view/banner/location_form_banner_cubit.dart';
+import 'package:core/core.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_bloc.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_event.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_state.dart';
@@ -24,11 +28,20 @@ class AddressFormScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AddressFormBloc>(
-      create: (context) => AddressFormBloc(
-        cmsRepository: context.read<ICmsRepository>(),
-        address: address,
-      )..add(const AddressFormLoadedEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AddressFormBloc>(
+          create: (context) => AddressFormBloc(
+            cmsRepository: context.read<ICmsRepository>(),
+            address: address,
+          )..add(const AddressFormLoadedEvent()),
+        ),
+        BlocProvider<LocationFormBannerCubit>(
+          create: (context) => LocationFormBannerCubit(
+            cmsRepository: context.read<ICmsRepository>(),
+          )..loadBanner(),
+        ),
+      ],
       child: MultiBlocListener(
         listeners: [
           // Listener for create operations
@@ -93,6 +106,8 @@ class AddressFormScreen extends StatelessWidget {
   }
 }
 
+// Banner rendered inline via LocationFormBannerCubit
+
 class AddressFormView extends StatefulWidget {
   const AddressFormView({required this.addressesBloc, super.key});
 
@@ -147,6 +162,62 @@ class _AddressFormViewState extends State<AddressFormView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Location form banner (optional)
+                    BlocBuilder<LocationFormBannerCubit, DataState<Banner?>>(
+                      builder: (context, bannerState) {
+                        return bannerState.maybeMap(
+                          orElse: () => const SizedBox.shrink(),
+                          loading: (_) => const SizedBox(
+                            height: 96,
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          success: (s) {
+                            final b = s.data;
+                            if (b == null || b.images.isEmpty)
+                              return const SizedBox.shrink();
+                            final image = b.images.firstWhere(
+                              (i) =>
+                                  i.imageUrl != null && i.imageUrl!.isNotEmpty,
+                              orElse: () => b.images.first,
+                            );
+                            if (image.imageUrl == null ||
+                                image.imageUrl!.isEmpty)
+                              return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final redirect = image.redirectUrl;
+                                  if (redirect != null && redirect.isNotEmpty) {
+                                    final uri = Uri.tryParse(redirect);
+                                    if (uri != null) await launchUrl(uri);
+                                  }
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: 120,
+                                    child: CachedNetworkImage(
+                                      imageUrl: image.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) =>
+                                          Container(color: AppColors.grey100),
+                                      errorWidget: (context, url, error) =>
+                                          const ColoredBox(
+                                            color: AppColors.grey100,
+                                            child: Icon(Icons.broken_image),
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+
                     // Address Type
                     Padding(
                       padding: const EdgeInsets.only(left: 4, bottom: 8),

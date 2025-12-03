@@ -207,20 +207,28 @@ class _SignupFormState extends State<_SignupForm> {
                   style: context.textTheme.bodyMedium,
                 ),
               ),
-              TextField(
-                keyboardType: TextInputType.phone,
+              // Option 1: UAE-only phone input (simple, locked to UAE)
+              // UaePhoneInput(
+              //   onChanged: (value) => context.read<SignupBloc>().add(
+              //     SignupPhoneChangedEvent(value),
+              //   ),
+              //   errorText: state.serverErrors['mobile'] ??
+              //       (state.showErrorMessages &&
+              //               state.phone.displayError != null
+              //           ? state.phone.displayError!.message
+              //           : null),
+              // ),
+              
+              // Option 2: International phone input (supports multiple countries)
+              InternationalPhoneInput(
                 onChanged: (value) => context.read<SignupBloc>().add(
                   SignupPhoneChangedEvent(value),
                 ),
-                decoration: InputDecoration(
-                  hintText: 'Enter Mobile Number',
-                  errorText:
-                      state.serverErrors['mobile'] ??
-                      (state.showErrorMessages &&
-                              state.phone.displayError != null
-                          ? state.phone.displayError!.message
-                          : null),
-                ),
+                errorText: state.serverErrors['mobile'] ??
+                    (state.showErrorMessages &&
+                            state.phone.displayError != null
+                        ? state.phone.displayError!.message
+                        : null),
               ),
               const Space(),
               Padding(

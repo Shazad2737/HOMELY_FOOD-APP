@@ -54,19 +54,6 @@ class MenuState {
     return data.getItemsForMealType(selectedMealType);
   }
 
-  // Get filtered items (by search)
-  List<FoodItem> get filteredItems {
-    final items = currentMealItems;
-    if (debouncedSearchQuery.isEmpty) return items;
-
-    final query = debouncedSearchQuery.toLowerCase();
-    return items.where((item) {
-      return item.name.toLowerCase().contains(query) ||
-          (item.description?.toLowerCase().contains(query) ?? false) ||
-          (item.code?.toLowerCase().contains(query) ?? false);
-    }).toList();
-  }
-
   MenuState copyWith({
     DataState<MenuData>? menuState,
     List<Category>? categories,

@@ -12,20 +12,30 @@ import 'package:instamess_app/order_form/view/widgets/widgets.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_bloc.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_event.dart';
 import 'package:instamess_app/profile/addresses/bloc/addresses_state.dart';
+import 'package:instamess_app/router/router.gr.dart';
 
 /// {@template order_form_screen}
 /// Screen for creating a new food order
 /// {@endtemplate}
 @RoutePage()
-class OrderFormScreen extends StatelessWidget {
+class OrderFormScreen extends StatefulWidget {
   /// {@macro order_form_screen}
   const OrderFormScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Load addresses when order form screen is opened
-    context.read<AddressesBloc>().add(const AddressesLoadedEvent());
+  State<OrderFormScreen> createState() => _OrderFormScreenState();
+}
 
+class _OrderFormScreenState extends State<OrderFormScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load addresses when order form screen is first opened
+    context.read<AddressesBloc>().add(const AddressesLoadedEvent());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => OrderFormBloc(
         userRepository: context.read<IUserRepository>(),
@@ -127,6 +137,25 @@ class OrderFormView extends StatelessWidget {
         );
       },
       builder: (context, state) {
+        // Check subscription state first
+        final isLoadingSubscription = state.subscriptionState.maybeMap(
+          initial: (_) => true,
+          loading: (_) => true,
+          orElse: () => false,
+        );
+
+        final hasNoSubscription = state.subscriptionState.maybeMap(
+          success: (s) => !s.data.hasSubscribedMeals,
+          orElse: () => false,
+        );
+
+        // Get subscription data for NoSubscriptionScreen
+        final subscriptionData = state.subscriptionState.maybeMap(
+          success: (s) => s.data,
+          refreshing: (r) => r.currentData,
+          orElse: () => null,
+        );
+
         return Scaffold(
           backgroundColor: AppColors.grey50,
           appBar: AppBar(
@@ -136,35 +165,65 @@ class OrderFormView extends StatelessWidget {
             backgroundColor: AppColors.white,
             surfaceTintColor: AppColors.white,
           ),
-          body: state.availableDaysState.map(
-            initial: (_) => const Center(child: CircularProgressIndicator()),
-            loading: (_) => const Center(child: CircularProgressIndicator()),
-            success: (s) => RefreshIndicator(
-              onRefresh: () async {
-                context.read<OrderFormBloc>().add(
-                  const OrderFormRefreshedEvent(),
-                );
-                // Wait for the refresh to complete
-                await context.read<OrderFormBloc>().stream.firstWhere(
-                  (state) => !state.availableDaysState.isRefreshing,
-                );
-              },
-              child: OrderFormContentWidget(state: state, data: s.data),
-            ),
-            failure: (f) => ErrorContentWidget(failure: f.failure),
-            refreshing: (r) => RefreshIndicator(
-              onRefresh: () async {
-                // Already refreshing, just wait for completion
-                await context.read<OrderFormBloc>().stream.firstWhere(
-                  (state) => !state.availableDaysState.isRefreshing,
-                );
-              },
-              child: OrderFormContentWidget(state: state, data: r.currentData),
-            ),
+          body: _buildBody(
+            context,
+            state,
+            isLoadingSubscription,
+            hasNoSubscription,
+            subscriptionData,
           ),
-          bottomNavigationBar: const BottomSubmitSection(),
+          // Hide bottom bar when no subscription or loading
+          bottomNavigationBar: (isLoadingSubscription || hasNoSubscription)
+              ? null
+              : const BottomSubmitSection(),
         );
       },
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    OrderFormState state,
+    bool isLoadingSubscription,
+    bool hasNoSubscription,
+    SubscriptionData? subscriptionData,
+  ) {
+    // Show loading while checking subscription
+    if (isLoadingSubscription) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Show no subscription screen if user has no active subscription
+    if (hasNoSubscription) {
+      return NoSubscriptionScreen(subscriptionData: subscriptionData);
+    }
+
+    // Show available days state
+    return state.availableDaysState.map(
+      initial: (_) => const Center(child: CircularProgressIndicator()),
+      loading: (_) => const Center(child: CircularProgressIndicator()),
+      success: (s) => RefreshIndicator(
+        onRefresh: () async {
+          context.read<OrderFormBloc>().add(
+            const OrderFormRefreshedEvent(),
+          );
+          // Wait for the refresh to complete
+          await context.read<OrderFormBloc>().stream.firstWhere(
+            (state) => !state.availableDaysState.isRefreshing,
+          );
+        },
+        child: OrderFormContentWidget(state: state, data: s.data),
+      ),
+      failure: (f) => ErrorContentWidget(failure: f.failure),
+      refreshing: (r) => RefreshIndicator(
+        onRefresh: () async {
+          // Already refreshing, just wait for completion
+          await context.read<OrderFormBloc>().stream.firstWhere(
+            (state) => !state.availableDaysState.isRefreshing,
+          );
+        },
+        child: OrderFormContentWidget(state: state, data: r.currentData),
+      ),
     );
   }
 
@@ -192,6 +251,22 @@ class OrderFormView extends StatelessWidget {
           mealSelections: mealSelections,
           nextAvailableDateLabel: nextAvailableInfo.label,
           showRepeatButton: nextAvailableInfo.canRepeat,
+          onCloseSelectNextAvailable: () {
+            Navigator.of(dialogContext).pop();
+
+            if (nextAvailableInfo.canRepeat) {
+              context.read<OrderFormBloc>().add(
+                OrderFormDateSelectedEvent(
+                  nextAvailableInfo.date,
+                  keepSelections: true,
+                ),
+              );
+            } else {
+              context.read<OrderFormBloc>()
+                ..add(const OrderFormDateClearedEvent())
+                ..add(OrderFormDateSelectedEvent(nextAvailableInfo.date));
+            }
+          },
           onRepeatForNextAvailable: nextAvailableInfo.canRepeat
               ? () {
                   Navigator.of(dialogContext).pop();
@@ -211,11 +286,10 @@ class OrderFormView extends StatelessWidget {
               ..add(const OrderFormDateClearedEvent())
               ..add(OrderFormDateSelectedEvent(nextAvailableInfo.date));
           },
-          onViewDetails: () {
+          onViewAllOrders: () {
             Navigator.of(dialogContext).pop();
-            // TODO: Navigate to order details screen when implemented
-            // For now, just go back to home
-            context.router.maybePop();
+
+            context.router.push(const OrdersRoute());
           },
         ),
       );

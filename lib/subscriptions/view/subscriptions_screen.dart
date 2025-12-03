@@ -7,7 +7,7 @@ import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/subscriptions/bloc/subscriptions_bloc.dart';
 import 'package:instamess_app/subscriptions/view/widgets/contact_button.dart';
 import 'package:instamess_app/subscriptions/view/widgets/promotional_banner.dart';
-import 'package:instamess_app/subscriptions/view/widgets/subscription_card.dart';
+import 'package:instamess_app/subscriptions/view/widgets/subscription_details_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
@@ -158,8 +158,7 @@ class _SuccessContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subscribed = data.subscribedMeals;
-    final available = data.availableMeals;
+    final subscription = data.subscription;
 
     return SliverToBoxAdapter(
       child: Padding(
@@ -167,47 +166,42 @@ class _SuccessContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Subscribed Meal Types
-            if (subscribed.isNotEmpty)
-              ...subscribed.map(
-                (m) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: SubscriptionCard(
-                    title: m.name,
-                    dateRange: m.formattedDateRange ?? 'Active',
-                  ),
-                ),
-              ),
-
-            // Available Meal Types
-            if (available.isNotEmpty) ...[
-              if (subscribed.isNotEmpty) const SizedBox(height: 8),
-              ...available.map(
-                (m) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: SubscriptionCard(
-                    title: m.name,
-                    dateRange: 'Available for subscription',
-                    isSubscribed: false,
-                  ),
-                ),
-              ),
+            // Active subscription details
+            if (subscription != null) ...[
+              SubscriptionDetailsCard(subscription: subscription),
+              const SizedBox(height: 24),
             ],
 
-            if (subscribed.isEmpty && available.isEmpty) ...[
+            // No active subscription message
+            if (subscription == null) ...[
               const SizedBox(height: 48),
               Center(
-                child: Text(
-                  'No subscriptions available',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.no_meals_outlined,
+                      size: 64,
+                      color: AppColors.textSecondary.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No Active Subscription',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Contact us to start your subscription',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 48),
             ],
-
-            const SizedBox(height: 16),
 
             if (data.banner != null && data.banner!.images.isNotEmpty) ...[
               PromotionalBanner(banner: data.banner!),

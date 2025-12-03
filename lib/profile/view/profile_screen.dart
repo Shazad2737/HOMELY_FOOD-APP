@@ -128,6 +128,32 @@ class _ProfileContent extends StatelessWidget {
                     color: AppColors.grey600,
                   ),
                 ),
+                if (profile.customerCode != null &&
+                    profile.customerCode!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Customer Code: ',
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: AppColors.grey600,
+                          ),
+                        ),
+                        TextSpan(
+                          text: profile.customerCode,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: AppColors.grey600,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                    ),
+                  ),
+                ],
                 if (profile.email != null && profile.email!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
@@ -165,16 +191,10 @@ class _ProfileContent extends StatelessWidget {
                     context.router.push(const AddressesRoute());
                   },
                 ),
-                const _Tile(icon: Icons.settings_outlined, title: 'Setting'),
               ],
             ),
           ),
           const Divider(height: 32),
-          const _Tile(
-            icon: Icons.notifications_outlined,
-            title: 'Notifications',
-          ),
-          const _Tile(icon: Icons.help_outline, title: 'Help Center'),
           ListTile(
             leading: const Icon(Icons.logout, color: AppColors.error),
             title: Text(

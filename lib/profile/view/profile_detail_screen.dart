@@ -115,20 +115,25 @@ class _ProfileDetailContent extends StatelessWidget {
     // Show options: Camera or Gallery
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      backgroundColor: Colors.white,
+
       builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Gallery'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Take a Photo'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Take a Photo'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+            ],
+          ),
         ),
       ),
     );

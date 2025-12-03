@@ -9,11 +9,15 @@ class MealSelectionDetails extends StatelessWidget {
   /// Constructor
   const MealSelectionDetails({
     required this.selection,
+    this.pairedMealSelected = false,
     super.key,
   });
 
   /// The meal selection
   final OrderItemSelection selection;
+
+  /// Whether the meal this item is delivered with is also selected
+  final bool pairedMealSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -88,14 +92,14 @@ class MealSelectionDetails extends StatelessWidget {
           const SizedBox(height: 8),
           _AttributeRow(
             icon: Icons.restaurant,
-            text: 'Cuisine: ${selection.food.cuisine!.displayName}',
+            text: 'Cuisine: ${selection.food.cuisine}',
           ),
         ],
         if (selection.food.style != null) ...[
           const SizedBox(height: 8),
           _AttributeRow(
             icon: Icons.kitchen,
-            text: 'Style: ${selection.food.style!.displayName}',
+            text: 'Style: ${selection.food.style}',
           ),
         ],
 
@@ -105,13 +109,22 @@ class MealSelectionDetails extends StatelessWidget {
         const SizedBox(height: 6),
         if (selection.food.deliveryMode == DeliveryMode.withOther &&
             selection.food.deliverWith != null)
-          _DeliveryInfoPill(
-            leadingIcon: Icons.schedule,
-            leadingText: 'Delivered with ${selection.food.deliverWith!.name}',
-            trailingIcon: Icons.delivery_dining,
-            trailingText: '5:00 PM - 6:00 PM',
-            color: AppColors.success,
-          )
+          (pairedMealSelected
+              ? _DeliveryInfoPill(
+                  leadingIcon: Icons.schedule,
+                  leadingText:
+                      'Delivered with ${selection.food.deliverWith!.name}',
+                  trailingIcon: Icons.delivery_dining,
+                  trailingText: '5:00 PM - 6:00 PM',
+                  color: AppColors.success,
+                )
+              : _DeliveryInfoPill(
+                  leadingIcon: Icons.location_on,
+                  leadingText: selection.location.displayName,
+                  trailingIcon: Icons.delivery_dining,
+                  trailingText: '5:00 PM - 6:00 PM',
+                  color: AppColors.success,
+                ))
         else if (selection.food.deliveryMode == DeliveryMode.separate)
           _DeliveryInfoPill(
             leadingIcon: Icons.location_on,

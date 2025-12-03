@@ -17,4 +17,7 @@ abstract class ICmsRepository {
 
   /// Get categories (cached for performance)
   Future<Either<Failure, List<Category>>> getCategories();
+
+  /// Get banner for location form (nullable)
+  Future<Either<Failure, Banner?>> getLocationFormBanner();
 }

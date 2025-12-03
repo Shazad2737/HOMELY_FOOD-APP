@@ -30,17 +30,12 @@ class Phone extends FormzInput<String, PhoneValidationError>
   /// Constructor for a modified (dirty) phone input.
   Phone.dirty([super.value = '']) : super.dirty();
 
-  /// UAE phone number patterns:
-  /// - 05X XXXXXXX (9 digits starting with 05)
-  /// - +971 5X XXXXXXX
-  /// - 00971 5X XXXXXXX
-  // static final _uaePhoneRegex = RegExp(
-  //   r'^(\+971|00971|0)?5[0-9]{8}$',
-  // );
-
-  /// Generic international phone number pattern (7 to 15 digits, optional +)
-  static final genericPhoneRegex = RegExp(
-    r'^\+?[0-9]{7,15}$',
+  /// Phone number validation pattern:
+  /// - International format: +[country code][number]
+  /// - For UAE specifically: +971 followed by 9 digits
+  /// - Generic international: 10-15 digits total after +
+  static final _internationalPhoneRegex = RegExp(
+    r'^\+[1-9]\d{9,14}$',
   );
 
   @override
@@ -49,7 +44,7 @@ class Phone extends FormzInput<String, PhoneValidationError>
 
     if (cleanedValue.isEmpty) {
       return PhoneValidationError.empty;
-    } else if (!genericPhoneRegex.hasMatch(cleanedValue)) {
+    } else if (!_internationalPhoneRegex.hasMatch(cleanedValue)) {
       return PhoneValidationError.invalid;
     }
     return null;

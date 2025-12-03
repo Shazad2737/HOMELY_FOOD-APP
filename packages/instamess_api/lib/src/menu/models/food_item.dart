@@ -1,11 +1,10 @@
 import 'package:deep_pick/deep_pick.dart';
 import 'package:equatable/equatable.dart';
 import 'package:instamess_api/src/menu/models/available_day.dart';
-import 'package:instamess_api/src/menu/models/cuisine.dart';
 import 'package:instamess_api/src/menu/models/day_of_week.dart';
 import 'package:instamess_api/src/menu/models/deliver_with.dart';
 import 'package:instamess_api/src/menu/models/delivery_mode.dart';
-import 'package:instamess_api/src/menu/models/food_style.dart';
+// Keep cuisine/style as raw strings (no enums)
 import 'package:instamess_api/src/menu/models/meal_type.dart';
 import 'package:instamess_api/src/user/models/delivery_location.dart';
 
@@ -52,8 +51,9 @@ class FoodItem extends Equatable {
       mealTypeId: json['mealTypeId'] as String?,
       description: json['description'] as String?,
       imageUrl: json['imageUrl'] as String?,
-      cuisine: Cuisine.fromString(json['cuisine'] as String?),
-      style: FoodStyle.fromString(json['style'] as String?),
+      // Store cuisine & style as raw strings directly from API
+      cuisine: json['cuisine'] as String?,
+      style: json['style'] as String?,
       price: parsedPrice,
       isVegetarian: json['isVegetarian'] as bool? ?? false,
       isVegan: json['isVegan'] as bool? ?? false,
@@ -112,11 +112,11 @@ class FoodItem extends Equatable {
   /// Optional image URL
   final String? imageUrl;
 
-  /// Type of cuisine
-  final Cuisine? cuisine;
+  /// Cuisine string as returned by API
+  final String? cuisine;
 
-  /// Food style
-  final FoodStyle? style;
+  /// Style string as returned by API
+  final String? style;
 
   /// Price
   final double? price;
@@ -158,8 +158,8 @@ class FoodItem extends Equatable {
       'mealTypeId': mealTypeId,
       if (description != null) 'description': description,
       if (imageUrl != null) 'imageUrl': imageUrl,
-      if (cuisine != null) 'cuisine': cuisine!.toApiString(),
-      if (style != null) 'style': style!.toApiString(),
+      if (cuisine != null) 'cuisine': cuisine,
+      if (style != null) 'style': style,
       if (price != null) 'price': price,
       'isVegetarian': isVegetarian,
       'isVegan': isVegan,

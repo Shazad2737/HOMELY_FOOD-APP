@@ -29,7 +29,6 @@ class CmsRepository implements ICmsRepository {
   Future<Either<Failure, List<Location>>> getLocations() async {
     final resEither = await apiClient.get<Map<String, dynamic>>(
       'location',
-      authRequired: false,
     );
 
     return resEither.fold(
@@ -82,7 +81,6 @@ class CmsRepository implements ICmsRepository {
   Future<Either<Failure, List<Area>>> getAreas(String locationId) async {
     final resEither = await apiClient.get<Map<String, dynamic>>(
       'location/area/$locationId',
-      authRequired: false,
     );
 
     return resEither.fold(
@@ -177,6 +175,58 @@ class CmsRepository implements ICmsRepository {
             const UnknownApiFailure(
               0,
               'Failed to parse home page response',
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  Future<Either<Failure, Banner?>> getLocationFormBanner() async {
+    final resEither = await apiClient.get<Map<String, dynamic>>(
+      'location/banner',
+    );
+
+    return resEither.fold(
+      (apiFailure) async {
+        log('Error fetching location form banner: $apiFailure');
+        return left(apiFailure);
+      },
+      (response) async {
+        final body = response.data;
+        if (body == null) {
+          return left(
+            const UnknownApiFailure(
+              0,
+              'Unknown error occurred while fetching location banner',
+            ),
+          );
+        }
+
+        try {
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            return left(
+              const UnknownApiFailure(0, 'Failed to fetch location banner'),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            // No banner present - return null success
+            return right(null);
+          }
+
+          final banner = Banner.fromJson(data);
+
+          return right(banner);
+        } catch (e, s) {
+          log('Error parsing location banner response: $e', stackTrace: s);
+          return left(
+            const UnknownApiFailure(
+              0,
+              'Failed to parse location banner response',
             ),
           );
         }

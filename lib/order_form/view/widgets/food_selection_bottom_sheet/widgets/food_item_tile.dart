@@ -1,8 +1,9 @@
 import 'package:app_ui/app_ui.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
+import 'package:instamess_app/menu/view/widgets/food_card/food_image.dart';
+import 'package:instamess_app/menu/view/widgets/info_row.dart';
 import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
 
 /// Individual food item tile in the selection list
@@ -47,8 +48,11 @@ class FoodItemTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Food image
-                  _buildImage(context),
+                  // Food image with veg badge and delivery mode badge
+                  FoodImage(
+                    foodItem: foodItem,
+                    showDeliveryModeBadge: true,
+                  ),
 
                   // Food details
                   Padding(
@@ -78,177 +82,39 @@ class FoodItemTile extends StatelessWidget {
                         const SizedBox(height: 12),
 
                         // Description
-                        if (foodItem.description != null) ...[
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.restaurant,
-                                size: 18,
-                                color: AppColors.appRed,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  foodItem.description!,
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.grey700,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        if (foodItem.description != null &&
+                            foodItem.description!.isNotEmpty)
+                          InfoRow(
+                            icon: Icons.restaurant,
+                            text: foodItem.description!,
+                            iconColor: AppColors.appRed,
                           ),
-                          const SizedBox(height: 8),
-                        ],
 
                         // Cuisine
-                        if (foodItem.cuisine != null)
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_outlined,
-                                size: 18,
-                                color: AppColors.appRed,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Cuisine: ${foodItem.cuisine!.displayName}',
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.grey700,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        if (foodItem.cuisine != null &&
+                            foodItem.cuisine!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          InfoRow(
+                            icon: Icons.location_on_outlined,
+                            text: 'Cuisine: ${foodItem.cuisine}',
+                            iconColor: AppColors.appRed,
                           ),
+                        ],
 
                         // Style
                         if (foodItem.style != null) ...[
                           const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.set_meal_outlined,
-                                size: 18,
-                                color: AppColors.appRed,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Style: ${foodItem.style!.displayName}',
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.grey700,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          InfoRow(
+                            icon: Icons.set_meal_outlined,
+                            text: 'Style: ${foodItem.style}',
+                            iconColor: AppColors.appRed,
                           ),
                         ],
 
-                        // Dietary badges and price
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            if (foodItem.isVegetarian)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.appGreen.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.eco,
-                                      size: 14,
-                                      color: AppColors.appGreen,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Veg',
-                                      style: context.textTheme.labelSmall
-                                          ?.copyWith(
-                                            color: AppColors.appGreen,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (foodItem.isVegetarian && foodItem.isVegan)
-                              const SizedBox(width: 8),
-                            if (foodItem.isVegan)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.appGreen.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.park,
-                                      size: 14,
-                                      color: AppColors.appGreen,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Vegan',
-                                      style: context.textTheme.labelSmall
-                                          ?.copyWith(
-                                            color: AppColors.appGreen,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-
-                        // Delivery mode info
-                        if (foodItem.deliveryMode == DeliveryMode.withOther &&
-                            foodItem.deliverWith != null) ...[
+                        // Vegan badge (veg badge is now on image)
+                        if (foodItem.isVegan) ...[
                           const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.info.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: AppColors.info.withOpacity(0.3),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.access_time,
-                                  size: 14,
-                                  color: AppColors.info,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Delivered with ${foodItem.deliverWith!.name}',
-                                  style: context.textTheme.labelSmall?.copyWith(
-                                    color: AppColors.info,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          _VeganBadge(),
                         ],
                       ],
                     ),
@@ -261,33 +127,31 @@ class FoodItemTile extends StatelessWidget {
       },
     );
   }
+}
 
-  Widget _buildImage(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 7,
-      child: (foodItem.imageUrl != null)
-          ? CachedNetworkImage(
-              imageUrl: foodItem.imageUrl!,
-              fit: BoxFit.cover,
-              placeholder: (_, __) => const ColoredBox(
-                color: AppColors.grey200,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              errorWidget: (_, __, ___) => _buildPlaceholder(),
-            )
-          : _buildPlaceholder(),
-    );
-  }
-
-  Widget _buildPlaceholder() {
-    return const ColoredBox(
-      color: AppColors.grey200,
-      child: Icon(
-        Icons.restaurant_menu,
-        size: 64,
-        color: AppColors.grey500,
+/// Badge for vegan food items
+class _VeganBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.appGreen.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.park, size: 14, color: AppColors.appGreen),
+          const SizedBox(width: 4),
+          Text(
+            'Vegan',
+            style: context.textTheme.labelSmall?.copyWith(
+              color: AppColors.appGreen,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -109,6 +109,7 @@ class _OtpScreenState extends State<_OtpScreen> {
         );
       },
       child: Scaffold(
+        appBar: AppBar(),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),

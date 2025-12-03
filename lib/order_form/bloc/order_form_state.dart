@@ -43,6 +43,7 @@ class OrderItemSelection extends Equatable {
 class OrderFormState extends Equatable {
   /// {@macro order_form_state}
   const OrderFormState({
+    required this.subscriptionState,
     required this.availableDaysState,
     required this.createOrderState,
     this.selectedDate,
@@ -56,8 +57,21 @@ class OrderFormState extends Equatable {
   /// Initial state
   factory OrderFormState.initial() {
     return OrderFormState(
+      subscriptionState: DataState.initial(),
       availableDaysState: DataState.initial(),
       createOrderState: DataState.initial(),
+    );
+  }
+
+  /// Subscription data state (checked first before loading available days)
+  final DataState<SubscriptionData> subscriptionState;
+
+  /// Whether user has an active subscription
+  bool get hasActiveSubscription {
+    return subscriptionState.maybeMap(
+      success: (s) => s.data.hasSubscribedMeals,
+      refreshing: (r) => r.currentData.hasSubscribedMeals,
+      orElse: () => false,
     );
   }
 
@@ -228,6 +242,7 @@ class OrderFormState extends Equatable {
 
   /// Copy with
   OrderFormState copyWith({
+    DataState<SubscriptionData>? subscriptionState,
     DataState<AvailableOrderDays>? availableDaysState,
     String? selectedDate,
     bool clearSelectedDate = false,
@@ -243,6 +258,7 @@ class OrderFormState extends Equatable {
     bool clearMealTapError = false,
   }) {
     return OrderFormState(
+      subscriptionState: subscriptionState ?? this.subscriptionState,
       availableDaysState: availableDaysState ?? this.availableDaysState,
       selectedDate: clearSelectedDate
           ? null
@@ -262,6 +278,7 @@ class OrderFormState extends Equatable {
 
   @override
   List<Object?> get props => [
+    subscriptionState,
     availableDaysState,
     selectedDate,
     mealSelections,

@@ -46,14 +46,61 @@ class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
     OrderFormLoadedEvent event,
     Emitter<OrderFormState> emit,
   ) async {
-    // Use refreshing state if we already have data (avoids flickering)
-    final hasData = state.availableDaysState.maybeMap(
+    // Step 1: Check subscription status first
+    final hasSubscriptionData = state.subscriptionState.maybeMap(
       success: (_) => true,
       refreshing: (_) => true,
       orElse: () => false,
     );
 
-    if (hasData) {
+    if (hasSubscriptionData) {
+      final currentSubData = state.subscriptionState.maybeMap(
+        success: (s) => s.data,
+        refreshing: (r) => r.currentData,
+        orElse: () => null,
+      );
+      if (currentSubData != null) {
+        emit(
+          state.copyWith(
+            subscriptionState: DataState.refreshing(currentSubData),
+          ),
+        );
+      }
+    } else {
+      emit(state.copyWith(subscriptionState: DataState.loading()));
+    }
+
+    final subscriptionResult = await _userRepository.getSubscription();
+
+    final hasActiveSubscription = subscriptionResult.fold(
+      (failure) {
+        emit(state.copyWith(subscriptionState: DataState.failure(failure)));
+        return false;
+      },
+      (subscriptionData) {
+        emit(
+          state.copyWith(
+            subscriptionState: DataState.success(subscriptionData),
+          ),
+        );
+        return subscriptionData.hasSubscribedMeals;
+      },
+    );
+
+    // Step 2: Only load available days if user has active subscription
+    if (!hasActiveSubscription) {
+      log('User has no active subscription, skipping available days fetch');
+      return;
+    }
+
+    // Use refreshing state if we already have available days data
+    final hasAvailableDaysData = state.availableDaysState.maybeMap(
+      success: (_) => true,
+      refreshing: (_) => true,
+      orElse: () => false,
+    );
+
+    if (hasAvailableDaysData) {
       final currentData = state.availableDaysState.maybeMap(
         success: (s) => s.data,
         refreshing: (r) => r.currentData,

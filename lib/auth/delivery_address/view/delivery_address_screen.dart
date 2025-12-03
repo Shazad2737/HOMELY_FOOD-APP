@@ -1,16 +1,20 @@
 import 'package:api_client/api_client.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Banner;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/auth/delivery_address/bloc/delivery_address_bloc.dart';
+import 'package:instamess_app/profile/addresses/view/banner/location_form_banner_cubit.dart';
+import 'package:core/core.dart';
 import 'package:instamess_app/auth/models/auth_error_classifier.dart';
 import 'package:instamess_app/auth/models/validation_error_groups.dart';
 import 'package:instamess_app/auth/signup/bloc/signup_bloc.dart';
 import 'package:instamess_app/router/router.gr.dart';
 import 'package:formz/formz.dart';
 import 'package:core/form_inputs.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
 class DeliveryAddressPage extends StatelessWidget {
@@ -21,7 +25,8 @@ class DeliveryAddressPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // If a DeliveryAddressBloc is already provided higher in the tree (e.g., by SignupPage),
-    // reuse it. Otherwise create a new instance here.
+    // reuse it. Otherwise create a new instance here. We always provide a separate
+    // LocationFormBannerCubit next to the DeliveryAddressBloc when creating a fresh bloc.
     DeliveryAddressBloc? existingBloc;
     try {
       existingBloc = context.read<DeliveryAddressBloc>();
@@ -39,16 +44,30 @@ class DeliveryAddressPage extends StatelessWidget {
     );
 
     if (existingBloc != null) {
-      // Reuse existing bloc
-      return scaffold;
+      // Reuse existing bloc but still provide a transient cubit for banner
+      return BlocProvider<LocationFormBannerCubit>(
+        create: (context) => LocationFormBannerCubit(
+          cmsRepository: context.read<ICmsRepository>(),
+        )..loadBanner(),
+        child: scaffold,
+      );
     }
 
-    // No existing bloc found — create one local to this page
-    return BlocProvider(
-      create: (context) => DeliveryAddressBloc(
-        cmsRepository: context.read<ICmsRepository>(),
-        authFacade: context.read<IAuthFacade>(),
-      )..add(DeliveryAddressLoadedEvent()),
+    // No existing bloc found — create one local to this page and the cubit
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<DeliveryAddressBloc>(
+          create: (context) => DeliveryAddressBloc(
+            cmsRepository: context.read<ICmsRepository>(),
+            authFacade: context.read<IAuthFacade>(),
+          )..add(DeliveryAddressLoadedEvent()),
+        ),
+        BlocProvider<LocationFormBannerCubit>(
+          create: (context) => LocationFormBannerCubit(
+            cmsRepository: context.read<ICmsRepository>(),
+          )..loadBanner(),
+        ),
+      ],
       child: scaffold,
     );
   }
@@ -82,37 +101,65 @@ class _MobileWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          const Expanded(
+          Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Container(
-                  //   padding: const EdgeInsets.all(20),
-                  //   decoration: BoxDecoration(
-                  //     color: AppColors.appRed,
-                  //     borderRadius: BorderRadius.circular(12),
-                  //   ),
-                  //   child: Column(
-                  //     children: [
-                  //       Text(
-                  //         'We offer Best Food in the Word',
-                  //         style: context.tsTitleMedium18.bold.copyWith(
-                  //           color: Colors.white,
-                  //         ),
-                  //       ),
-                  //       const SizedBox(height: 4),
-                  //       Text(
-                  //         'Lorem ipsam lorem ipsam',
-                  //         style: context.tsBodyMedium14.copyWith(
-                  //           color: Colors.white.withOpacity(0.9),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 24),
-                  _DeliveryAddressForm(),
+                  BlocBuilder<LocationFormBannerCubit, DataState<Banner?>>(
+                    builder: (context, bannerState) {
+                      return bannerState.maybeMap(
+                        orElse: () => const SizedBox.shrink(),
+                        loading: (_) => const SizedBox(
+                          height: 96,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        success: (s) {
+                          final b = s.data;
+                          if (b == null || b.images.isEmpty)
+                            return const SizedBox.shrink();
+                          final image = b.images.firstWhere(
+                            (i) => i.imageUrl != null && i.imageUrl!.isNotEmpty,
+                            orElse: () => b.images.first,
+                          );
+                          if (image.imageUrl == null || image.imageUrl!.isEmpty)
+                            return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: GestureDetector(
+                              onTap: () async {
+                                final redirect = image.redirectUrl;
+                                if (redirect != null && redirect.isNotEmpty) {
+                                  final uri = Uri.tryParse(redirect);
+                                  if (uri != null) await launchUrl(uri);
+                                }
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 120,
+                                  child: CachedNetworkImage(
+                                    imageUrl: image.imageUrl!,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) =>
+                                        Container(color: AppColors.grey100),
+                                    errorWidget: (context, url, error) =>
+                                        const ColoredBox(
+                                          color: AppColors.grey100,
+                                          child: Icon(Icons.broken_image),
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  const _DeliveryAddressForm(),
                 ],
               ),
             ),

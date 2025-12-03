@@ -1,8 +1,8 @@
 import 'package:deep_pick/deep_pick.dart';
 import 'package:equatable/equatable.dart';
 import 'package:instamess_api/src/cms/models/banner.dart';
-import 'package:instamess_api/src/subscription/models/meal_subscription.dart';
 import 'package:instamess_api/src/subscription/models/subscription_contact.dart';
+import 'package:instamess_api/src/subscription/models/subscription_info.dart';
 
 /// {@template subscription_data}
 /// Complete subscription page data
@@ -10,16 +10,16 @@ import 'package:instamess_api/src/subscription/models/subscription_contact.dart'
 class SubscriptionData extends Equatable {
   /// {@macro subscription_data}
   const SubscriptionData({
-    required this.mealSubscriptions,
     required this.contact,
+    this.subscription,
     this.banner,
   });
 
   /// Creates SubscriptionData from JSON
   factory SubscriptionData.fromJson(Map<String, dynamic> json) {
     return SubscriptionData(
-      mealSubscriptions: pick(json, 'mealTypes').asListOrEmpty((pick) {
-        return MealSubscription.fromJson(pick.asMapOrThrow<String, dynamic>());
+      subscription: pick(json, 'subscription').letOrNull((pick) {
+        return SubscriptionInfo.fromJson(pick.asMapOrThrow<String, dynamic>());
       }),
       banner: pick(json, 'banner').letOrNull((pick) {
         return Banner.fromJson(pick.asMapOrThrow<String, dynamic>());
@@ -30,8 +30,8 @@ class SubscriptionData extends Equatable {
     );
   }
 
-  /// List of meal subscriptions with status
-  final List<MealSubscription> mealSubscriptions;
+  /// Active subscription details (nullable - null means no subscription)
+  final SubscriptionInfo? subscription;
 
   /// Promotional banner for subscription page (nullable)
   final Banner? banner;
@@ -42,22 +42,27 @@ class SubscriptionData extends Equatable {
   /// Converts to JSON
   Map<String, dynamic> toJson() {
     return {
-      'mealTypes': mealSubscriptions.map((e) => e.toJson()).toList(),
+      if (subscription != null) 'subscription': subscription!.toJson(),
       'banner': banner?.toJson(),
       'contact': contact.toJson(),
     };
   }
 
-  /// Returns only subscribed meals
-  List<MealSubscription> get subscribedMeals {
-    return mealSubscriptions.where((meal) => meal.isSubscribed).toList();
+  /// Returns true if user has an active subscription
+  bool get hasActiveSubscription =>
+      subscription != null && subscription!.isActive;
+
+  /// Returns list of subscribed meal type names
+  List<String> get subscribedMealTypes {
+    if (subscription == null) return [];
+    return subscription!.mealTypes.map((m) => m.type).toList();
   }
 
-  /// Returns available meals for subscription
-  List<MealSubscription> get availableMeals {
-    return mealSubscriptions.where((meal) => meal.isAvailable).toList();
-  }
+  /// Returns true if user has any subscribed meals
+  /// (used for backward compatibility with order form logic)
+  bool get hasSubscribedMeals =>
+      subscription != null && subscription!.mealTypes.isNotEmpty;
 
   @override
-  List<Object?> get props => [mealSubscriptions, banner, contact];
+  List<Object?> get props => [subscription, banner, contact];
 }

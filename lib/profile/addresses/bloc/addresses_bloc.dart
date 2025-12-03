@@ -31,6 +31,13 @@ class AddressesBloc extends Bloc<AddressesEvent, AddressesState> {
     AddressesLoadedEvent event,
     Emitter<AddressesState> emit,
   ) async {
+    // Skip fetch if we already have data (not initial/failure state)
+    if (state.addressesState is DataStateSuccess ||
+        state.addressesState is DataStateRefreshing) {
+      log('AddressesBloc: Addresses already loaded, skipping fetch');
+      return;
+    }
+
     log('AddressesBloc: Loading addresses');
     emit(state.copyWith(addressesState: DataState.loading()));
 

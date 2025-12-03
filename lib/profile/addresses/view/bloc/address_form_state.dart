@@ -53,8 +53,8 @@ class AddressFormState extends Equatable {
         zipCode: address.zipCode ?? '',
         mobile: address.mobile ?? '',
         isDefault: address.isDefault,
-        locations: [],
-        areas: [],
+        locations: const [],
+        areas: const [],
         isLoadingLocations: false,
         isLoadingAreas: false,
       );

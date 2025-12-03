@@ -1,15 +1,10 @@
-// Name: "John Doe"
-// Email: "john@example.com"
-// Mobile: "+971501234567"
-// Password: hashed "password123"
-// Status: ACTIVE
-// Verified: true
+// +971 58 889 5187
+// password
 
 import 'package:api_client/api_client.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:core/core.dart';
-import 'package:core/form_inputs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_app/auth/login/bloc/login_bloc.dart';
@@ -192,14 +187,15 @@ class _LoginFormState extends State<_LoginForm> {
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Text('Mobile Number'),
               ),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Enter Mobile Number',
-                ),
-                initialValue: state.mobile,
-                keyboardType: TextInputType.phone,
-                validator: (value) =>
-                    Phone.dirty(value ?? '').displayError?.message,
+              // Option 1: UAE-only phone input (simple, locked to UAE)
+              // UaePhoneInput(
+              //   onChanged: (value) => context.read<LoginBloc>().add(
+              //     LoginMobileChangedEvent(value),
+              //   ),
+              // ),
+
+              // Option 2: International phone input (supports multiple countries)
+              InternationalPhoneInput(
                 onChanged: (value) => context.read<LoginBloc>().add(
                   LoginMobileChangedEvent(value),
                 ),
