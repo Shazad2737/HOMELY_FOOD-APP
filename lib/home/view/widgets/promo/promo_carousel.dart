@@ -13,7 +13,7 @@ class PromoCarousel extends StatefulWidget {
     required this.banners,
     super.key,
     this.height = 120,
-    this.autoPlay = false,
+    this.autoPlay = true,
     this.autoPlayInterval = const Duration(seconds: 3),
     this.enableInfiniteScroll = true,
     this.viewportFraction = 1.0,

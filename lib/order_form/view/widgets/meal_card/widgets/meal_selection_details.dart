@@ -72,7 +72,7 @@ class MealSelectionDetails extends StatelessWidget {
 
         // Food name with code
         Text(
-          selection.food.name,
+          '${selection.food.name} (${selection.food.code ?? '-'})',
           style: context.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -115,14 +115,18 @@ class MealSelectionDetails extends StatelessWidget {
                   leadingText:
                       'Delivered with ${selection.food.deliverWith!.name}',
                   trailingIcon: Icons.delivery_dining,
-                  trailingText: '5:00 PM - 6:00 PM',
+                  trailingText: selection.food.deliveryTime != null
+                      ? selection.food.deliveryTime!.displayString
+                      : 'N/A',
                   color: AppColors.success,
                 )
               : _DeliveryInfoPill(
                   leadingIcon: Icons.location_on,
                   leadingText: selection.location.displayName,
                   trailingIcon: Icons.delivery_dining,
-                  trailingText: '5:00 PM - 6:00 PM',
+                  trailingText: selection.food.deliveryTime != null
+                      ? selection.food.deliveryTime!.displayString
+                      : 'N/A',
                   color: AppColors.success,
                 ))
         else if (selection.food.deliveryMode == DeliveryMode.separate)
@@ -130,7 +134,9 @@ class MealSelectionDetails extends StatelessWidget {
             leadingIcon: Icons.location_on,
             leadingText: selection.location.displayName,
             trailingIcon: Icons.delivery_dining,
-            trailingText: '5:00 PM - 6:00 PM',
+            trailingText: selection.food.deliveryTime != null
+                ? selection.food.deliveryTime!.displayString
+                : 'N/A',
             color: AppColors.success,
           ),
       ],

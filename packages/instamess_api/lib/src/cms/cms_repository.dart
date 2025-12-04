@@ -235,6 +235,59 @@ class CmsRepository implements ICmsRepository {
   }
 
   @override
+  Future<Either<Failure, Terms>> getTerms() async {
+    final resEither = await apiClient.get<Map<String, dynamic>>(
+      'terms',
+    );
+
+    return resEither.fold(
+      (apiFailure) async {
+        log('Error fetching terms: $apiFailure');
+        return left(apiFailure);
+      },
+      (response) async {
+        final body = response.data;
+        if (body == null) {
+          return left(
+            const UnknownApiFailure(
+              0,
+              'Unknown error occurred while fetching terms',
+            ),
+          );
+        }
+
+        try {
+          final success = body['success'] as bool? ?? false;
+          if (!success) {
+            return left(
+              const UnknownApiFailure(0, 'Failed to fetch terms'),
+            );
+          }
+
+          final data = body['data'] as Map<String, dynamic>?;
+          if (data == null) {
+            return left(
+              const UnknownApiFailure(0, 'No terms data received'),
+            );
+          }
+
+          final terms = Terms.fromJson(data);
+
+          return right(terms);
+        } catch (e, s) {
+          log('Error parsing terms response: $e', stackTrace: s);
+          return left(
+            const UnknownApiFailure(
+              0,
+              'Failed to parse terms response',
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  @override
   Future<Either<Failure, List<Category>>> getCategories() async {
     // Return cached categories if valid
     if (_categoriesCache != null && _isCacheValid()) {

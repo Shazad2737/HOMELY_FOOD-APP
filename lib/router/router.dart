@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instamess_app/auth/bloc/auth_bloc.dart';
 import 'package:instamess_app/auth/signup/bloc/signup_bloc.dart';
 import 'package:instamess_app/auth/signup/view/signup_screen.dart';
+import 'package:instamess_app/profile/terms/terms_and_conditions_screen.dart';
 import 'package:instamess_app/router/guards/auth_guard.dart';
 import 'package:instamess_app/router/router.gr.dart';
 
@@ -63,6 +64,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: OrdersRoute.page, path: '/orders'),
     AutoRoute(page: ProfileDetailRoute.page, path: '/profile/detail'),
     AutoRoute(page: AddressesRoute.page, path: '/addresses'),
+    AutoRoute(page: TermsAndConditionsRoute.page, path: '/terms'),
     AutoRoute(page: AddressFormRoute.page, path: '/addresses/form'),
     AutoRoute(page: NotificationsRoute.page, path: '/notifications'),
   ];

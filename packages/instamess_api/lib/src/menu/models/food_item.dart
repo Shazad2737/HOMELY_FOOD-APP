@@ -28,6 +28,7 @@ class FoodItem extends Equatable {
     this.style,
     this.price,
     this.deliverWith,
+    this.deliveryTime,
     this.availableLocations = const <DeliveryLocation>[],
   });
 
@@ -60,6 +61,8 @@ class FoodItem extends Equatable {
       deliveryMode: DeliveryMode.fromString(json['deliveryMode'] as String?) ??
           DeliveryMode.separate,
       deliverWith: _parseDeliverWith(json['deliverWith']),
+      deliveryTime:
+          DeliveryTime.fromJson(json['deliveryTime'] as Map<String, dynamic>?),
       availableDays: (json['availableDays'] as List<dynamic>?)
               ?.map((e) => AvailableDay.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -133,6 +136,9 @@ class FoodItem extends Equatable {
   /// Meal this item is delivered with (if deliveryMode is withOther)
   final DeliverWith? deliverWith;
 
+  /// Delivery time information
+  final DeliveryTime? deliveryTime;
+
   /// Days when this item is available
   final List<AvailableDay> availableDays;
 
@@ -165,6 +171,7 @@ class FoodItem extends Equatable {
       'isVegan': isVegan,
       'deliveryMode': deliveryMode.toApiString(),
       if (deliverWith != null) 'deliverWith': deliverWith!.toJson(),
+      if (deliveryTime != null) 'deliveryTime': deliveryTime!.toJson(),
       'availableDays': availableDays.map((e) => e.toJson()).toList(),
       'availableLocations': availableLocations.map((e) => e.toJson()).toList(),
     };
@@ -185,7 +192,98 @@ class FoodItem extends Equatable {
         isVegan,
         deliveryMode,
         deliverWith,
+        deliveryTime,
         availableDays,
         availableLocations,
+      ];
+}
+
+class DeliveryTime extends Equatable {
+  const DeliveryTime({
+    required this.start,
+    required this.end,
+  });
+
+  /// Parse from JSON
+  factory DeliveryTime.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return const DeliveryTime(
+        start: '00:00',
+        end: '00:00',
+      );
+    }
+
+    if (json['start'] == null || json['end'] == null) {
+      return const DeliveryTime(
+        start: '00:00',
+        end: '00:00',
+      );
+    }
+
+    if (json['start'] is String? && json['end'] is String?) {
+      return DeliveryTime(
+        start: json['start'] as String? ?? '00:00',
+        end: json['end'] as String? ?? '00:00',
+      );
+    }
+
+    if (json['start'] is num? && json['end'] is num?) {
+      // "deliveryTime": {start: 17:00, end: 20:00},
+      return DeliveryTime(
+        start: (json['start'] as num?).toString(),
+        end: (json['end'] as num?).toString(),
+      );
+    }
+
+    return DeliveryTime(
+      start: json['start'] as String? ?? '00:00',
+      end: json['end'] as String? ?? '00:00',
+    );
+  }
+
+  /// Start time in HH:mm format
+  final String start;
+
+  /// End time in HH:mm format
+  final String end;
+
+  // times will be in 24-hour HH:mm format, we need to convert them to a more
+  //user-friendly format
+  // eg 17:00 - 20:00 -> 5:00 PM - 8:00 PM
+  String get displayString {
+    String formatTime(String time) {
+      final parts = time.split(':');
+      if (parts.length != 2) return time;
+
+      var hour = int.tryParse(parts[0]) ?? 0;
+      final minute = parts[1];
+      final period = hour >= 12 ? 'PM' : 'AM';
+
+      if (hour > 12) {
+        hour -= 12;
+      } else if (hour == 0) {
+        hour = 12;
+      }
+
+      return '$hour:$minute $period';
+    }
+
+    final formattedStart = formatTime(start);
+    final formattedEnd = formatTime(end);
+    return '$formattedStart - $formattedEnd';
+  }
+
+  /// Convert to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'start': start,
+      'end': end,
+    };
+  }
+
+  @override
+  List<Object?> get props => [
+        start,
+        end,
       ];
 }

@@ -20,4 +20,7 @@ abstract class ICmsRepository {
 
   /// Get banner for location form (nullable)
   Future<Either<Failure, Banner?>> getLocationFormBanner();
+
+  /// Get latest Terms & Conditions
+  Future<Either<Failure, Terms>> getTerms();
 }

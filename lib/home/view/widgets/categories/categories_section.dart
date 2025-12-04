@@ -52,7 +52,9 @@ class _CategorySelector extends StatelessWidget {
                 ? NetworkImage(category.imageUrl!)
                 : appImages.foodRoundSmall1.provider(),
             onTap: () {
-              context.router.push(MenuRoute(category: category));
+              context.router.popAndPushAll(
+                [MenuRoute(category: category)],
+              );
             },
           );
         },

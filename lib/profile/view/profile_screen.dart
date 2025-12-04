@@ -195,6 +195,13 @@ class _ProfileContent extends StatelessWidget {
             ),
           ),
           const Divider(height: 32),
+          _Tile(
+            icon: Icons.description_outlined,
+            title: 'Terms & Conditions',
+            onTap: () {
+              context.router.push(const TermsAndConditionsRoute());
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.logout, color: AppColors.error),
             title: Text(

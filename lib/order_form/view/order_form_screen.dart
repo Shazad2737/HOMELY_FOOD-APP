@@ -74,7 +74,7 @@ class _OrderFormGuard extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: const Text('New Order'),
-              centerTitle: false,
+              centerTitle: true,
             ),
             body: const Center(child: CircularProgressIndicator()),
           );
@@ -85,7 +85,7 @@ class _OrderFormGuard extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: const Text('New Order'),
-              centerTitle: false,
+              centerTitle: true,
             ),
             body: const NoAddressScreen(),
           );
@@ -160,7 +160,7 @@ class OrderFormView extends StatelessWidget {
           backgroundColor: AppColors.grey50,
           appBar: AppBar(
             title: const Text('New Order'),
-            centerTitle: false,
+            centerTitle: true,
             elevation: 0,
             backgroundColor: AppColors.white,
             surfaceTintColor: AppColors.white,
