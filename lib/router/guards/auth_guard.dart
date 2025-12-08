@@ -1,21 +1,28 @@
 import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/auth/bloc/auth_bloc.dart';
 import 'package:instamess_app/router/router.gr.dart';
 
 /// {@template auth_guard}
 /// Authentication guard that handles route protection and redirects
-/// based on the current authentication state.
+/// based on the current authentication state and onboarding status.
 /// {@endtemplate}
 class AuthGuard extends AutoRouteGuard {
   /// {@macro auth_guard}
-  AuthGuard({required this.authBloc}) {
+  AuthGuard({
+    required this.authBloc,
+    required this.onboardingRepository,
+  }) {
     log('AuthGuard: Created for routing protection');
   }
 
   /// Auth bloc to check authentication state
   final AuthBloc authBloc;
+
+  /// Repository to check onboarding completion status
+  final IOnboardingRepository onboardingRepository;
 
   @override
   Future<void> onNavigation(
@@ -31,15 +38,46 @@ class AuthGuard extends AutoRouteGuard {
     final root = router.root as StackRouter;
     final topName = root.topRoute.name;
 
+    // Check if onboarding is completed
+    final onboardingResult = await onboardingRepository
+        .isOnboardingCompleted()
+        .run();
+    final onboardingCompleted = onboardingResult.match(
+      () => false,
+      (value) => value,
+    );
+
+    // If onboarding not completed, handle separately
+    if (!onboardingCompleted) {
+      // Allow access to OnboardingRoute
+      if (routeName == OnboardingRoute.name) {
+        log('AuthGuard: Allowing access to onboarding (not completed yet)');
+        resolver.next();
+        return;
+      }
+      // Redirect to onboarding from any other route
+      log('AuthGuard: Onboarding not completed, redirecting to onboarding');
+      const target = OnboardingRoute();
+      if (topName != target.routeName) {
+        await root.replaceAll(<PageRouteInfo>[target]);
+        resolver.next(false);
+      } else {
+        resolver.next();
+      }
+      return;
+    }
+
+    // Onboarding is completed, proceed with auth checks
     switch (state) {
       case Authenticated():
         // User is authenticated - allow access to protected routes
 
-        // If trying to access login, signup, otp or splash, redirect to main
+        // If trying to access login, signup, otp, splash or onboarding, redirect to main
         if (routeName == LoginRoute.name ||
             routeName == SplashRoute.name ||
             routeName == SignupRoute.name ||
-            routeName == OtpRoute.name) {
+            routeName == OtpRoute.name ||
+            routeName == OnboardingRoute.name) {
           const target = MainShellRoute();
           if (topName != target.routeName) {
             log(
@@ -62,20 +100,18 @@ class AuthGuard extends AutoRouteGuard {
         final isPublicRoute =
             routeName == LoginRoute.name ||
             routeName == SignupRoute.name ||
-            routeName == OtpRoute.name;
-        print('---isPublicRoute: $isPublicRoute');
+            routeName == OtpRoute.name ||
+            routeName == OnboardingRoute.name;
         if (!isPublicRoute) {
           if (topName != target.routeName) {
             log('AuthGuard: Replacing stack with login (unauthenticated)');
             await root.replaceAll(<PageRouteInfo>[target]);
             resolver.next(false);
           } else {
-            print('---resolver.next()');
             resolver.next();
           }
         } else {
           log('AuthGuard: Allowing access to $routeName (unauthenticated)');
-          print('---resolver.next()');
           resolver.next();
         }
 

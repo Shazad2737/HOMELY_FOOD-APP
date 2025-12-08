@@ -6,7 +6,7 @@ Future<void> main() async {
   await bootstrap(
     () {
       // final api = InstaMessApi(baseUrl: 'http://localhost:4000');
-      final api = InstaMessApi(baseUrl: 'https://instamess-app.iotics.me/');
+      final api = InstaMessApi(baseUrl: 'http://192.168.1.5:5000');
       return App(
         api: api,
         releaseMode: ReleaseMode.development,

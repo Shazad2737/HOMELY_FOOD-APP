@@ -71,6 +71,22 @@ class $AssetsImagesGen {
   AssetGenImage get menuHeader =>
       const AssetGenImage('assets/images/menu_header.png');
 
+  /// File path: assets/images/onboarding-1.png
+  AssetGenImage get onboarding1 =>
+      const AssetGenImage('assets/images/onboarding-1.png');
+
+  /// File path: assets/images/onboarding-2.png
+  AssetGenImage get onboarding2 =>
+      const AssetGenImage('assets/images/onboarding-2.png');
+
+  /// File path: assets/images/onboarding-3.png
+  AssetGenImage get onboarding3 =>
+      const AssetGenImage('assets/images/onboarding-3.png');
+
+  /// File path: assets/images/onboarding-4.png
+  AssetGenImage get onboarding4 =>
+      const AssetGenImage('assets/images/onboarding-4.png');
+
   /// File path: assets/images/popcorn.png
   AssetGenImage get popcorn => const AssetGenImage('assets/images/popcorn.png');
 
@@ -91,6 +107,10 @@ class $AssetsImagesGen {
         foodRoundSmall2,
         foodRoundSmall3,
         menuHeader,
+        onboarding1,
+        onboarding2,
+        onboarding3,
+        onboarding4,
         popcorn,
         promoBannerBottom
       ];

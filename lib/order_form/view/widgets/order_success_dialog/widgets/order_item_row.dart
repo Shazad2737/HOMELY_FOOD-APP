@@ -57,7 +57,10 @@ class OrderItemRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.foodItem.name,
+                item.foodItem.name +
+                    ((item.foodItem.code?.isNotEmpty ?? false)
+                        ? ' ${item.foodItem.code!}'
+                        : ''),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),

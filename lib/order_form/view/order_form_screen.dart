@@ -1,3 +1,4 @@
+import 'package:api_client/api_client.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -56,44 +57,198 @@ class _OrderFormGuard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AddressesBloc, AddressesState>(
       builder: (context, addressesState) {
-        // Check if user has any addresses
-        final hasAddresses = addressesState.addressesState.maybeMap(
-          success: (s) => s.data.addresses.isNotEmpty,
-          refreshing: (r) => r.currentData.addresses.isNotEmpty,
-          orElse: () => false,
+        return addressesState.addressesState.map(
+          initial: (_) => _buildScaffold(const _LoadingIndicator()),
+          loading: (_) => _buildScaffold(const _LoadingIndicator()),
+          failure: (f) => _buildScaffold(
+            _AddressesErrorContent(failure: f.failure),
+          ),
+          refreshing: (r) => _handleAddressesData(r.currentData.addresses),
+          success: (s) => _handleAddressesData(s.data.addresses),
         );
-
-        // Show loading while checking addresses
-        final isLoadingAddresses = addressesState.addressesState.maybeMap(
-          initial: (_) => true,
-          loading: (_) => true,
-          orElse: () => false,
-        );
-
-        if (isLoadingAddresses) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('New Order'),
-              centerTitle: true,
-            ),
-            body: const Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        // Block order form if user has no addresses
-        if (!hasAddresses) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('New Order'),
-              centerTitle: true,
-            ),
-            body: const NoAddressScreen(),
-          );
-        }
-
-        // User has addresses, show normal order form
-        return const OrderFormView();
       },
+    );
+  }
+
+  Widget _buildScaffold(Widget body) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('New Order'),
+        centerTitle: true,
+      ),
+      body: body,
+    );
+  }
+
+  Widget _handleAddressesData(List<CustomerAddress> addresses) {
+    if (addresses.isEmpty) {
+      return _buildScaffold(const NoAddressScreen());
+    }
+    return const OrderFormView();
+  }
+}
+
+/// Error content for address loading failures
+class _AddressesErrorContent extends StatelessWidget {
+  const _AddressesErrorContent({required this.failure});
+
+  final Failure failure;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.location_off_rounded,
+              size: 64,
+              color: AppColors.error.withValues(alpha: 0.7),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Unable to load addresses',
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              failure.message,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: AppColors.grey600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () {
+                context.read<AddressesBloc>().add(const AddressesLoadedEvent());
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// {@template order_form_body}
+/// Body widget that handles all states: subscription → available days
+/// {@endtemplate}
+class _OrderFormBody extends StatelessWidget {
+  const _OrderFormBody({required this.state});
+
+  final OrderFormState state;
+
+  @override
+  Widget build(BuildContext context) {
+    // Step 1: Handle subscription state first
+    return state.subscriptionState.map(
+      initial: (_) => const _LoadingIndicator(),
+      loading: (_) => const _LoadingIndicator(),
+      failure: (f) => _SubscriptionErrorContent(failure: f.failure),
+      refreshing: (r) => _buildAvailableDaysContent(context, r.currentData),
+      success: (s) => _buildAvailableDaysContent(context, s.data),
+    );
+  }
+
+  Widget _buildAvailableDaysContent(
+    BuildContext context,
+    SubscriptionData subscriptionData,
+  ) {
+    // Step 2: Check if user has active subscription
+    if (!subscriptionData.hasSubscribedMeals) {
+      return NoSubscriptionScreen(subscriptionData: subscriptionData);
+    }
+
+    // Step 3: Handle available days state
+    return state.availableDaysState.map(
+      initial: (_) => const _LoadingIndicator(),
+      loading: (_) => const _LoadingIndicator(),
+      failure: (f) => ErrorContentWidget(failure: f.failure),
+      refreshing: (r) => _buildOrderForm(context, r.currentData),
+      success: (s) => _buildOrderForm(context, s.data),
+    );
+  }
+
+  Widget _buildOrderForm(BuildContext context, AvailableOrderDays data) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<OrderFormBloc>().add(const OrderFormRefreshedEvent());
+        // Wait for refresh to complete
+        await context.read<OrderFormBloc>().stream.firstWhere(
+          (s) =>
+              !s.subscriptionState.isRefreshing &&
+              !s.availableDaysState.isRefreshing,
+        );
+      },
+      child: OrderFormContentWidget(state: state, data: data),
+    );
+  }
+}
+
+/// Loading indicator widget
+class _LoadingIndicator extends StatelessWidget {
+  const _LoadingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: CircularProgressIndicator());
+  }
+}
+
+/// Error content for subscription failures with retry
+class _SubscriptionErrorContent extends StatelessWidget {
+  const _SubscriptionErrorContent({required this.failure});
+
+  final Failure failure;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 64,
+              color: AppColors.error.withValues(alpha: 0.7),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Unable to load subscription',
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              failure.message,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: AppColors.grey600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () {
+                context.read<OrderFormBloc>().add(const OrderFormLoadedEvent());
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -109,8 +264,7 @@ class OrderFormView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<OrderFormBloc, OrderFormState>(
       listenWhen: (previous, current) {
-        // Only listen when createOrderState changes (prevents infinite loop)
-        // Listen on transitions to success or failure
+        // Listen on transitions to success or failure for order creation
         return previous.createOrderState != current.createOrderState &&
             current.createOrderState.maybeMap(
               success: (_) => true,
@@ -119,12 +273,8 @@ class OrderFormView extends StatelessWidget {
             );
       },
       listener: (context, state) {
-        // Handle order creation success
         state.createOrderState.maybeMap(
-          success: (s) {
-            // Show success dialog instead of just snackbar
-            _showSuccessDialog(context, s.data);
-          },
+          success: (s) => _showSuccessDialog(context, s.data),
           failure: (f) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -137,25 +287,6 @@ class OrderFormView extends StatelessWidget {
         );
       },
       builder: (context, state) {
-        // Check subscription state first
-        final isLoadingSubscription = state.subscriptionState.maybeMap(
-          initial: (_) => true,
-          loading: (_) => true,
-          orElse: () => false,
-        );
-
-        final hasNoSubscription = state.subscriptionState.maybeMap(
-          success: (s) => !s.data.hasSubscribedMeals,
-          orElse: () => false,
-        );
-
-        // Get subscription data for NoSubscriptionScreen
-        final subscriptionData = state.subscriptionState.maybeMap(
-          success: (s) => s.data,
-          refreshing: (r) => r.currentData,
-          orElse: () => null,
-        );
-
         return Scaffold(
           backgroundColor: AppColors.grey50,
           appBar: AppBar(
@@ -165,66 +296,30 @@ class OrderFormView extends StatelessWidget {
             backgroundColor: AppColors.white,
             surfaceTintColor: AppColors.white,
           ),
-          body: _buildBody(
-            context,
-            state,
-            isLoadingSubscription,
-            hasNoSubscription,
-            subscriptionData,
-          ),
-          // Hide bottom bar when no subscription or loading
-          bottomNavigationBar: (isLoadingSubscription || hasNoSubscription)
-              ? null
-              : const BottomSubmitSection(),
+          body: _OrderFormBody(state: state),
+          bottomNavigationBar: _shouldShowBottomBar(state)
+              ? const BottomSubmitSection()
+              : null,
         );
       },
     );
   }
 
-  Widget _buildBody(
-    BuildContext context,
-    OrderFormState state,
-    bool isLoadingSubscription,
-    bool hasNoSubscription,
-    SubscriptionData? subscriptionData,
-  ) {
-    // Show loading while checking subscription
-    if (isLoadingSubscription) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // Show no subscription screen if user has no active subscription
-    if (hasNoSubscription) {
-      return NoSubscriptionScreen(subscriptionData: subscriptionData);
-    }
-
-    // Show available days state
-    return state.availableDaysState.map(
-      initial: (_) => const Center(child: CircularProgressIndicator()),
-      loading: (_) => const Center(child: CircularProgressIndicator()),
-      success: (s) => RefreshIndicator(
-        onRefresh: () async {
-          context.read<OrderFormBloc>().add(
-            const OrderFormRefreshedEvent(),
-          );
-          // Wait for the refresh to complete
-          await context.read<OrderFormBloc>().stream.firstWhere(
-            (state) => !state.availableDaysState.isRefreshing,
-          );
-        },
-        child: OrderFormContentWidget(state: state, data: s.data),
-      ),
-      failure: (f) => ErrorContentWidget(failure: f.failure),
-      refreshing: (r) => RefreshIndicator(
-        onRefresh: () async {
-          // Already refreshing, just wait for completion
-          await context.read<OrderFormBloc>().stream.firstWhere(
-            (state) => !state.availableDaysState.isRefreshing,
-          );
-        },
-        child: OrderFormContentWidget(state: state, data: r.currentData),
-      ),
+  bool _shouldShowBottomBar(OrderFormState state) {
+    // Only show bottom bar when we have active subscription and available days
+    final hasSubscription = state.subscriptionState.maybeMap(
+      success: (s) => s.data.hasSubscribedMeals,
+      refreshing: (r) => r.currentData.hasSubscribedMeals,
+      orElse: () => false,
     );
+
+    final hasAvailableDays = state.availableDaysState.maybeMap(
+      success: (_) => true,
+      refreshing: (_) => true,
+      orElse: () => false,
+    );
+
+    return hasSubscription && hasAvailableDays;
   }
 
   void _showSuccessDialog(BuildContext context, CreateOrderResponse order) {

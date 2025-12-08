@@ -199,7 +199,18 @@ class _ProfileContent extends StatelessWidget {
             icon: Icons.description_outlined,
             title: 'Terms & Conditions',
             onTap: () {
-              context.router.push(const TermsAndConditionsRoute());
+              context.router.push(TermsAndConditionsRoute());
+            },
+          ),
+          _Tile(
+            icon: Icons.privacy_tip_outlined,
+            title: 'Privacy Policy',
+            onTap: () {
+              context.router.push(
+                TermsAndConditionsRoute(
+                  isPrivacyPolicy: true,
+                ),
+              );
             },
           ),
           ListTile(

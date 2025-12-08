@@ -45,7 +45,7 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     authBloc = AuthBloc(widget.api.authFacade, widget.api.sessionManager);
-    appRouter = AppRouter(authBloc);
+    appRouter = AppRouter(authBloc, widget.api.onboardingRepository);
   }
 
   late final AuthBloc authBloc;
@@ -76,6 +76,9 @@ class _AppState extends State<App> {
         ),
         RepositoryProvider(
           create: (context) => widget.api.userRepository,
+        ),
+        RepositoryProvider(
+          create: (context) => widget.api.onboardingRepository,
         ),
       ],
       child: MultiBlocProvider(

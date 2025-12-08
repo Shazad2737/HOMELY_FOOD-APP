@@ -169,7 +169,7 @@ class _SuccessContent extends StatelessWidget {
             // Active subscription details
             if (subscription != null) ...[
               SubscriptionDetailsCard(subscription: subscription),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
             ],
 
             // No active subscription message
@@ -205,7 +205,7 @@ class _SuccessContent extends StatelessWidget {
 
             if (data.banner != null && data.banner!.images.isNotEmpty) ...[
               PromotionalBanner(banner: data.banner!),
-              const SizedBox(height: 32),
+              const SizedBox(height: 12),
             ],
 
             if (data.contact.whatsapp != null) ...[

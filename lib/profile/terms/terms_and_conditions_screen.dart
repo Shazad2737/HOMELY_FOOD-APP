@@ -9,7 +9,10 @@ import 'package:instamess_app/profile/terms/bloc/terms_cubit.dart';
 
 @RoutePage()
 class TermsAndConditionsScreen extends StatelessWidget {
-  const TermsAndConditionsScreen({super.key});
+  const TermsAndConditionsScreen({super.key, this.isPrivacyPolicy = false});
+
+  /// Set to true to show Privacy Policy instead of Terms & Conditions
+  final bool isPrivacyPolicy;
 
   @override
   Widget build(BuildContext context) {
@@ -17,19 +20,21 @@ class TermsAndConditionsScreen extends StatelessWidget {
       create: (ctx) => TermsCubit(
         cmsRepository: ctx.read<ICmsRepository>(),
       )..loadTerms(),
-      child: const _TermsAndConditionsView(),
+      child: _TermsAndConditionsView(isPrivacyPolicy: isPrivacyPolicy),
     );
   }
 }
 
 class _TermsAndConditionsView extends StatelessWidget {
-  const _TermsAndConditionsView({super.key});
+  const _TermsAndConditionsView({required this.isPrivacyPolicy, super.key});
+
+  final bool isPrivacyPolicy;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Terms & Conditions'),
+        title: Text(isPrivacyPolicy ? 'Privacy Policy' : 'Terms & Conditions'),
       ),
       body: BlocBuilder<TermsCubit, DataState<Terms>>(
         builder: (context, state) {
@@ -44,7 +49,11 @@ class _TermsAndConditionsView extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppDims.screenPadding),
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: Html(data: s.data.termsAndConditions),
+                child: Html(
+                  data: isPrivacyPolicy
+                      ? s.data.privacyPolicy
+                      : s.data.termsAndConditions,
+                ),
               ),
             ),
             refreshing: (r) => RefreshIndicator(
@@ -54,7 +63,11 @@ class _TermsAndConditionsView extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppDims.screenPadding),
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: Html(data: r.currentData.termsAndConditions),
+                child: Html(
+                  data: isPrivacyPolicy
+                      ? r.currentData.privacyPolicy
+                      : r.currentData.termsAndConditions,
+                ),
               ),
             ),
           );

@@ -9,14 +9,14 @@ enum SubscriptionStatus {
   /// Active subscription
   active,
 
-  /// Paused subscription
-  paused,
-
   /// Expired subscription
   expired,
 
   /// Cancelled subscription
   cancelled,
+
+  /// Pending subscription
+  pending,
 
   /// Unknown status
   unknown;
@@ -35,8 +35,8 @@ enum SubscriptionStatus {
     switch (this) {
       case SubscriptionStatus.active:
         return 'Active';
-      case SubscriptionStatus.paused:
-        return 'Paused';
+      case SubscriptionStatus.pending:
+        return 'Pending';
       case SubscriptionStatus.expired:
         return 'Expired';
       case SubscriptionStatus.cancelled:
@@ -135,7 +135,22 @@ class SubscriptionInfo extends Equatable {
   }
 
   /// Returns true if subscription is active
-  bool get isActive => status.isActive;
+  bool get isActive {
+    // First ensure the API status is active
+    if (!status.isActive) return false;
+
+    // Then check the start date locally: subscription should only be
+    // considered active if the start date is today or in the past.
+    try {
+      final start = DateTime.parse(startDate);
+      // If the start date is in the future, it's not active yet.
+      if (start.isAfter(DateTime.now())) return false;
+      return true;
+    } catch (_) {
+      // If parsing fails, fallback to the API-provided status
+      return status.isActive;
+    }
+  }
 
   /// Formats date range for display (e.g., "03-December-2025 - 03-January-2026")
   String get formattedDateRange {
@@ -162,9 +177,33 @@ class SubscriptionInfo extends Equatable {
     }
   }
 
-  /// Returns remaining days in subscription
-  int get remainingDays {
+  /// Returns a display name for the subscription status that accounts for
+  /// the local start date check. If the API reports `ACTIVE` but the
+  /// subscription's `startDate` is in the future, this will return
+  /// `Pending` instead of `Active` so the UI does not show "Active"
+  /// prematurely.
+  String get effectiveStatusDisplayName {
     try {
+      if (status.isActive) {
+        final start = DateTime.parse(startDate);
+        if (start.isAfter(DateTime.now()))
+          return SubscriptionStatus.pending.displayName;
+      }
+    } catch (_) {
+      // ignore parse errors and fall back to API status
+    }
+    return status.displayName;
+  }
+
+  /// Returns remaining days in subscription. Returns null if start date is in
+  /// future or end date is invalid.
+  int? get remainingDays {
+    try {
+      if (DateTime.parse(startDate).isAfter(DateTime.now()) ||
+          endDate.isEmpty ||
+          DateTime.parse(endDate).isBefore(DateTime.now())) {
+        return null;
+      }
       final end = DateTime.parse(endDate);
       final now = DateTime.now();
       final difference = end.difference(now).inDays;

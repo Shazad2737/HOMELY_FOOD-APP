@@ -19,6 +19,9 @@ abstract class IInstaMessApi {
 
   /// User Repository (orders, subscriptions, profile)
   IUserRepository get userRepository;
+
+  /// Onboarding Repository
+  IOnboardingRepository get onboardingRepository;
 }
 
 /// {@template instamess_api}
@@ -67,6 +70,11 @@ class InstaMessApi implements IInstaMessApi {
 
     // Create User repository
     _userRepository = UserRepository(_apiClient);
+
+    // Create Onboarding repository
+    _onboardingRepository = OnboardingRepository(
+      storageController: _storageController,
+    );
   }
 
   final IStorageController _storageController;
@@ -77,6 +85,7 @@ class InstaMessApi implements IInstaMessApi {
   late final IMenuRepository _menuRepository;
   late final INotificationRepository _notificationRepository;
   late final IUserRepository _userRepository;
+  late final IOnboardingRepository _onboardingRepository;
 
   /// {@macro auth_facade}
   @override
@@ -96,6 +105,9 @@ class InstaMessApi implements IInstaMessApi {
 
   @override
   IUserRepository get userRepository => _userRepository;
+
+  @override
+  IOnboardingRepository get onboardingRepository => _onboardingRepository;
 }
 
 class MockInstaMessApi implements IInstaMessApi {
@@ -133,4 +145,8 @@ class MockInstaMessApi implements IInstaMessApi {
 
   @override
   IUserRepository get userRepository => throw UnimplementedError();
+
+  @override
+  IOnboardingRepository get onboardingRepository =>
+      throw UnimplementedError();
 }

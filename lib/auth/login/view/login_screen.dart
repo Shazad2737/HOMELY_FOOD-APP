@@ -87,35 +87,69 @@ class _MobileWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              text: 'By Continuing you agree instamess ',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.grey500,
-                fontWeight: FontWeight.w400,
-                fontSize: 10,
-                height: 1.5,
-              ),
-
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                TextSpan(
-                  text:
-                      'Terms${kNonBreakingSpace}of${kNonBreakingSpace}services',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.black,
-                  ),
-                ),
-                TextSpan(
-                  text: ' and ',
+                Text(
+                  'By Continuing you agree instamess ',
+                  textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.grey500,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 10,
+                    height: 1.5,
                   ),
                 ),
-                TextSpan(
-                  text: 'Privacy${kNonBreakingSpace}Policy',
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    alignment: Alignment.centerLeft,
+                  ),
+                  onPressed: () {
+                    context.router.push(TermsAndConditionsRoute());
+                  },
+                  child: Text(
+                    'Terms${kNonBreakingSpace}of${kNonBreakingSpace}services',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.black,
+                      fontSize: 10,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                Text(
+                  ' and ',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.black,
+                    color: AppColors.grey500,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 10,
+                    height: 1.5,
+                  ),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    alignment: Alignment.centerLeft,
+                  ),
+                  onPressed: () {
+                    context.router.push(
+                      TermsAndConditionsRoute(isPrivacyPolicy: true),
+                    );
+                  },
+                  child: Text(
+                    'Privacy${kNonBreakingSpace}Policy',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.black,
+                      fontSize: 10,
+                      height: 1.5,
+                    ),
                   ),
                 ),
               ],

@@ -42,11 +42,11 @@ class SubscriptionDetailsCard extends StatelessWidget {
                 _PlanAndCategorySection(subscription: subscription),
                 const SizedBox(height: 12),
                 _DateSection(subscription: subscription),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 _MealTypesSection(subscription: subscription),
                 if (subscription.notes != null &&
                     subscription.notes!.isNotEmpty) ...[
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
                   _NotesSection(notes: subscription.notes!),
                 ],
               ],
@@ -65,7 +65,7 @@ class _StatusHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = subscription.status.isActive;
+    final isActive = subscription.isActive;
     final statusColor = isActive ? AppColors.success : AppColors.appRed;
 
     return Container(
@@ -90,7 +90,7 @@ class _StatusHeader extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                subscription.status.displayName,
+                subscription.effectiveStatusDisplayName,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: statusColor,
                   fontWeight: FontWeight.w600,
@@ -98,7 +98,9 @@ class _StatusHeader extends StatelessWidget {
               ),
             ],
           ),
-          if (isActive && subscription.remainingDays > 0)
+          if (isActive &&
+              subscription.remainingDays != null &&
+              subscription.remainingDays! > 0)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(

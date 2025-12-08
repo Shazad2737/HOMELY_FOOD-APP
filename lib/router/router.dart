@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instamess_api/instamess_api.dart';
 import 'package:instamess_app/auth/bloc/auth_bloc.dart';
 import 'package:instamess_app/auth/signup/bloc/signup_bloc.dart';
 import 'package:instamess_app/auth/signup/view/signup_screen.dart';
+import 'package:instamess_app/onboarding/view/onboarding_page.dart';
 import 'package:instamess_app/profile/terms/terms_and_conditions_screen.dart';
 import 'package:instamess_app/router/guards/auth_guard.dart';
 import 'package:instamess_app/router/router.gr.dart';
@@ -16,7 +18,7 @@ import 'package:instamess_app/router/router.gr.dart';
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
   /// Constructs an [AppRouter]
-  AppRouter(this.authBloc) {
+  AppRouter(this.authBloc, this.onboardingRepository) {
     log('AppRouter: Constructor called with AuthBloc state: ${authBloc.state}');
   }
 
@@ -25,9 +27,19 @@ class AppRouter extends RootStackRouter {
   /// Used to check the authentication state of the user
   final AuthBloc authBloc;
 
+  /// Onboarding repository
+  ///
+  /// Used to check the onboarding status of the user
+  final IOnboardingRepository onboardingRepository;
+
   @override
   List<AutoRouteGuard> get guards {
-    return [AuthGuard(authBloc: authBloc)];
+    return [
+      AuthGuard(
+        authBloc: authBloc,
+        onboardingRepository: onboardingRepository,
+      ),
+    ];
   }
 
   @override
@@ -35,6 +47,9 @@ class AppRouter extends RootStackRouter {
     AutoRoute(
       page: SplashRoute.page,
       initial: true,
+    ),
+    AutoRoute(
+      page: OnboardingRoute.page,
     ),
     AutoRoute(
       page: LoginRoute.page,

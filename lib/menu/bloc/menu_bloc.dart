@@ -248,6 +248,15 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
               menuState: DataState.success(menuData),
             ),
           );
+          // If no plan is currently selected but the backend returned available
+          // plans, default to the first plan and trigger a selection event so
+          // the menu is re-fetched for that plan. This avoids showing "all"
+          // mixed-plan results and makes the UI default to a concrete plan.
+          if (state.selectedPlan == null && menuData.availablePlans.isNotEmpty) {
+            log('MenuBloc: No selected plan - defaulting to first available plan');
+            // Dispatch plan selection to reuse existing selection/fetch logic.
+            add(MenuPlanSelectedEvent(plan: menuData.availablePlans.first));
+          }
         },
       );
     } catch (e, s) {

@@ -80,6 +80,7 @@ class _OrdersViewState extends State<OrdersView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         title: const Text('My Orders'),
         centerTitle: false,

@@ -17,29 +17,17 @@ class PlanSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Add "All Plans" option at the beginning
+    // NOTE: The "All Plans" toggle has been removed/disabled for now.
+    // If needed in future, re-enable by adding an initial "All Plans" item.
     return SizedBox(
       height: 48,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
-        itemCount: plans.length + 1, // +1 for "All Plans"
+        itemCount: plans.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          // "All Plans" option
-          if (index == 0) {
-            return _PlanChip(
-              name: 'All Plans',
-              isSelected: selectedPlan == null,
-              onTap: () {
-                context.read<MenuBloc>().add(
-                  MenuPlanSelectedEvent(),
-                );
-              },
-            );
-          }
-
-          final plan = plans[index - 1];
+          final plan = plans[index];
           final isSelected = selectedPlan?.id == plan.id;
 
           return _PlanChip(

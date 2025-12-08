@@ -27,6 +27,14 @@ class StorageKey<T> {
     parser: User.fromJsonString,
   );
 
+  /// Onboarding completed flag
+  static const onboardingCompleted = StorageKey<bool>(
+    name: 'onboardingCompleted',
+    parser: _parseBool,
+  );
+
+  static bool _parseBool(String value) => value.toLowerCase() == 'true';
+
   /// The name of the key.
   final String name;
 
