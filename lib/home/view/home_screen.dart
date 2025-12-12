@@ -1,0 +1,501 @@
+import 'package:api_client/api_client.dart';
+import 'package:app_ui/app_ui.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instamess_api/instamess_api.dart';
+import 'package:instamess_app/home/bloc/home_bloc.dart';
+import 'package:instamess_app/home/view/widgets/categories/categories_section.dart';
+import 'package:instamess_app/home/view/widgets/promo/promo.dart';
+import 'package:instamess_app/notifications/bloc/notifications_bloc.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_bloc.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_event.dart';
+import 'package:instamess_app/profile/addresses/bloc/addresses_state.dart';
+import 'package:instamess_app/profile/bloc/profile_bloc.dart';
+import 'package:instamess_app/profile/bloc/profile_event.dart';
+import 'package:instamess_app/router/router.gr.dart';
+import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
+
+@RoutePage()
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => HomeBloc(
+        cmsRepository: context.read<ICmsRepository>(),
+      )..add(HomeLoadedEvent()),
+      child: const _HomeScreenContent(),
+    );
+  }
+}
+
+class _HomeScreenContent extends StatefulWidget {
+  const _HomeScreenContent();
+
+  @override
+  State<_HomeScreenContent> createState() => _HomeScreenContentState();
+}
+
+class _HomeScreenContentState extends State<_HomeScreenContent>
+    with AutoRouteAwareStateMixin<_HomeScreenContent> {
+  @override
+  void initState() {
+    context.read<ProfileBloc>().add(const ProfileLoadedEvent());
+    context.read<AddressesBloc>().add(const AddressesLoadedEvent());
+    super.initState();
+  }
+
+  @override
+  void didChangeTabRoute(TabPageRoute previousRoute) {
+    super.didChangeTabRoute(previousRoute);
+    // When home tab becomes visible, trigger smart refresh
+    // This ensures fresh notifications when switching tabs
+    if (mounted) {
+      context.read<NotificationsBloc>().add(NotificationsSmartRefreshedEvent());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          return RefreshIndicator(
+            onRefresh: () async {
+              context.read<HomeBloc>().add(HomeRefreshedEvent());
+              context.read<NotificationsBloc>().add(
+                NotificationsSmartRefreshedEvent(),
+              );
+              context.read<ProfileBloc>().add(const ProfileLoadedEvent());
+              await context.read<HomeBloc>().stream.firstWhere(
+                (state) => !state.isRefreshing,
+              );
+            },
+            child: CustomScrollView(
+              slivers: [
+                _AppBarSection(state: state),
+                const _AddAddressBannerSection(),
+                _ContentSection(state: state),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AppBarSection extends StatelessWidget {
+  const _AppBarSection({required this.state});
+
+  final HomeState state;
+
+  @override
+  Widget build(BuildContext context) {
+    // Get user name from ProfileBloc
+    final profileState = context.watch<ProfileBloc>().state;
+    final userName = profileState.displayName;
+    // Extract first name
+    final firstName = userName.split(' ').first;
+
+    // Get notification badge state from NotificationsBloc
+    final notificationsState = context.watch<NotificationsBloc>().state;
+    final hasUnreadNotifications = notificationsState.hasUnreadNotifications;
+
+    return SliverAppBar(
+      automaticallyImplyLeading: false,
+      title: Text('Hi, $firstName', style: context.textTheme.titleLarge),
+      pinned: true,
+      centerTitle: false,
+      backgroundColor: AppColors.white,
+      actions: [
+        Stack(
+          children: [
+            IconButton(
+              onPressed: () {
+                context.router.pushNamed('/notifications');
+              },
+              style: IconButton.styleFrom(
+                foregroundColor: AppColors.appBarIcon,
+              ),
+              icon: const Icon(Icons.notifications_outlined),
+            ),
+            if (hasUnreadNotifications)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ContentSection extends StatelessWidget {
+  const _ContentSection({required this.state});
+
+  final HomeState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return state.homePageState.map(
+      initial: (_) => const SliverFillRemaining(
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      loading: (_) => const SliverFillRemaining(
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      success: (successState) => _SuccessContent(data: successState.data),
+      failure: (failureState) => _ErrorContent(failure: failureState.failure),
+      refreshing: (refreshingState) =>
+          _SuccessContent(data: refreshingState.currentData),
+    );
+  }
+}
+
+class _ErrorContent extends StatelessWidget {
+  const _ErrorContent({required this.failure});
+
+  final Failure failure;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverFillRemaining(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              failure.message,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                context.read<HomeBloc>().add(HomeLoadedEvent());
+                context.read<NotificationsBloc>().add(
+                  NotificationsSmartRefreshedEvent(),
+                );
+                context.read<ProfileBloc>().add(const ProfileLoadedEvent());
+              },
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SuccessContent extends StatelessWidget {
+  const _SuccessContent({required this.data});
+
+  final HomePageData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final topBanners = data.getBannersByPlacement(
+      BannerPlacement.homePageTop,
+    );
+
+    final middleBanner1 = data.getBannersByPlacement(
+      BannerPlacement.homePageMiddle1,
+    );
+
+    final middleBanner2 = data.getBannersByPlacement(
+      BannerPlacement.homePageMiddle2,
+    );
+
+    final bottomBanners = data.getBannersByPlacement(
+      BannerPlacement.homePageBottom,
+    );
+
+    final hasContent =
+        topBanners.isNotEmpty ||
+        data.categories.isNotEmpty ||
+        middleBanner1.isNotEmpty ||
+        middleBanner2.isNotEmpty ||
+        bottomBanners.isNotEmpty;
+
+    if (!hasContent) {
+      return const _EmptyContent();
+    }
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDims.screenPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (topBanners.isNotEmpty) ...[
+              PromoCarousel(
+                banners: topBanners,
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (data.categories.isNotEmpty) ...[
+              CategoriesSection(categories: data.categories),
+              const Space(2),
+            ],
+            // Middle promo row (safe layout + presence checks)
+            if (middleBanner1.isNotEmpty || middleBanner2.isNotEmpty) ...[
+              SizedBox(
+                height: 170,
+                child: Row(
+                  children: [
+                    if (middleBanner1.isNotEmpty)
+                      Expanded(
+                        child: PromoBannerCard(
+                          promoBanner: PromoBanner(
+                            imageUrl: middleBanner1.first.images.isNotEmpty
+                                ? middleBanner1.first.images.first.imageUrl ??
+                                      ''
+                                : '',
+                            onTap:
+                                middleBanner1.first.images.isNotEmpty &&
+                                    middleBanner1
+                                            .first
+                                            .images
+                                            .first
+                                            .redirectUrl !=
+                                        null &&
+                                    middleBanner1
+                                        .first
+                                        .images
+                                        .first
+                                        .redirectUrl!
+                                        .isNotEmpty
+                                ? () {
+                                    BannerNavigationHandler.handleBannerTap(
+                                      context.router,
+                                      middleBanner1
+                                          .first
+                                          .images
+                                          .first
+                                          .redirectUrl,
+                                    );
+                                  }
+                                : null,
+                          ),
+                        ),
+                      ),
+                    if (middleBanner1.isNotEmpty && middleBanner2.isNotEmpty)
+                      const SizedBox(width: 16),
+                    if (middleBanner2.isNotEmpty)
+                      Expanded(
+                        child: PromoBannerCard(
+                          promoBanner: PromoBanner(
+                            imageUrl: middleBanner2.first.images.isNotEmpty
+                                ? middleBanner2.first.images.first.imageUrl ??
+                                      ''
+                                : '',
+                            onTap:
+                                middleBanner2.first.images.isNotEmpty &&
+                                    middleBanner2
+                                            .first
+                                            .images
+                                            .first
+                                            .redirectUrl !=
+                                        null &&
+                                    middleBanner2
+                                        .first
+                                        .images
+                                        .first
+                                        .redirectUrl!
+                                        .isNotEmpty
+                                ? () {
+                                    BannerNavigationHandler.handleBannerTap(
+                                      context.router,
+                                      middleBanner2
+                                          .first
+                                          .images
+                                          .first
+                                          .redirectUrl,
+                                    );
+                                  }
+                                : null,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (bottomBanners.isNotEmpty) ...[
+              PromoCarousel(
+                banners: bottomBanners,
+                showPageIndicatorInside: true,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyContent extends StatelessWidget {
+  const _EmptyContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverFillRemaining(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.inbox_outlined,
+              size: 64,
+              color: AppColors.grey300,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No content available',
+              style: context.textTheme.titleMedium?.copyWith(
+                color: AppColors.grey600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Check back later for updates',
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: AppColors.grey400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Banner prompting users to add delivery address if they don't have one
+class _AddAddressBannerSection extends StatefulWidget {
+  const _AddAddressBannerSection();
+
+  @override
+  State<_AddAddressBannerSection> createState() =>
+      _AddAddressBannerSectionState();
+}
+
+class _AddAddressBannerSectionState extends State<_AddAddressBannerSection> {
+  bool _isDismissed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isDismissed) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    return BlocBuilder<AddressesBloc, AddressesState>(
+      builder: (context, addressesState) {
+        // Check if user has any addresses
+        final hasAddresses = addressesState.addressesState.maybeMap(
+          success: (s) => s.data.addresses.isNotEmpty,
+          refreshing: (r) => r.currentData.addresses.isNotEmpty,
+          orElse: () => true, // Don't show banner if loading or error
+        );
+
+        // Don't show banner if user has addresses
+        if (hasAddresses) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        return SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: AppDims.screenPadding,
+              vertical: 8,
+            ),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.location_on,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Add Delivery Address',
+                        style: context.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Add your address to start ordering meals',
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: AppColors.grey700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () {
+                    context.router.push(AddressFormRoute());
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                  ),
+                  child: const Text('Add Now'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: () {
+                    setState(() {
+                      _isDismissed = true;
+                    });
+                  },
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                  color: AppColors.grey600,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

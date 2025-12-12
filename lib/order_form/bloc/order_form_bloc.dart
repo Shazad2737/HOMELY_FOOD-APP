@@ -1,0 +1,442 @@
+import 'dart:developer';
+
+import 'package:api_client/api_client.dart';
+import 'package:bloc/bloc.dart';
+import 'package:core/core.dart';
+import 'package:equatable/equatable.dart';
+import 'package:instamess_api/instamess_api.dart';
+import 'package:instamess_api/src/user/models/models.dart' as user_models;
+
+part 'order_form_event.dart';
+part 'order_form_state.dart';
+
+/// {@template order_form_bloc}
+/// BLoC for managing order form state
+///
+/// Location Selection Logic:
+/// - SEPARATE delivery mode → Always show location picker
+/// - WITH_OTHER delivery mode:
+///   - If paired meal already selected → Auto-use same location (no picker)
+///   - If paired meal NOT selected → Show location picker
+/// {@endtemplate}
+class OrderFormBloc extends Bloc<OrderFormEvent, OrderFormState> {
+  /// {@macro order_form_bloc}
+  OrderFormBloc({
+    required IUserRepository userRepository,
+  }) : _userRepository = userRepository,
+       super(OrderFormState.initial()) {
+    on<OrderFormLoadedEvent>(_onLoaded);
+    on<OrderFormRefreshedEvent>(_onRefreshed);
+    on<OrderFormDateSelectedEvent>(_onDateSelected);
+    on<OrderFormDateClearRequestedEvent>(_onDateClearRequested);
+    on<OrderFormDateClearedEvent>(_onDateCleared);
+    on<OrderFormMealTappedEvent>(_onMealTapped);
+    on<OrderFormMealTapErrorClearedEvent>(_onMealTapErrorCleared);
+    on<OrderFormBottomSheetClearedEvent>(_onBottomSheetCleared);
+    on<OrderFormFoodSelectedEvent>(_onFoodSelected);
+    on<OrderFormLocationSelectedEvent>(_onLocationSelected);
+    on<OrderFormMealRemovedEvent>(_onMealRemoved);
+    on<OrderFormNotesChangedEvent>(_onNotesChanged);
+    on<OrderFormSubmittedEvent>(_onSubmitted);
+  }
+
+  final IUserRepository _userRepository;
+
+  Future<void> _onLoaded(
+    OrderFormLoadedEvent event,
+    Emitter<OrderFormState> emit,
+  ) async {
+    // Step 1: Check subscription status first
+    final hasSubscriptionData = state.subscriptionState.maybeMap(
+      success: (_) => true,
+      refreshing: (_) => true,
+      orElse: () => false,
+    );
+
+    if (hasSubscriptionData) {
+      final currentSubData = state.subscriptionState.maybeMap(
+        success: (s) => s.data,
+        refreshing: (r) => r.currentData,
+        orElse: () => null,
+      );
+      if (currentSubData != null) {
+        emit(
+          state.copyWith(
+            subscriptionState: DataState.refreshing(currentSubData),
+          ),
+        );
+      }
+    } else {
+      emit(state.copyWith(subscriptionState: DataState.loading()));
+    }
+
+    final subscriptionResult = await _userRepository.getSubscription();
+
+    final hasActiveSubscription = subscriptionResult.fold(
+      (failure) {
+        emit(state.copyWith(subscriptionState: DataState.failure(failure)));
+        return false;
+      },
+      (subscriptionData) {
+        emit(
+          state.copyWith(
+            subscriptionState: DataState.success(subscriptionData),
+          ),
+        );
+        return subscriptionData.hasSubscribedMeals;
+      },
+    );
+
+    // Step 2: Only load available days if user has active subscription
+    if (!hasActiveSubscription) {
+      log('User has no active subscription, skipping available days fetch');
+      return;
+    }
+
+    // Use refreshing state if we already have available days data
+    final hasAvailableDaysData = state.availableDaysState.maybeMap(
+      success: (_) => true,
+      refreshing: (_) => true,
+      orElse: () => false,
+    );
+
+    if (hasAvailableDaysData) {
+      final currentData = state.availableDaysState.maybeMap(
+        success: (s) => s.data,
+        refreshing: (r) => r.currentData,
+        orElse: () => null,
+      );
+      if (currentData != null) {
+        emit(
+          state.copyWith(
+            availableDaysState: DataState.refreshing(currentData),
+          ),
+        );
+      }
+    } else {
+      emit(state.copyWith(availableDaysState: DataState.loading()));
+    }
+
+    final result = await _userRepository.getAvailableOrderDays();
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(availableDaysState: DataState.failure(failure)),
+      ),
+      (data) => emit(
+        state.copyWith(availableDaysState: DataState.success(data)),
+      ),
+    );
+  }
+
+  Future<void> _onRefreshed(
+    OrderFormRefreshedEvent event,
+    Emitter<OrderFormState> emit,
+  ) async {
+    // Refresh logic is the same as loading
+    add(const OrderFormLoadedEvent());
+  }
+
+  void _onDateSelected(
+    OrderFormDateSelectedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    // If keepSelections is true, validate and preserve selections
+    if (event.keepSelections && state.selectedMealCount > 0) {
+      final validatedSelections = _validateSelectionsForDate(
+        event.date,
+        state.mealSelections,
+      );
+
+      emit(
+        state.copyWith(
+          selectedDate: event.date,
+          mealSelections: validatedSelections,
+        ),
+      );
+      return;
+    }
+
+    // If meals already selected and not keeping them, need confirmation
+    if (state.selectedMealCount > 0 && !event.keepSelections) {
+      // This will be handled in UI with a dialog
+      // UI will dispatch OrderFormDateClearedEvent after confirmation
+      return;
+    }
+
+    // Normal date selection - clear selections
+    emit(
+      state.copyWith(
+        selectedDate: event.date,
+        mealSelections: {},
+      ),
+    );
+  }
+
+  /// Validates meal selections for a new date
+  /// Removes selections for unavailable meal types
+  Map<MealType, OrderItemSelection?> _validateSelectionsForDate(
+    String date,
+    Map<MealType, OrderItemSelection?> currentSelections,
+  ) {
+    final validatedSelections = <MealType, OrderItemSelection?>{};
+
+    for (final entry in currentSelections.entries) {
+      final mealType = entry.key;
+      final selection = entry.value;
+
+      if (selection != null) {
+        // Check if this meal type is available on the new date
+        final newState = state.copyWith(selectedDate: date);
+        if (newState.isMealTypeAvailable(mealType)) {
+          validatedSelections[mealType] = selection;
+        } else {
+          log(
+            '⚠️ Meal type $mealType not available on $date, removing selection',
+          );
+        }
+      }
+    }
+
+    return validatedSelections;
+  }
+
+  void _onDateClearRequested(
+    OrderFormDateClearRequestedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    // This event is for UI to know to show confirmation dialog
+    // No state change here
+  }
+
+  void _onDateCleared(
+    OrderFormDateClearedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        clearSelectedDate: true,
+        mealSelections: {},
+      ),
+    );
+  }
+
+  void _onMealTapped(
+    OrderFormMealTappedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    log('🔍 Meal tapped: ${event.mealType.name}');
+
+    // Validate that we have a selected date
+    if (state.selectedDate == null) {
+      log('❌ No selected date');
+      emit(
+        state.copyWith(
+          mealTapError: 'Please select a date first',
+        ),
+      );
+      return;
+    }
+
+    // Check if meal type is available
+    if (!state.isMealTypeAvailable(event.mealType)) {
+      log('❌ Meal type not available: ${event.mealType.name}');
+      emit(
+        state.copyWith(
+          mealTapError: '${event.mealType.name} is not available for this date',
+        ),
+      );
+      return;
+    }
+
+    // Get food items for this meal
+    final foodItems = state.getFoodItemsForMeal(event.mealType);
+    log('📊 Found ${foodItems.length} food items for ${event.mealType.name}');
+
+    if (foodItems.isEmpty) {
+      log('⚠️ No food items available');
+      emit(
+        state.copyWith(
+          mealTapError:
+              'No ${event.mealType.name.toLowerCase()} items available for this date',
+        ),
+      );
+      return;
+    }
+
+    // Success - store the active meal type so UI can navigate
+    log('✅ Ready to show food selection for ${event.mealType.name}');
+    emit(
+      state.copyWith(
+        activeBottomSheet: event.mealType,
+        clearMealTapError: true, // Clear any previous error
+      ),
+    );
+  }
+
+  void _onMealTapErrorCleared(
+    OrderFormMealTapErrorClearedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    emit(state.copyWith(clearMealTapError: true));
+  }
+
+  void _onBottomSheetCleared(
+    OrderFormBottomSheetClearedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    emit(state.copyWith(clearActiveBottomSheet: true));
+  }
+
+  /// Handles food selection with location already determined
+  ///
+  /// This event is dispatched after:
+  /// - WITH_OTHER mode + paired meal exists → auto-selected location
+  /// - WITH_OTHER mode + no paired meal → user picked location
+  /// - SEPARATE mode → user picked location
+  void _onFoodSelected(
+    OrderFormFoodSelectedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    final food = event.food;
+    final location = event.location;
+
+    log(
+      '📦 Food selected: ${food.name} (${food.deliveryMode}) for ${event.mealType}',
+    );
+    log('📍 Location: ${location.displayName}');
+
+    // Location is already provided, directly add to selections
+    final updatedSelections = Map<MealType, OrderItemSelection?>.from(
+      state.mealSelections,
+    );
+    updatedSelections[event.mealType] = OrderItemSelection(
+      food: food,
+      location: location,
+    );
+
+    log('✅ Added to selections. Total selections: ${updatedSelections.length}');
+
+    emit(
+      state.copyWith(
+        mealSelections: updatedSelections,
+        clearActiveBottomSheet: true,
+        clearPendingFood: true,
+      ),
+    );
+  }
+
+  void _onLocationSelected(
+    OrderFormLocationSelectedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    final pendingFood = state.pendingFood;
+    if (pendingFood == null) {
+      log('No pending food when location selected');
+      return;
+    }
+
+    final updatedSelections = Map<MealType, OrderItemSelection?>.from(
+      state.mealSelections,
+    );
+
+    updatedSelections[event.mealType] = OrderItemSelection(
+      food: pendingFood,
+      location: event.location,
+    );
+
+    emit(
+      state.copyWith(
+        mealSelections: updatedSelections,
+        clearActiveBottomSheet: true,
+        clearPendingFood: true,
+      ),
+    );
+  }
+
+  void _onMealRemoved(
+    OrderFormMealRemovedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    final updatedSelections = Map<MealType, OrderItemSelection?>.from(
+      state.mealSelections,
+    );
+    updatedSelections.remove(event.mealType);
+
+    emit(state.copyWith(mealSelections: updatedSelections));
+  }
+
+  void _onNotesChanged(
+    OrderFormNotesChangedEvent event,
+    Emitter<OrderFormState> emit,
+  ) {
+    emit(state.copyWith(orderNotes: event.notes));
+  }
+
+  Future<void> _onSubmitted(
+    OrderFormSubmittedEvent event,
+    Emitter<OrderFormState> emit,
+  ) async {
+    if (!state.canSubmit) return;
+
+    // Validate WITH_OTHER constraints
+    for (final entry in state.mealSelections.entries) {
+      final selection = entry.value;
+      if (selection == null) continue;
+
+      if (selection.food.deliveryMode == DeliveryMode.withOther &&
+          selection.food.deliverWith != null) {
+        final pairedMealType = selection.food.deliverWith!.type;
+        final pairedSelection = state.mealSelections[pairedMealType];
+
+        if (pairedSelection != null) {
+          if (selection.location.id != pairedSelection.location.id) {
+            emit(
+              state.copyWith(
+                createOrderState: DataState.failure(
+                  const UnknownFailure(
+                    message: 'Meals delivered together must have same location',
+                  ),
+                ),
+              ),
+            );
+            return;
+          }
+        }
+      }
+    }
+
+    emit(state.copyWith(createOrderState: DataState.loading()));
+
+    final request = user_models.CreateOrderRequest(
+      orderDate: state.selectedDate!,
+      notes: state.orderNotes,
+      orderItems: state.mealSelections.entries
+          .where((e) => e.value != null)
+          .map(
+            (e) => user_models.OrderItemRequest(
+              foodItemId: e.value!.food.id,
+              mealTypeId: e.value!.food.mealTypeId ?? '',
+              deliveryLocationId: e.value!.location.id,
+            ),
+          )
+          .toList(),
+    );
+
+    final result = await _userRepository.createOrder(request);
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(createOrderState: DataState.failure(failure)),
+      ),
+      (data) => emit(
+        state.copyWith(
+          createOrderState: DataState.success(data),
+          // Clear form after successful order
+          clearSelectedDate: true,
+          mealSelections: {},
+        ),
+      ),
+    );
+  }
+}

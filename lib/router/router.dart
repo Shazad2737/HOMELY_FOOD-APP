@@ -1,0 +1,83 @@
+import 'dart:developer';
+
+import 'package:auto_route/auto_route.dart';
+import 'package:instamess_api/instamess_api.dart';
+import 'package:instamess_app/auth/bloc/auth_bloc.dart';
+import 'package:instamess_app/router/guards/auth_guard.dart';
+import 'package:instamess_app/router/router.gr.dart';
+
+/// App router
+///
+/// This class is used to define the routes for the app
+@AutoRouterConfig()
+class AppRouter extends RootStackRouter {
+  /// Constructs an [AppRouter]
+  AppRouter(this.authBloc, this.onboardingRepository) {
+    log('AppRouter: Constructor called with AuthBloc state: ${authBloc.state}');
+  }
+
+  /// Auth bloc
+  ///
+  /// Used to check the authentication state of the user
+  final AuthBloc authBloc;
+
+  /// Onboarding repository
+  ///
+  /// Used to check the onboarding status of the user
+  final IOnboardingRepository onboardingRepository;
+
+  @override
+  List<AutoRouteGuard> get guards {
+    return [
+      AuthGuard(
+        authBloc: authBloc,
+        onboardingRepository: onboardingRepository,
+      ),
+    ];
+  }
+
+  @override
+  List<AutoRoute> get routes => [
+    AutoRoute(
+      page: SplashRoute.page,
+      initial: true,
+    ),
+    AutoRoute(
+      page: OnboardingRoute.page,
+    ),
+    AutoRoute(
+      page: LoginRoute.page,
+    ),
+    AutoRoute(
+      page: SignupRoute.page,
+    ),
+    AutoRoute(
+      page: OtpRoute.page,
+    ),
+    AutoRoute(
+      page: ForgotPasswordRoute.page,
+    ),
+    AutoRoute(
+      page: DeliveryAddressRoute.page,
+    ),
+    AutoRoute(
+      page: MainShellRoute.page,
+      children: [
+        AutoRoute(
+          page: HomeRoute.page,
+          initial: true,
+        ),
+        AutoRoute(page: MenuRoute.page),
+        AutoRoute(page: OrderFormRoute.page),
+        AutoRoute(page: SubscriptionsRoute.page),
+        AutoRoute(page: ProfileRoute.page),
+      ],
+    ),
+    AutoRoute(page: OrdersRoute.page, path: '/orders'),
+    AutoRoute(page: ProfileDetailRoute.page, path: '/profile/detail'),
+    AutoRoute(page: AddressesRoute.page, path: '/addresses'),
+    AutoRoute(page: TermsAndConditionsRoute.page, path: '/terms'),
+    AutoRoute(page: AddressFormRoute.page, path: '/addresses/form'),
+    AutoRoute(page: NotificationsRoute.page, path: '/notifications'),
+  ];
+}

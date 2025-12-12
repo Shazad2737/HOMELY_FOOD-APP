@@ -1,0 +1,25 @@
+name: homely_api
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  api_client:
+    path: ../api_client
+  core:
+    path: ../core
+  deep_pick: ^1.1.0
+  flutter:
+    sdk: flutter
+  fpdart: ^1.1.1
+  jwt_decoder: ^2.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.0
+  very_good_analysis: ^5.1.0

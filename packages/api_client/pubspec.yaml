@@ -1,0 +1,27 @@
+name: api_client
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  core:
+    path: ../core
+  dio: ^5.9.0
+  flutter:
+    sdk: flutter
+  flutter_secure_storage: ^9.2.4
+  fpdart: ^1.1.1
+  http_parser: ^4.1.2
+  image_picker: ^1.2.0
+  jwt_decoder: ^2.0.1
+  pretty_dio_logger: ^1.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.0
+  very_good_analysis: ^9.0.0
