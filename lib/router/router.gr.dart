@@ -11,32 +11,30 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i20;
 import 'package:flutter/material.dart' as _i21;
-import 'package:instamess_api/instamess_api.dart' as _i22;
-import 'package:instamess_app/auth/delivery_address/view/delivery_address_screen.dart'
+import 'package:homely_api/homely_api.dart' as _i22;
+import 'package:homely_app/auth/delivery_address/view/delivery_address_screen.dart'
     as _i3;
-import 'package:instamess_app/auth/forgot_password/view/forgot_password_screen.dart'
+import 'package:homely_app/auth/forgot_password/view/forgot_password_screen.dart'
     as _i4;
-import 'package:instamess_app/auth/login/view/login_screen.dart' as _i6;
-import 'package:instamess_app/auth/login/view/otp_screen.dart' as _i13;
-import 'package:instamess_app/auth/signup/view/signup_screen.dart' as _i16;
-import 'package:instamess_app/home/view/home_screen.dart' as _i5;
-import 'package:instamess_app/main_shell/view/main_shell_page.dart' as _i7;
-import 'package:instamess_app/menu/view/menu_screen.dart' as _i8;
-import 'package:instamess_app/notifications/view/notifications_screen.dart'
-    as _i9;
-import 'package:instamess_app/onboarding/view/onboarding_page.dart' as _i10;
-import 'package:instamess_app/order_form/view/order_form_screen.dart' as _i11;
-import 'package:instamess_app/profile/addresses/view/address_form_screen.dart'
+import 'package:homely_app/auth/login/view/login_screen.dart' as _i6;
+import 'package:homely_app/auth/login/view/otp_screen.dart' as _i13;
+import 'package:homely_app/auth/signup/view/signup_screen.dart' as _i16;
+import 'package:homely_app/home/view/home_screen.dart' as _i5;
+import 'package:homely_app/main_shell/view/main_shell_page.dart' as _i7;
+import 'package:homely_app/menu/view/menu_screen.dart' as _i8;
+import 'package:homely_app/notifications/view/notifications_screen.dart' as _i9;
+import 'package:homely_app/onboarding/view/onboarding_page.dart' as _i10;
+import 'package:homely_app/order_form/view/order_form_screen.dart' as _i11;
+import 'package:homely_app/profile/addresses/view/address_form_screen.dart'
     as _i1;
-import 'package:instamess_app/profile/addresses/view/addresses_screen.dart'
-    as _i2;
-import 'package:instamess_app/profile/orders/view/orders_screen.dart' as _i12;
-import 'package:instamess_app/profile/terms/terms_and_conditions_screen.dart'
+import 'package:homely_app/profile/addresses/view/addresses_screen.dart' as _i2;
+import 'package:homely_app/profile/orders/view/orders_screen.dart' as _i12;
+import 'package:homely_app/profile/terms/terms_and_conditions_screen.dart'
     as _i19;
-import 'package:instamess_app/profile/view/profile_detail_screen.dart' as _i14;
-import 'package:instamess_app/profile/view/profile_screen.dart' as _i15;
-import 'package:instamess_app/splash/view/splash_page.dart' as _i17;
-import 'package:instamess_app/subscriptions/view/subscriptions_screen.dart'
+import 'package:homely_app/profile/view/profile_detail_screen.dart' as _i14;
+import 'package:homely_app/profile/view/profile_screen.dart' as _i15;
+import 'package:homely_app/splash/view/splash_page.dart' as _i17;
+import 'package:homely_app/subscriptions/view/subscriptions_screen.dart'
     as _i18;
 
 /// generated route for

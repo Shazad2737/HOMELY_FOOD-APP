@@ -2,9 +2,9 @@ import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/src/cms/models/banner.dart' as api_models;
-import 'package:instamess_app/home/view/widgets/promo/promo.dart';
-import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
+import 'package:homely_api/src/cms/models/banner.dart' as api_models;
+import 'package:homely_app/home/view/widgets/promo/promo.dart';
+import 'package:homely_app/router/utils/banner_navigation_handler.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 /// A carousel widget that displays multiple promotional banner cards with page indicators.

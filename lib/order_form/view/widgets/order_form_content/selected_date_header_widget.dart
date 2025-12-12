@@ -1,9 +1,9 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
-import 'package:instamess_app/order_form/view/helpers/date_formatter.dart';
-import 'package:instamess_api/src/user/models/models.dart' as user_models;
+import 'package:homely_app/order_form/bloc/order_form_bloc.dart';
+import 'package:homely_app/order_form/view/helpers/date_formatter.dart';
+import 'package:homely_api/src/user/models/models.dart' as user_models;
 
 /// Header showing the selected date with edit option
 class SelectedDateHeaderWidget extends StatelessWidget {

@@ -4,7 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_api/homely_api.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';

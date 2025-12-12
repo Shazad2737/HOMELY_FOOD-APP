@@ -4,9 +4,9 @@ import 'package:api_client/api_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:core/core.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/profile/addresses/bloc/addresses_event.dart';
-import 'package:instamess_app/profile/addresses/bloc/addresses_state.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/profile/addresses/bloc/addresses_event.dart';
+import 'package:homely_app/profile/addresses/bloc/addresses_state.dart';
 
 /// {@template addresses_bloc}
 /// Business logic component for addresses management

@@ -3,9 +3,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/profile/orders/bloc/orders_bloc.dart';
-import 'package:instamess_app/profile/orders/view/widgets/widgets.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/profile/orders/bloc/orders_bloc.dart';
+import 'package:homely_app/profile/orders/view/widgets/widgets.dart';
 
 @RoutePage()
 class OrdersScreen extends StatelessWidget {

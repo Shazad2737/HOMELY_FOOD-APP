@@ -1,6 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/src/user/models/models.dart' as user_models;
+import 'package:homely_api/src/user/models/models.dart' as user_models;
 import 'package:intl/intl.dart';
 
 /// {@template skipped_dates_warning_dialog}

@@ -2,12 +2,12 @@ import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/auth/bloc/auth_bloc.dart';
-import 'package:instamess_app/profile/bloc/profile_bloc.dart';
-import 'package:instamess_app/profile/bloc/profile_event.dart';
-import 'package:instamess_app/profile/bloc/profile_state.dart';
-import 'package:instamess_app/router/router.gr.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/auth/bloc/auth_bloc.dart';
+import 'package:homely_app/profile/bloc/profile_bloc.dart';
+import 'package:homely_app/profile/bloc/profile_event.dart';
+import 'package:homely_app/profile/bloc/profile_state.dart';
+import 'package:homely_app/router/router.gr.dart';
 
 @RoutePage()
 class ProfileScreen extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/src/user/models/meal_type.dart';
+import 'package:homely_api/src/user/models/meal_type.dart';
 
 /// {@template meal_type_badge}
 /// A badge widget displaying the meal type with an icon and color coding

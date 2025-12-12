@@ -1,6 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_api/homely_api.dart';
 
 /// {@template unselected_meals_warning_dialog}
 /// Dialog that warns users about available meals they haven't selected

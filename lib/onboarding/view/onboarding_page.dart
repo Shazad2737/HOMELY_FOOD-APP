@@ -2,10 +2,10 @@ import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/onboarding/bloc/onboarding_bloc.dart';
-import 'package:instamess_app/onboarding/view/widgets/widgets.dart';
-import 'package:instamess_app/router/router.gr.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/onboarding/bloc/onboarding_bloc.dart';
+import 'package:homely_app/onboarding/view/widgets/widgets.dart';
+import 'package:homely_app/router/router.gr.dart';
 
 /// Data model for onboarding page content.
 class OnboardingPageData {

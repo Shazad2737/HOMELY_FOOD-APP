@@ -1,9 +1,9 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/menu/view/widgets/food_card/delivery_mode_overlay_badge.dart';
-import 'package:instamess_app/menu/view/widgets/food_card/veg_badge.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/menu/view/widgets/food_card/delivery_mode_overlay_badge.dart';
+import 'package:homely_app/menu/view/widgets/food_card/veg_badge.dart';
 
 /// Displays the food item image with optional badge overlays.
 class FoodImage extends StatelessWidget {

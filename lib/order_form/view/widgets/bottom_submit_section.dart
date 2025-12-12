@@ -1,10 +1,10 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
-import 'package:instamess_app/order_form/view/helpers/date_formatter.dart';
-import 'package:instamess_app/order_form/view/widgets/final_order_confirmation_dialog.dart';
-import 'package:instamess_app/order_form/view/widgets/unselected_meals_warning_dialog.dart';
+import 'package:homely_app/order_form/bloc/order_form_bloc.dart';
+import 'package:homely_app/order_form/view/helpers/date_formatter.dart';
+import 'package:homely_app/order_form/view/widgets/final_order_confirmation_dialog.dart';
+import 'package:homely_app/order_form/view/widgets/unselected_meals_warning_dialog.dart';
 
 /// Bottom section with submit button
 class BottomSubmitSection extends StatelessWidget {

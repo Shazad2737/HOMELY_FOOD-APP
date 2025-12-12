@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_api/homely_api.dart';
 
 /// {@template profile_state}
 /// State for profile screen

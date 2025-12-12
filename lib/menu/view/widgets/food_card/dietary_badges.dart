@@ -1,6 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_api/homely_api.dart';
 
 /// Displays dietary badges for a food item (currently only vegan badge).
 class DietaryBadges extends StatelessWidget {

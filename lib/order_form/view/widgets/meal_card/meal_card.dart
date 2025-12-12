@@ -2,11 +2,11 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
-import 'package:instamess_app/order_form/view/widgets/food_selection_bottom_sheet/food_selection_bottom_sheet.dart';
-import 'package:instamess_app/order_form/view/widgets/meal_card/widgets/meal_selection_details.dart';
-import 'package:instamess_app/order_form/view/helpers/meal_type_helper.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/order_form/bloc/order_form_bloc.dart';
+import 'package:homely_app/order_form/view/widgets/food_selection_bottom_sheet/food_selection_bottom_sheet.dart';
+import 'package:homely_app/order_form/view/widgets/meal_card/widgets/meal_selection_details.dart';
+import 'package:homely_app/order_form/view/helpers/meal_type_helper.dart';
 
 /// Card for selecting a meal type
 class MealCard extends StatelessWidget {

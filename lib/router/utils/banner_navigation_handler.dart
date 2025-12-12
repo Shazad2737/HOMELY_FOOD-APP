@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
-import 'package:instamess_app/router/router.gr.dart';
+import 'package:homely_app/router/router.gr.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Handles navigation for banner redirect URLs

@@ -2,9 +2,9 @@ import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:core/core.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/profile/bloc/profile_event.dart';
-import 'package:instamess_app/profile/bloc/profile_state.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/profile/bloc/profile_event.dart';
+import 'package:homely_app/profile/bloc/profile_state.dart';
 
 /// {@template profile_bloc}
 /// Business logic component for profile management

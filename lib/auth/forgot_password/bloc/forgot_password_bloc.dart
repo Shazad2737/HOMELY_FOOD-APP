@@ -1,7 +1,7 @@
 import 'package:api_client/api_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:instamess_api/instamess_api.dart'; // For IAuthFacade, Failure
+import 'package:homely_api/homely_api.dart'; // For IAuthFacade, Failure
 
 part 'forgot_password_event.dart';
 part 'forgot_password_state.dart';

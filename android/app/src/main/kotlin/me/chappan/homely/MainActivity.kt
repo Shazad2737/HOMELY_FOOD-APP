@@ -1,4 +1,4 @@
-package me.iotics.homely
+package me.chappan.homely
 
 import io.flutter.embedding.android.FlutterActivity
 

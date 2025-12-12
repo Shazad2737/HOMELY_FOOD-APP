@@ -1,7 +1,7 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_api/src/user/models/meal_type.dart' as user_models;
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_api/src/user/models/meal_type.dart' as user_models;
 
 /// {@template order_item_card}
 /// Widget displaying a single order item with food details in a compact card

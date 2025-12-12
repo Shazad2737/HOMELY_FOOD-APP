@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:core/core.dart';
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_api/homely_api.dart';
 
 /// Cubit that manages DataState<Terms>
 class TermsCubit extends Cubit<DataState<Terms>> {

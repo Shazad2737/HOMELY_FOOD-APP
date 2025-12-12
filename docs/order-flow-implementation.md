@@ -90,7 +90,7 @@ Single screen with smart state transitions:
 
 ### Phase 1: API Models & Repository
 
-#### New Models (packages/instamess_api/lib/src/user/models/)
+#### New Models (packages/homely_api/lib/src/user/models/)
 
 **1. available_order_days.dart**
 ```dart
@@ -239,7 +239,7 @@ class CreateOrderResponse {
 }
 ```
 
-#### Repository Methods (packages/instamess_api/lib/src/user/)
+#### Repository Methods (packages/homely_api/lib/src/user/)
 
 **user_repository_interface.dart**
 ```dart

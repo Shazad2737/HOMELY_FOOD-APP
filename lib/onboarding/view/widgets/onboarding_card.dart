@@ -1,6 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_app/onboarding/view/widgets/onboarding_page_indicator.dart';
+import 'package:homely_app/onboarding/view/widgets/onboarding_page_indicator.dart';
 
 /// {@template onboarding_card}
 /// Orange card widget displaying onboarding content.

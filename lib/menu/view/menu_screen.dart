@@ -3,13 +3,13 @@ import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/menu/bloc/menu_bloc.dart';
-import 'package:instamess_app/menu/view/widgets/category_selector.dart';
-import 'package:instamess_app/menu/view/widgets/empty_state.dart';
-import 'package:instamess_app/menu/view/widgets/food_card/food_card.dart';
-import 'package:instamess_app/menu/view/widgets/plan_selector.dart';
-import 'package:instamess_app/menu/view/widgets/sticky_tab_bar_delegate.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/menu/bloc/menu_bloc.dart';
+import 'package:homely_app/menu/view/widgets/category_selector.dart';
+import 'package:homely_app/menu/view/widgets/empty_state.dart';
+import 'package:homely_app/menu/view/widgets/food_card/food_card.dart';
+import 'package:homely_app/menu/view/widgets/plan_selector.dart';
+import 'package:homely_app/menu/view/widgets/sticky_tab_bar_delegate.dart';
 
 @RoutePage()
 class MenuScreen extends StatelessWidget {

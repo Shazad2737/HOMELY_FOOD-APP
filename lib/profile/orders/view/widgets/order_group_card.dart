@@ -1,8 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_api/src/user/models/meal_type.dart' as user_models;
-import 'package:instamess_app/profile/orders/view/widgets/order_item_card.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_api/src/user/models/meal_type.dart' as user_models;
+import 'package:homely_app/profile/orders/view/widgets/order_item_card.dart';
 import 'package:intl/intl.dart';
 
 /// {@template order_group_card}

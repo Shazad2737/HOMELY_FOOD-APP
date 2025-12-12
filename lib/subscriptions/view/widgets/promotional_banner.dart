@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/instamess_api.dart' as ia;
-import 'package:instamess_app/router/utils/banner_navigation_handler.dart';
+import 'package:homely_api/homely_api.dart' as ia;
+import 'package:homely_app/router/utils/banner_navigation_handler.dart';
 
 class PromotionalBanner extends StatelessWidget {
   const PromotionalBanner({

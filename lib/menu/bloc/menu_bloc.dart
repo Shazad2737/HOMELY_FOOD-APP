@@ -4,7 +4,7 @@ import 'package:api_client/api_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart' hide Category;
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_api/homely_api.dart';
 
 part 'menu_event.dart';
 part 'menu_state.dart';
@@ -252,8 +252,11 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
           // plans, default to the first plan and trigger a selection event so
           // the menu is re-fetched for that plan. This avoids showing "all"
           // mixed-plan results and makes the UI default to a concrete plan.
-          if (state.selectedPlan == null && menuData.availablePlans.isNotEmpty) {
-            log('MenuBloc: No selected plan - defaulting to first available plan');
+          if (state.selectedPlan == null &&
+              menuData.availablePlans.isNotEmpty) {
+            log(
+              'MenuBloc: No selected plan - defaulting to first available plan',
+            );
             // Dispatch plan selection to reuse existing selection/fetch logic.
             add(MenuPlanSelectedEvent(plan: menuData.availablePlans.first));
           }

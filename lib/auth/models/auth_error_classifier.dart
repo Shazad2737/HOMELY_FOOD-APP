@@ -1,5 +1,5 @@
 import 'package:api_client/api_client.dart';
-import 'package:instamess_app/auth/models/validation_error_groups.dart';
+import 'package:homely_app/auth/models/validation_error_groups.dart';
 
 /// Classifier for authentication-related validation errors.
 ///

@@ -2,8 +2,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/menu/bloc/menu_bloc.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/menu/bloc/menu_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockMenuRepository extends Mock implements IMenuRepository {}

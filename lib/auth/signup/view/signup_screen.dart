@@ -4,9 +4,9 @@ import 'package:core/core.dart';
 import 'package:core/form_inputs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_app/auth/signup/bloc/signup_bloc.dart';
-import 'package:instamess_app/router/router.gr.dart';
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_app/auth/signup/bloc/signup_bloc.dart';
+import 'package:homely_app/router/router.gr.dart';
+import 'package:homely_api/homely_api.dart';
 
 @RoutePage()
 class SignupPage extends StatelessWidget {
@@ -97,7 +97,7 @@ class _MobileWidget extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
-                  'By Continuing you agree instamess ',
+                  'By Continuing you agree homely ',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.grey500,

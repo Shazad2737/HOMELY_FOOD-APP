@@ -2,7 +2,7 @@ import 'package:api_client/api_client.dart';
 import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_api/homely_api.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';

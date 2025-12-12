@@ -1,6 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
+import 'package:homely_app/order_form/bloc/order_form_bloc.dart';
 
 /// {@template final_order_confirmation_dialog}
 /// Final confirmation dialog shown before submitting an order

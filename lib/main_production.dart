@@ -4,7 +4,7 @@ import 'package:homely_app/bootstrap.dart';
 
 Future<void> main() async {
   await bootstrap(() {
-    final api = HomelyApi(baseUrl: 'https://homely-app.iotics.me');
+    final api = HomelyApi(baseUrl: 'https://homely-app.chappan.me');
     return App(api: api, releaseMode: ReleaseMode.production);
   });
 }

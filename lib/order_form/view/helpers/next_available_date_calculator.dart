@@ -1,5 +1,5 @@
-import 'package:instamess_api/src/user/models/models.dart' as user_models;
-import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
+import 'package:homely_api/src/user/models/models.dart' as user_models;
+import 'package:homely_app/order_form/bloc/order_form_bloc.dart';
 import 'package:intl/intl.dart';
 
 /// Helper class for calculating next available date information

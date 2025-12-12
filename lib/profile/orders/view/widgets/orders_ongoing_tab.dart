@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_app/profile/orders/bloc/orders_bloc.dart';
-import 'package:instamess_app/profile/orders/view/widgets/empty_state.dart';
-import 'package:instamess_app/profile/orders/view/widgets/error_content.dart';
-import 'package:instamess_app/profile/orders/view/widgets/order_group_card.dart';
+import 'package:homely_app/profile/orders/bloc/orders_bloc.dart';
+import 'package:homely_app/profile/orders/view/widgets/empty_state.dart';
+import 'package:homely_app/profile/orders/view/widgets/error_content.dart';
+import 'package:homely_app/profile/orders/view/widgets/order_group_card.dart';
 
 /// {@template orders_ongoing_tab}
 /// Tab view for displaying ongoing orders

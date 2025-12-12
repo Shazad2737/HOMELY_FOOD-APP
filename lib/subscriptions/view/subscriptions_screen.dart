@@ -3,11 +3,11 @@ import 'package:app_ui/app_ui.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/subscriptions/bloc/subscriptions_bloc.dart';
-import 'package:instamess_app/subscriptions/view/widgets/contact_button.dart';
-import 'package:instamess_app/subscriptions/view/widgets/promotional_banner.dart';
-import 'package:instamess_app/subscriptions/view/widgets/subscription_details_card.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/subscriptions/bloc/subscriptions_bloc.dart';
+import 'package:homely_app/subscriptions/view/widgets/contact_button.dart';
+import 'package:homely_app/subscriptions/view/widgets/promotional_banner.dart';
+import 'package:homely_app/subscriptions/view/widgets/subscription_details_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()

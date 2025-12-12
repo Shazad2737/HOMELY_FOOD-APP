@@ -4,8 +4,8 @@ import 'package:api_client/api_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_api/src/user/models/models.dart' as user_models;
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_api/src/user/models/models.dart' as user_models;
 
 part 'order_form_event.dart';
 part 'order_form_state.dart';

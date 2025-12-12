@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "iotics.me.homely-app" "\0"
+            VALUE "CompanyName", "chappan.me.homely-app" "\0"
             VALUE "FileDescription", "homely_app" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "homely_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 iotics.me.homely-app. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 chappan.me.homely-app. All rights reserved." "\0"
             VALUE "OriginalFilename", "homely_app.exe" "\0"
             VALUE "ProductName", "Homely App" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

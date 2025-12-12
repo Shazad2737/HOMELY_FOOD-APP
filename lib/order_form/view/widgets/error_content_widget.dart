@@ -2,7 +2,7 @@ import 'package:api_client/api_client.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
+import 'package:homely_app/order_form/bloc/order_form_bloc.dart';
 
 /// Error content widget for order form
 class ErrorContentWidget extends StatelessWidget {

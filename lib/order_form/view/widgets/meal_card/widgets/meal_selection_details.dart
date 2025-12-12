@@ -1,8 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/order_form/bloc/order_form_bloc.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/order_form/bloc/order_form_bloc.dart';
 
 /// Displays selection details for a selected meal
 class MealSelectionDetails extends StatelessWidget {

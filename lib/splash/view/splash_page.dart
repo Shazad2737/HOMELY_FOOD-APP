@@ -3,8 +3,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:instamess_app/auth/bloc/auth_bloc.dart';
-import 'package:instamess_app/router/router.gr.dart';
+import 'package:homely_app/auth/bloc/auth_bloc.dart';
+import 'package:homely_app/router/router.gr.dart';
 
 /// Animated splash screen with logo bounce and text fade-in.
 @RoutePage()

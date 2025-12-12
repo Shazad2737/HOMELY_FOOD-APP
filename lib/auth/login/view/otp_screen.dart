@@ -3,9 +3,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/auth/login/bloc/otp_bloc.dart';
-import 'package:instamess_app/router/router.gr.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/auth/login/bloc/otp_bloc.dart';
+import 'package:homely_app/router/router.gr.dart';
 import 'package:pinput/pinput.dart';
 
 @RoutePage()
@@ -235,7 +235,7 @@ class _OtpScreenState extends State<_OtpScreen> {
                 RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
-                    text: 'By Continuing you agree instamess ',
+                    text: 'By Continuing you agree homely ',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: AppColors.grey500,
                       fontWeight: FontWeight.w400,

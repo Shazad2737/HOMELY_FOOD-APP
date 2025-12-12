@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:instamess_api/instamess_api.dart';
+import 'package:homely_api/homely_api.dart';
 
 /// {@template address_form_state}
 /// State for address form

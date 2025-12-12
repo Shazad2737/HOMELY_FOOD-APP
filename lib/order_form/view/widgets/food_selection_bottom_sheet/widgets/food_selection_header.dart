@@ -1,8 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:instamess_api/instamess_api.dart';
-import 'package:instamess_app/order_form/view/helpers/date_formatter.dart';
-import 'package:instamess_app/order_form/view/helpers/meal_type_helper.dart';
+import 'package:homely_api/homely_api.dart';
+import 'package:homely_app/order_form/view/helpers/date_formatter.dart';
+import 'package:homely_app/order_form/view/helpers/meal_type_helper.dart';
 
 /// Shows context information (date and meal type) for food selection
 class FoodSelectionHeader extends StatelessWidget {
