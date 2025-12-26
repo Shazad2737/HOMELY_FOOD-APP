@@ -29,7 +29,7 @@ class ApiClient {
             baseUrl: '$baseUrl/api/v1/',
             sendTimeout: const Duration(seconds: 15),
             headers: {
-              'brand': 'IMSS001',
+              'brand': 'HM001',
             },
             connectTimeout: const Duration(seconds: 15),
             receiveTimeout: const Duration(seconds: 15),

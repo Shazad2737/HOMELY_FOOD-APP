@@ -5,8 +5,8 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 ///
 /// Features:
 /// - International country selector with bottom sheet
-/// - UAE as default country
-/// - Middle East countries prioritized in selector
+/// - India as default country
+/// - India and Middle East countries prioritized in selector
 /// - Automatic phone number parsing and validation
 /// - Beautiful UI consistent with app design system
 /// - Error state handling
@@ -40,9 +40,9 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
   PhoneNumber? _initialValue;
   late TextEditingController _controller;
 
-  // Default to UAE
-  static const _defaultDialCode = '971';
-  static const _defaultIsoCode = 'AE';
+  // Default to India
+  static const _defaultDialCode = '91';
+  static const _defaultIsoCode = 'IN';
 
   @override
   void initState() {
@@ -143,7 +143,7 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
                 fontWeight: FontWeight.w500,
               ),
               inputDecoration: InputDecoration(
-                hintText: '5xx xxx xxxx',
+                hintText: '9xxx xxx xxx',
                 hintStyle: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurface.withOpacity(0.4),
                 ),
@@ -169,9 +169,10 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
                 trailingSpace: false,
                 useEmoji: true,
 
-                // Prioritize Middle East countries
+                // Prioritize India and Middle East countries
                 countryComparator: (a, b) {
                   const priorityCountries = [
+                    'IN', // India
                     'AE', // UAE
                     'SA', // Saudi Arabia
                     'QA', // Qatar
