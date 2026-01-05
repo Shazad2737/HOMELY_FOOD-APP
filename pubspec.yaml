@@ -17,7 +17,7 @@ dependencies:
   cached_network_image: ^3.3.1
   core:
     path: packages/core
-  equatable: ^2.0.7
+  equatable: ^2.0.8
   formz: ^0.7.0
   homely_api:
     path: packages/homely_api
